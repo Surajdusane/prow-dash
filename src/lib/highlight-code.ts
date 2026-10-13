@@ -1,3 +1,6 @@
+import type { ShikiTransformer } from "shiki";
+import { codeToHtml } from "shiki";
+
 import {
   transformerNotationDiff,
   transformerNotationErrorLevel,
@@ -5,8 +8,6 @@ import {
   transformerNotationHighlight,
   transformerNotationWordHighlight,
 } from "@shikijs/transformers";
-import type { ShikiTransformer } from "shiki";
-import { codeToHtml } from "shiki";
 
 // Strip [!code ...] annotations from raw code for copying
 export function stripCodeAnnotations(code: string): string {
@@ -23,9 +24,7 @@ export function stripCodeAnnotations(code: string): string {
     cleaned = cleaned.replace(/\s*<!--\s*\[!code\s+[^\]]+\]\s*-->\s*$/, "");
 
     // Drop lines that were only [!code word:...] annotations
-    const isWordAnnotationLine = /^\s*(?:\/\/|\/\*|\{\/\*|<!--)\s*\[!code\s+word:/.test(
-      originalLine,
-    );
+    const isWordAnnotationLine = /^\s*(?:\/\/|\/\*|\{\/\*|<!--)\s*\[!code\s+word:/.test(originalLine);
     if (isWordAnnotationLine && cleaned.trim() === "") continue;
 
     result.push(cleaned);
@@ -98,11 +97,7 @@ export const transformers = [
   transformerNotationErrorLevel(),
 ] as ShikiTransformer[];
 
-export async function highlightCode(
-  code: string,
-  language = "tsx",
-  options?: { showLineNumbers?: boolean },
-) {
+export async function highlightCode(code: string, language = "tsx", options?: { showLineNumbers?: boolean }) {
   const { showLineNumbers = true } = options ?? {};
 
   const html = await codeToHtml(code, {

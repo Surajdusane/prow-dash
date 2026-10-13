@@ -57,9 +57,7 @@ export function EChartsBudgetRadialChart() {
   return (
     <div className="flex h-full w-full flex-col gap-6 p-4">
       <div className="flex items-baseline justify-between gap-4">
-        <span className="text-primary text-base font-medium tracking-tight sm:text-lg">
-          Quarterly Spend
-        </span>
+        <span className="text-primary text-base font-medium tracking-tight sm:text-lg">Quarterly Spend</span>
         <span className="text-muted-foreground text-xs">${money(TOTAL)}</span>
       </div>
 
@@ -88,10 +86,7 @@ export function EChartsBudgetRadialChart() {
 
       <div className="flex min-h-0 flex-1 flex-col">
         {chartData.map(({ name, label, value, amount, swatch }) => (
-          <div
-            key={name}
-            className="odd:bg-muted/30 flex flex-1 items-center gap-2 rounded-md px-3"
-          >
+          <div key={name} className="odd:bg-muted/30 flex flex-1 items-center gap-2 rounded-md px-3">
             <span className={cn("size-2.5 shrink-0 rounded-[3px]", swatch)} />
             <span className="text-primary text-xs font-medium tabular-nums">{value}%</span>
             <span className="text-muted-foreground truncate text-xs">{label}</span>

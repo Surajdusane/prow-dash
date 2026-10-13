@@ -1,6 +1,6 @@
-import { CanvasRenderer, SVGRenderer } from "echarts/renderers";
 import type { ComponentType, ReactNode } from "react";
 import * as echarts from "echarts/core";
+import { CanvasRenderer, SVGRenderer } from "echarts/renderers";
 
 export const ECHARTS_RENDERERS = {
   canvas: "canvas",
@@ -27,9 +27,7 @@ export type ThemeKey = keyof typeof THEMES;
 export const THEME_KEYS = Object.keys(THEMES) as ThemeKey[];
 
 // Require at least one theme key — identical constraint to the repo's ChartConfig.
-export type AtLeastOneThemeColor =
-  | { light: string[]; dark?: string[] }
-  | { light?: string[]; dark: string[] };
+export type AtLeastOneThemeColor = { light: string[]; dark?: string[] } | { light?: string[]; dark: string[] };
 
 export type ChartConfig = Record<
   string,
@@ -84,7 +82,7 @@ export function buildChartCss(id: string, config: ChartConfig): string {
         const authored = item.colors?.[theme];
         if (!authored || authored.length === 0) return [];
         return distributeColors(authored, getColorsCount(item)).map(
-          (color, index) => `  --color-${key}-${index}: ${color};`,
+          (color, index) => `  --color-${key}-${index}: ${color};`
         );
       })
       .join("\n");
@@ -141,11 +139,7 @@ export type ResolvedColors = {
 // Reads the injected CSS vars + theme tokens from the live DOM. Series slots come
 // from `getComputedStyle` on the container; tokens are read off a throwaway probe
 // carrying the matching Tailwind class (robust to the var naming a theme uses).
-export function resolveColors(
-  container: HTMLElement,
-  config: ChartConfig,
-  seriesKeys: string[],
-): ResolvedColors {
+export function resolveColors(container: HTMLElement, config: ChartConfig, seriesKeys: string[]): ResolvedColors {
   const computed = getComputedStyle(container);
   const series: Record<string, string[]> = {};
 
@@ -208,7 +202,6 @@ export function flattenColor(color: string, base: string): string {
       .map((part) => Number.parseFloat(part)) ?? [0, 0, 0, 1];
   const [r, g, b, a = 1] = parse(color);
   const [baseR, baseG, baseB] = parse(base);
-  const mix = (channel: number, baseChannel: number) =>
-    Math.round(channel * a + baseChannel * (1 - a));
+  const mix = (channel: number, baseChannel: number) => Math.round(channel * a + baseChannel * (1 - a));
   return `rgb(${mix(r, baseR)}, ${mix(g, baseG)}, ${mix(b, baseB)})`;
 }

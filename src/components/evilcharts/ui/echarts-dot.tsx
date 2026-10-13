@@ -43,7 +43,7 @@ function withAlpha(color: string, alpha: number): string {
 export function dotItemStyle(
   variant: DotVariant,
   paint: string | echarts.graphic.LinearGradient,
-  background: string,
+  background: string
 ): DotItemStyleOption {
   switch (variant) {
     case "border":
@@ -82,7 +82,7 @@ export const DOT_SIZES: Record<DotVariant, number> = {
 export function dotStyle(
   variant: DotVariant,
   paint: string | echarts.graphic.LinearGradient,
-  background: string,
+  background: string
 ): DotStyle {
   return { size: DOT_SIZES[variant], itemStyle: dotItemStyle(variant, paint, background) };
 }

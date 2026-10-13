@@ -29,9 +29,7 @@ export function EChartsAudienceAreaChart() {
     <div className="flex h-full w-full flex-col">
       <div className="flex items-start justify-between gap-4 px-4 pt-4">
         <div className="flex flex-col gap-1">
-          <span className="text-primary text-base font-medium tracking-tight sm:text-lg">
-            Listeners
-          </span>
+          <span className="text-primary text-base font-medium tracking-tight sm:text-lg">Listeners</span>
           <span className="text-muted-foreground max-w-[26ch] text-xs leading-snug">
             Monthly reach across every show and episode
           </span>
@@ -57,12 +55,7 @@ export function EChartsAudienceAreaChart() {
           }}
         >
           <EChartsAreaChart.Tooltip variant="frosted-glass" />
-          <EChartsAreaChart.Area
-            dataKey="listeners"
-            variant="gradient"
-            strokeVariant="solid"
-            strokeWidth={2.5}
-          >
+          <EChartsAreaChart.Area dataKey="listeners" variant="gradient" strokeVariant="solid" strokeWidth={2.5}>
             <EChartsAreaChart.ActiveDot variant="ping" />
           </EChartsAreaChart.Area>
         </EChartsAreaChart>

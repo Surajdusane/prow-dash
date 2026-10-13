@@ -1,9 +1,9 @@
-import { initTRPC } from '@trpc/server';
-import { cache } from 'react';
-import SuperJSON from 'superjson';
+import { cache } from "react";
+import { initTRPC } from "@trpc/server";
+import SuperJSON from "superjson";
 
 export const createTRPCContext = cache(async () => {
-  return { };
+  return {};
 });
 
 // Avoid exporting the entire t-object

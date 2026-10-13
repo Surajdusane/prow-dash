@@ -1,39 +1,41 @@
 ---
 title: Example
-description: Example docs page showcasing Fumadocs code blocks, callouts, and tabs.
+description:
+  Example docs page showcasing Fumadocs code blocks, callouts, and tabs.
 ---
 
 ## Code Blocks
 
-Fumadocs renders code blocks with syntax highlighting out of the box. Use a `title` to show a file name:
+Fumadocs renders code blocks with syntax highlighting out of the box. Use a
+`title` to show a file name:
 
 ```ts title="lib/source.ts"
-import { defineDocs } from 'fumadocs-mdx/macro';
-import { loader } from 'fumadocs-core/source';
+import { defineDocs } from "fumadocs-mdx/macro";
+import { loader } from "fumadocs-core/source";
 
 const docs = defineDocs({
-  dir: 'src/content/docs',
+  dir: "src/content/docs",
 });
 
 export const source = loader({
-  baseUrl: '/docs',
+  baseUrl: "/docs",
   source: docs.toFumadocsSource(),
 });
 ```
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
-import { source } from '@/lib/source';
+import { source } from "@/lib/source";
 import {
   DocsBody,
   DocsDescription,
   DocsPage,
   DocsTitle,
-} from 'fumadocs-ui/layouts/docs/page';
-import { notFound } from 'next/navigation';
-import { getMDXComponents } from '@/features/docs/components/mdx';
-import { createRelativeLink } from 'fumadocs-ui/mdx';
+} from "fumadocs-ui/layouts/docs/page";
+import { notFound } from "next/navigation";
+import { getMDXComponents } from "@/features/docs/components/mdx";
+import { createRelativeLink } from "fumadocs-ui/mdx";
 
-export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) notFound();
@@ -57,9 +59,9 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 ```
 
 ```css title="app/globals.css"
-@import 'tailwindcss';
-@import 'fumadocs-ui/css/neutral.css';
-@import 'fumadocs-ui/css/preset.css';
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
 ```
 
 ```bash title="Terminal"
@@ -69,11 +71,13 @@ bun run dev
 ## Callouts
 
 <Callout title="Good to Know">
-Fumadocs also supports other content sources, including Content Collections and headless CMS.
+  Fumadocs also supports other content sources, including Content Collections
+  and headless CMS.
 </Callout>
 
 <Callout title="Watch Out" type="warn">
-Make sure the `dir` in `defineDocs` matches your content folder (`src/content/docs`).
+  Make sure the `dir` in `defineDocs` matches your content folder
+  (`src/content/docs`).
 </Callout>
 
 ## Tabs
@@ -96,4 +100,5 @@ pnpm add fumadocs-ui fumadocs-core
 
 ## Relative Links
 
-You can link to [Hello World](/docs) from here, or use relative paths thanks to `createRelativeLink`.
+You can link to [Hello World](/docs) from here, or use relative paths thanks to
+`createRelativeLink`.

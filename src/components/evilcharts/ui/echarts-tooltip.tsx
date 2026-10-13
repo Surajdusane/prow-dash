@@ -1,5 +1,6 @@
-import { indicatorBackground, type ResolvedColors } from "@/components/evilcharts/ui/echarts-chart";
 import type { TooltipComponentOption } from "echarts/components";
+
+import { indicatorBackground, type ResolvedColors } from "@/components/evilcharts/ui/echarts-chart";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tooltip — the shared HTML shell/row primitives and the chart-agnostic option
@@ -80,9 +81,7 @@ export function tooltipShell({
 // "variable" → undefined (default follow-both-axes, current behavior); "fixed" →
 // a callback that centers the tooltip on the pointer's X but pins it near the
 // top (fixed Y).
-export function resolveTooltipPosition(
-  position: TooltipPosition,
-): TooltipComponentOption["position"] {
+export function resolveTooltipPosition(position: TooltipPosition): TooltipComponentOption["position"] {
   if (position === "variable") return undefined;
   return (point, _params, _dom, _rect, size) => [point[0] - size.contentSize[0] / 2, 8];
 }
