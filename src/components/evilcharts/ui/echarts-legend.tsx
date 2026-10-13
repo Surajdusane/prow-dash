@@ -1,7 +1,8 @@
 "use client";
 
-import { getColorsCount, indicatorBackground, type ChartConfig } from "@/components/evilcharts/ui/echarts-chart";
 import type { CSSProperties } from "react";
+
+import { getColorsCount, indicatorBackground, type ChartConfig } from "@/components/evilcharts/ui/echarts-chart";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Legend overlay (React) — replicates ChartLegendContent + its 7 indicators.
@@ -98,17 +99,14 @@ export function LegendOverlay({
   onToggle,
   style,
 }: LegendOverlayProps) {
-  const legendJustify =
-    align === "left" ? "justify-start" : align === "center" ? "justify-center" : "justify-end";
+  const legendJustify = align === "left" ? "justify-start" : align === "center" ? "justify-center" : "justify-end";
 
   return (
     <div style={style} className={`flex items-center gap-4 select-none ${legendJustify}`}>
       {seriesKeys.map((key) => {
         const item = config[key];
         const colorsCount = item ? getColorsCount(item) : 1;
-        const isSelected =
-          (selectedKey === null || selectedKey === key) &&
-          (hoveredKey === null || hoveredKey === key);
+        const isSelected = (selectedKey === null || selectedKey === key) && (hoveredKey === null || hoveredKey === key);
         return (
           // No entrance here — the Recharts legend appears instantly, and a
           // fade-in reads as disconnected from the canvas draw-in.

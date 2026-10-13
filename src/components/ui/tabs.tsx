@@ -34,7 +34,7 @@ function TabsList({
         variant === "default"
           ? "bg-muted text-muted-foreground/72 rounded-lg p-0.5"
           : "*:data-[slot=tabs-trigger]:hover:bg-accent/50 data-[orientation=horizontal]:py-1 data-[orientation=vertical]:px-1",
-        className,
+        className
       )}
       data-slot="tabs-list"
       {...props}
@@ -46,7 +46,7 @@ function TabsList({
           variant === "underline"
             ? "bg-primary! z-10 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:translate-y-px data-[orientation=vertical]:w-0.5 data-[orientation=vertical]:-translate-x-px"
             : "bg-background dark:bg-accent -z-1 rounded-md shadow-sm",
-          indicatorClassName,
+          indicatorClassName
         )}
         data-slot="tab-indicator"
       />
@@ -62,7 +62,7 @@ function TabsTab({ className, ...props }: TabsPrimitive.Tab.Props) {
         "not-data-active:hover:text-primary data-active:text-foreground",
         "h-6 gap-1.5 px-[calc(--spacing(2.5)-1px)]",
         "data-[orientation=vertical]:w-full data-[orientation=vertical]:justify-start",
-        className,
+        className
       )}
       data-slot="tabs-trigger"
       {...props}
@@ -71,13 +71,7 @@ function TabsTab({ className, ...props }: TabsPrimitive.Tab.Props) {
 }
 
 function TabsPanel({ className, ...props }: TabsPrimitive.Panel.Props) {
-  return (
-    <TabsPrimitive.Panel
-      className={cn("flex-1 outline-none", className)}
-      data-slot="tabs-content"
-      {...props}
-    />
-  );
+  return <TabsPrimitive.Panel className={cn("flex-1 outline-none", className)} data-slot="tabs-content" {...props} />;
 }
 
 export { Tabs, TabsList, TabsTab, TabsTab as TabsTrigger, TabsPanel, TabsPanel as TabsContent };

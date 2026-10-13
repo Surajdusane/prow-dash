@@ -1,43 +1,6 @@
 "use client";
 
 import {
-  DEFAULT_ECHARTS_RENDERER,
-  buildChartCss,
-  flattenColor,
-  getColorsCount,
-  resolveColors,
-  withAlpha,
-  type ChartConfig,
-  type EChartsRenderer,
-  type ResolvedColors,
-} from "@/components/evilcharts/ui/echarts-chart";
-import {
-  tooltipBaseOption,
-  tooltipIndicatorHtml,
-  tooltipRow,
-  tooltipShell,
-  type TooltipPosition,
-  type TooltipRoundness,
-  type TooltipVariant,
-} from "@/components/evilcharts/ui/echarts-tooltip";
-import {
-  Brush,
-  buildBrushDataZoom,
-  syncBrushOverlay,
-  type BrushGeometry,
-  type BrushOverlayElements,
-  type BrushProps,
-  type BrushRange,
-} from "@/components/evilcharts/ui/echarts-brush";
-import {
-  DataZoomComponent,
-  GridComponent,
-  TooltipComponent,
-  type DataZoomComponentOption,
-  type GridComponentOption,
-  type TooltipComponentOption,
-} from "echarts/components";
-import {
   Children,
   isValidElement,
   useCallback,
@@ -50,23 +13,55 @@ import {
   type FC,
   type ReactNode,
 } from "react";
-import { LegendOverlay, type LegendVariant } from "@/components/evilcharts/ui/echarts-legend";
-import type { ComposeOption, ImagePatternObject } from "echarts/core";
 import { BarChart, type BarSeriesOption } from "echarts/charts";
-import { sampleGradient } from "@/components/evilcharts/ui/echarts-dot";
-import { motion, useReducedMotion } from "motion/react";
+import {
+  DataZoomComponent,
+  GridComponent,
+  TooltipComponent,
+  type DataZoomComponentOption,
+  type GridComponentOption,
+  type TooltipComponentOption,
+} from "echarts/components";
+import type { ComposeOption, ImagePatternObject } from "echarts/core";
 import * as echarts from "echarts/core";
+
+import { motion, useReducedMotion } from "motion/react";
+
+import {
+  Brush,
+  buildBrushDataZoom,
+  syncBrushOverlay,
+  type BrushGeometry,
+  type BrushOverlayElements,
+  type BrushProps,
+  type BrushRange,
+} from "@/components/evilcharts/ui/echarts-brush";
+import {
+  buildChartCss,
+  DEFAULT_ECHARTS_RENDERER,
+  flattenColor,
+  getColorsCount,
+  resolveColors,
+  withAlpha,
+  type ChartConfig,
+  type EChartsRenderer,
+  type ResolvedColors,
+} from "@/components/evilcharts/ui/echarts-chart";
+import { sampleGradient } from "@/components/evilcharts/ui/echarts-dot";
+import { LegendOverlay, type LegendVariant } from "@/components/evilcharts/ui/echarts-legend";
+import {
+  tooltipBaseOption,
+  tooltipIndicatorHtml,
+  tooltipRow,
+  tooltipShell,
+  type TooltipPosition,
+  type TooltipRoundness,
+  type TooltipVariant,
+} from "@/components/evilcharts/ui/echarts-tooltip";
 
 // Re-export the shared types that were previously declared inline here, so
 // existing consumers/examples keep importing them from the chart module.
-export type {
-  ChartConfig,
-  EChartsRenderer,
-  LegendVariant,
-  TooltipPosition,
-  TooltipRoundness,
-  TooltipVariant,
-};
+export type { ChartConfig, EChartsRenderer, LegendVariant, TooltipPosition, TooltipRoundness, TooltipVariant };
 
 // Modular registration keeps the bundle lean — only the pieces this chart needs.
 // `DataZoomComponent` bundles both the slider (brush footer) and inside (wheel/drag)
@@ -174,22 +169,10 @@ const BRUSH_FILLER_OPACITY = 0; // selected-range wash — evil-brush draws none
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type BarVariant =
-  | "default"
-  | "hatched"
-  | "duotone"
-  | "duotone-reverse"
-  | "gradient"
-  | "stripped"
-  | "blocks"
-  | "expandable";
+  "default" | "hatched" | "duotone" | "duotone-reverse" | "gradient" | "stripped" | "blocks" | "expandable";
 export type StackType = "default" | "stacked" | "percent";
 export type BarLayout = "vertical" | "horizontal";
-export type BarAnimationType =
-  | "none"
-  | "left-to-right"
-  | "right-to-left"
-  | "center-out"
-  | "edges-in";
+export type BarAnimationType = "none" | "left-to-right" | "right-to-left" | "center-out" | "edges-in";
 // TooltipVariant, TooltipRoundness, LegendVariant, and ChartConfig now live in
 // the shared @/registry/ui/echarts/* modules and are imported + re-exported at
 // the top of this file.
@@ -457,10 +440,7 @@ const GRAY = "rgba(120, 120, 120, 1)";
 // Solid vertical top→bottom color for a series — a plain string when there is
 // one color, else a vertical multi-stop LinearGradient in each bar's own box.
 // The `default` variant paints from this at full alpha.
-function solidVerticalPaint(
-  slots: string[],
-  alpha: number,
-): string | echarts.graphic.LinearGradient {
+function solidVerticalPaint(slots: string[], alpha: number): string | echarts.graphic.LinearGradient {
   if (slots.length <= 1) {
     const base = slots[0] ?? GRAY;
     return alpha === 1 ? base : withAlpha(base, alpha);
@@ -494,7 +474,7 @@ function duotoneSplitPaint(
   base: string,
   leftAlpha: number,
   rightAlpha: number,
-  isHorizontal: boolean,
+  isHorizontal: boolean
 ): echarts.graphic.LinearGradient {
   const stops = [
     { offset: 0, color: withAlpha(base, leftAlpha) },
@@ -522,7 +502,7 @@ function duotoneSplitPaint(
 function strippedDatumPaint(
   slots: string[],
   isHorizontal: boolean,
-  capFraction: number,
+  capFraction: number
 ): echarts.graphic.LinearGradient {
   const f = Math.min(Math.max(capFraction, 0), 1);
   const cap = withAlpha(sampleGradient(slots, 0), 1);
@@ -577,7 +557,7 @@ function measureValuePxPerUnit(chart: EChartsInstance, isHorizontal: boolean): n
 function measureBarWidthPx(
   chart: EChartsInstance,
   isHorizontal: boolean,
-  barCategoryGap: number | undefined,
+  barCategoryGap: number | undefined
 ): number | null {
   const finder = isHorizontal ? { yAxisIndex: 0 } : { xAxisIndex: 0 };
   try {
@@ -602,7 +582,7 @@ function measureBarWidthPx(
 function patternFill(
   kind: "hatched" | "buffer" | "blocks",
   color: string,
-  blockSize = BLOCK_SIZE,
+  blockSize = BLOCK_SIZE
 ): ImagePatternObject | null {
   if (typeof document === "undefined") return null;
   const dpr = Math.max(window.devicePixelRatio || 1, 1);
@@ -677,7 +657,7 @@ function barFillPaint(
   variant: BarVariant,
   slots: string[],
   isHorizontal: boolean,
-  blockSize = BLOCK_SIZE,
+  blockSize = BLOCK_SIZE
 ): string | echarts.graphic.LinearGradient | ImagePatternObject {
   const base = slots[0] ?? GRAY;
   switch (variant) {
@@ -707,11 +687,7 @@ function barFillPaint(
 // Border radius per variant/layout. Non-stripped bars round every corner
 // (Recharts passes a plain number); stripped rounds only the tip corners — the
 // top for vertical bars, the right end for horizontal.
-function barBorderRadius(
-  radius: number,
-  variant: BarVariant,
-  isHorizontal: boolean,
-): number | number[] {
+function barBorderRadius(radius: number, variant: BarVariant, isHorizontal: boolean): number | number[] {
   // Blocks draw their own square segments; a radius would clip the end one. An
   // expandable bar is a thin line at rest, where a radius would swallow it.
   if (variant === "blocks" || variant === "expandable") return 0;
@@ -841,16 +817,7 @@ function buildChartLayout({
 // The category + value axes, laid onto x/y per layout. Vertical bars → x is
 // category, y is value; horizontal bars → x is value, y is category.
 function buildMainAxes(ctx: OptionBuildContext): { xAxis: XAxisOption; yAxis: YAxisOption } {
-  const {
-    isHorizontal,
-    showGrid,
-    isLoading,
-    isPercent,
-    categories,
-    loadingData,
-    categorySlot,
-    valueSlot,
-  } = ctx;
+  const { isHorizontal, showGrid, isLoading, isPercent, categories, loadingData, categorySlot, valueSlot } = ctx;
   const { tokens } = ctx.resolved;
 
   const axisLabelColor = tokens.mutedForeground;
@@ -907,9 +874,7 @@ function buildMainAxes(ctx: OptionBuildContext): { xAxis: XAxisOption; yAxis: YA
       color: axisLabelColor,
       fontSize: 10,
       margin: 8,
-      formatter: catFormatter
-        ? (value: string, index: number) => catFormatter(value, index)
-        : undefined,
+      formatter: catFormatter ? (value: string, index: number) => catFormatter(value, index) : undefined,
     },
   };
 
@@ -955,9 +920,7 @@ function buildMainAxes(ctx: OptionBuildContext): { xAxis: XAxisOption; yAxis: YA
     },
   };
 
-  return isHorizontal
-    ? { xAxis: valueAxis, yAxis: categoryAxis }
-    : { xAxis: categoryAxis, yAxis: valueAxis };
+  return isHorizontal ? { xAxis: valueAxis, yAxis: categoryAxis } : { xAxis: categoryAxis, yAxis: valueAxis };
 }
 
 // Tooltip HTML builder, closed over the build context. Dims by the click
@@ -990,8 +953,7 @@ function createTooltipFormatter(ctx: OptionBuildContext) {
         const colorsCount = item ? getColorsCount(item) : 1;
         const labelText = typeof item?.label === "string" ? item.label : (p.seriesName ?? key);
         const dimmed = selectedDataKey != null && selectedDataKey !== key ? " opacity-30" : "";
-        const value =
-          typeof p.value === "number" ? p.value.toLocaleString() : String(p.value ?? "");
+        const value = typeof p.value === "number" ? p.value.toLocaleString() : String(p.value ?? "");
 
         return tooltipRow({
           indicatorHtml: tooltipIndicatorHtml(key, colorsCount),
@@ -1036,7 +998,7 @@ function buildTooltipOption(ctx: OptionBuildContext): TooltipComponentOption {
 // itself. Only called for the vertical layout, where the category axis is x.
 function buildBrushOption(
   ctx: OptionBuildContext,
-  brushBottom: number,
+  brushBottom: number
 ): {
   miniGrid: GridComponentOption;
   miniXAxis: XAxisOption;
@@ -1105,7 +1067,7 @@ function buildBrushOption(
 // parity: its skeleton is a single LoadingBar), swept by the shimmer rAF.
 function buildLoadingOption(
   ctx: OptionBuildContext,
-  frame: { grid: GridComponentOption; xAxis: XAxisOption; yAxis: YAxisOption },
+  frame: { grid: GridComponentOption; xAxis: XAxisOption; yAxis: YAxisOption }
 ): EChartsOption {
   const { tokens } = ctx.resolved;
 
@@ -1185,11 +1147,7 @@ function buildBarSeries(ctx: OptionBuildContext): BarSeriesOption[] {
     // ECharts' own bar background so it spans the column's full height.
     const isBlocks = bar.variant === "blocks";
     const blockTrack = isBlocks
-      ? patternFill(
-          "blocks",
-          withAlpha(resolved.tokens.mutedForeground, BLOCK_TRACK_OPACITY),
-          blockSize,
-        )
+      ? patternFill("blocks", withAlpha(resolved.tokens.mutedForeground, BLOCK_TRACK_OPACITY), blockSize)
       : null;
 
     const values = data.map((row, i) => {
@@ -1221,10 +1179,7 @@ function buildBarSeries(ctx: OptionBuildContext): BarSeriesOption[] {
     // out" reading collapses. Same shadow either way, so the two share a builder.
     const glowAt = (i: number) => ({
       shadowBlur: GLOW_BLUR,
-      shadowColor: withAlpha(
-        sampleGradient(slots, values.length > 1 ? i / (values.length - 1) : 0),
-        GLOW_OPACITY,
-      ),
+      shadowColor: withAlpha(sampleGradient(slots, values.length > 1 ? i / (values.length - 1) : 0), GLOW_OPACITY),
     });
     const glowFor = bar.glowing
       ? glowAt
@@ -1237,11 +1192,7 @@ function buildBarSeries(ctx: OptionBuildContext): BarSeriesOption[] {
     // itemStyle applies untouched. Stripped and glow touch every datum; buffer only
     // the last one.
     const dataPoints =
-      isStripped ||
-      isExpandable ||
-      glowFor ||
-      ctx.maxHighlightIndex != null ||
-      (bufferStyle && lastIndex >= 0)
+      isStripped || isExpandable || glowFor || ctx.maxHighlightIndex != null || (bufferStyle && lastIndex >= 0)
         ? values.map((value, i) => {
             const isBuffer = !!bufferStyle && i === lastIndex;
             if (!isBuffer && !glowFor && !isStripped && !isExpandable && !isMuted(i)) return value;
@@ -1255,16 +1206,10 @@ function buildBarSeries(ctx: OptionBuildContext): BarSeriesOption[] {
                 // the last datum.
                 ...(isStripped && !isBuffer
                   ? {
-                      color: strippedDatumPaint(
-                        slots,
-                        isHorizontal,
-                        strippedCapFraction(value, ctx.valuePxPerUnit),
-                      ),
+                      color: strippedDatumPaint(slots, isHorizontal, strippedCapFraction(value, ctx.valuePxPerUnit)),
                     }
                   : {}),
-                ...(isExpandable && !isBuffer
-                  ? { color: expandableDatumPaint(slots, expandOf(i)) }
-                  : {}),
+                ...(isExpandable && !isBuffer ? { color: expandableDatumPaint(slots, expandOf(i)) } : {}),
                 ...(isBuffer && bufferStyle ? bufferStyle : {}),
                 ...(glowFor ? glowFor(i) : {}),
                 // Last so it overrides the variant's own paint.
@@ -1315,10 +1260,7 @@ function buildBarSeries(ctx: OptionBuildContext): BarSeriesOption[] {
         bar.enableHoverHighlight && !hasSelection
           ? { focus: "self" as const, blurScope: "coordinateSystem" as const }
           : { disabled: true },
-      blur:
-        bar.enableHoverHighlight && !hasSelection
-          ? { itemStyle: { opacity: HOVER_BLUR } }
-          : undefined,
+      blur: bar.enableHoverHighlight && !hasSelection ? { itemStyle: { opacity: HOVER_BLUR } } : undefined,
       // The grow-in envelope. Only takes effect on the reveal push (top-level
       // `animation: true`); every later push sends `animation: false`, so the
       // per-datum stagger is dormant then.
@@ -1338,9 +1280,7 @@ function buildBarSeries(ctx: OptionBuildContext): BarSeriesOption[] {
   // Before the first layout that measurement is null and the gap is simply skipped;
   // the push re-applies once it exists, in the same frame (see the sync effect).
   const gapUnits =
-    (isStacked || isPercent) && series.length > 1 && ctx.valuePxPerUnit
-      ? STACK_SEGMENT_GAP / ctx.valuePxPerUnit
-      : 0;
+    (isStacked || isPercent) && series.length > 1 && ctx.valuePxPerUnit ? STACK_SEGMENT_GAP / ctx.valuePxPerUnit : 0;
   if (!gapUnits) return series;
 
   const spaced: BarSeriesOption[] = [];
@@ -1491,10 +1431,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
 
   // Skeleton rows roll lazily on first use — an impure useRef initializer would
   // re-roll Math.random() on every render.
-  const loadingData = useCallback(
-    () => (live.loadingRows ??= getLoadingBarData(loadingBars)),
-    [live, loadingBars],
-  );
+  const loadingData = useCallback(() => (live.loadingRows ??= getLoadingBarData(loadingBars)), [live, loadingBars]);
   const shouldReduceMotion = useReducedMotion();
 
   const [selectedDataKey, setSelectedDataKey] = useState<string | null>(defaultSelectedDataKey);
@@ -1562,10 +1499,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
   const hasSelection = selectedDataKey !== null;
 
   // Which series may be clicked to toggle selection (consulted by the click handler).
-  const clickableKeys = useMemo(
-    () => new Set(bars.filter((bar) => bar.isClickable).map((bar) => bar.dataKey)),
-    [bars],
-  );
+  const clickableKeys = useMemo(() => new Set(bars.filter((bar) => bar.isClickable).map((bar) => bar.dataKey)), [bars]);
 
   // Any visible stripped bar? (never while loading — the skeleton has no stripped
   // series.) Gates the post-layout cap correction in the `finished` handler.
@@ -1594,7 +1528,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
         return next;
       });
     },
-    [onSelectionChange],
+    [onSelectionChange]
   );
 
   // The brush is meaningful only when the category axis is on x (vertical layout).
@@ -1786,8 +1720,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
       const p = params as { seriesId?: string; seriesIndex?: number };
       // Bar clicks carry seriesId; keep the seriesIndex fallback for safety. Main
       // series come first in the series array, so the index maps directly.
-      const id =
-        p.seriesId ?? (typeof p.seriesIndex === "number" ? keys[p.seriesIndex] : undefined);
+      const id = p.seriesId ?? (typeof p.seriesIndex === "number" ? keys[p.seriesIndex] : undefined);
       if (typeof id === "string" && clickable.has(id)) toggleSelection(id);
     });
 
@@ -1961,9 +1894,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
     // patchStrippedCaps) — never a full notMerge push, which would fight the
     // hover state it is animating.
     live.animateExpand = (key: string | null, index: number | null) => {
-      const expandKeys = new Set(
-        bars.filter((bar) => bar.variant === "expandable").map((bar) => bar.dataKey),
-      );
+      const expandKeys = new Set(bars.filter((bar) => bar.variant === "expandable").map((bar) => bar.dataKey));
       if (!expandKeys.size) return;
 
       const next = index != null && key != null ? index : null;
@@ -1978,14 +1909,8 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
 
       const patchOnce = () => {
         const option = buildOption();
-        const series = Array.isArray(option.series)
-          ? option.series
-          : option.series
-            ? [option.series]
-            : [];
-        const patch = series.filter(
-          (s): s is BarSeriesOption => typeof s?.id === "string" && expandKeys.has(s.id),
-        );
+        const series = Array.isArray(option.series) ? option.series : option.series ? [option.series] : [];
+        const patch = series.filter((s): s is BarSeriesOption => typeof s?.id === "string" && expandKeys.has(s.id));
         if (patch.length) chart.setOption({ series: patch }, { silent: true, lazyUpdate: true });
       };
 
@@ -2017,17 +1942,9 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
 
     live.patchStrippedCaps = () => {
       const option = buildOption();
-      const series = Array.isArray(option.series)
-        ? option.series
-        : option.series
-          ? [option.series]
-          : [];
-      const strippedKeys = new Set(
-        bars.filter((bar) => bar.variant === "stripped").map((bar) => bar.dataKey),
-      );
-      const patch = series.filter(
-        (s): s is BarSeriesOption => typeof s?.id === "string" && strippedKeys.has(s.id),
-      );
+      const series = Array.isArray(option.series) ? option.series : option.series ? [option.series] : [];
+      const strippedKeys = new Set(bars.filter((bar) => bar.variant === "stripped").map((bar) => bar.dataKey));
+      const patch = series.filter((s): s is BarSeriesOption => typeof s?.id === "string" && strippedKeys.has(s.id));
       if (patch.length) chart.setOption({ series: patch }, { silent: true, lazyUpdate: true });
     };
 
@@ -2040,8 +1957,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
     if (isLoading) live.hasRevealed = false;
     const shouldReveal = !live.hasRevealed && !isLoading;
     if (shouldReveal) live.hasRevealed = true;
-    const revealEnabled =
-      animation && shouldReveal && effectiveAnimation !== "none" && !shouldReduceMotion;
+    const revealEnabled = animation && shouldReveal && effectiveAnimation !== "none" && !shouldReduceMotion;
     push(revealEnabled);
 
     // Theme flips and resizes re-enter here without touching React: re-read the
@@ -2080,14 +1996,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
       chart.dispatchAction({ type: "showTip", seriesIndex: 0, dataIndex: index });
     }, 300);
     return () => clearTimeout(timer);
-  }, [
-    renderer,
-    tooltipSlot.present,
-    tooltipSlot.defaultIndex,
-    isLoading,
-    data.length,
-    seriesKeys.length,
-  ]);
+  }, [renderer, tooltipSlot.present, tooltipSlot.defaultIndex, isLoading, data.length, seriesKeys.length]);
 
   // ── Loading shimmer — rAF sweeps a bright band across the gray bars ──────────
   useEffect(() => {
@@ -2126,11 +2035,11 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
         w,
         w,
         shimmerWindowStops(center, foreground, LOADING_SHIMMER_MAX_OPACITY),
-        true,
+        true
       );
       chart.setOption(
         { series: [{ id: "__loading", data: loadingData(), itemStyle: { color: fill } }] },
-        { silent: true, lazyUpdate: true },
+        { silent: true, lazyUpdate: true }
       );
       raf = requestAnimationFrame(tick);
     };
@@ -2153,11 +2062,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
   };
 
   return (
-    <div
-      ref={containerRef}
-      data-chart={chartId}
-      className={`relative flex flex-col text-xs ${className ?? ""}`}
-    >
+    <div ref={containerRef} data-chart={chartId} className={`relative flex flex-col text-xs ${className ?? ""}`}>
       <style dangerouslySetInnerHTML={{ __html: css }} />
 
       <div className="relative min-h-0 w-full flex-1">
@@ -2227,15 +2132,7 @@ function shimmerWindowStops(center: number, color: string, peak: number) {
     return peak * Math.sin(((1 - (dist - (half - feather)) / feather) * Math.PI) / 2);
   };
 
-  const offsets = [
-    0,
-    center - half,
-    center - half + feather,
-    center,
-    center + half - feather,
-    center + half,
-    1,
-  ]
+  const offsets = [0, center - half, center - half + feather, center, center + half - feather, center + half, 1]
     .filter((x) => x >= 0 && x <= 1)
     .sort((a, b) => a - b);
 

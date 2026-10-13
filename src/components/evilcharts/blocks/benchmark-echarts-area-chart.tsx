@@ -41,12 +41,8 @@ export function EChartsBenchmarkAreaChart() {
         <div className="flex flex-col gap-1">
           <span className="text-muted-foreground text-xs">Weekly signups</span>
           <div className="flex items-baseline gap-2">
-            <span className="text-primary text-2xl font-semibold tracking-tight sm:text-3xl">
-              {LATEST.actual}
-            </span>
-            <span className="text-sm font-medium text-emerald-500">
-              +{DELTA.toFixed(1)}% vs target
-            </span>
+            <span className="text-primary text-2xl font-semibold tracking-tight sm:text-3xl">{LATEST.actual}</span>
+            <span className="text-sm font-medium text-emerald-500">+{DELTA.toFixed(1)}% vs target</span>
           </div>
         </div>
 
@@ -59,15 +55,7 @@ export function EChartsBenchmarkAreaChart() {
           </div>
           <div className="text-muted-foreground flex items-center gap-2 text-xs">
             <svg width="18" height="2" viewBox="0 0 18 2" aria-hidden>
-              <line
-                x1="0"
-                y1="1"
-                x2="18"
-                y2="1"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray="4 3"
-              />
+              <line x1="0" y1="1" x2="18" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="4 3" />
             </svg>
             Target
           </div>

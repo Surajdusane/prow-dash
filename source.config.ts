@@ -1,4 +1,5 @@
 import { defineConfig } from "fumadocs-mdx/config";
+
 import { transformers } from "@/lib/highlight-code";
 
 export default defineConfig({

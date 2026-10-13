@@ -2,44 +2,6 @@
 "use client";
 
 import {
-  DEFAULT_ECHARTS_RENDERER,
-  buildChartCss,
-  flattenColor,
-  getColorsCount,
-  resolveColors,
-  seriesPaint,
-  withAlpha,
-  type ChartConfig,
-  type EChartsRenderer,
-  type ResolvedColors,
-} from "@/components/evilcharts/ui/echarts-chart";
-import {
-  tooltipBaseOption,
-  tooltipIndicatorHtml,
-  tooltipRow,
-  tooltipShell,
-  type TooltipPosition,
-  type TooltipRoundness,
-  type TooltipVariant,
-} from "@/components/evilcharts/ui/echarts-tooltip";
-import {
-  Brush,
-  buildBrushDataZoom,
-  syncBrushOverlay,
-  type BrushGeometry,
-  type BrushOverlayElements,
-  type BrushProps,
-  type BrushRange,
-} from "@/components/evilcharts/ui/echarts-brush";
-import {
-  DataZoomComponent,
-  GridComponent,
-  TooltipComponent,
-  type DataZoomComponentOption,
-  type GridComponentOption,
-  type TooltipComponentOption,
-} from "echarts/components";
-import {
   Children,
   isValidElement,
   useCallback,
@@ -52,12 +14,52 @@ import {
   type FC,
   type ReactNode,
 } from "react";
+import { LineChart, type LineSeriesOption } from "echarts/charts";
+import {
+  DataZoomComponent,
+  GridComponent,
+  TooltipComponent,
+  type DataZoomComponentOption,
+  type GridComponentOption,
+  type TooltipComponentOption,
+} from "echarts/components";
+import type { ComposeOption, ImagePatternObject } from "echarts/core";
+import * as echarts from "echarts/core";
+
+import { motion, useReducedMotion } from "motion/react";
+
+import {
+  Brush,
+  buildBrushDataZoom,
+  syncBrushOverlay,
+  type BrushGeometry,
+  type BrushOverlayElements,
+  type BrushProps,
+  type BrushRange,
+} from "@/components/evilcharts/ui/echarts-brush";
+import {
+  buildChartCss,
+  DEFAULT_ECHARTS_RENDERER,
+  flattenColor,
+  getColorsCount,
+  resolveColors,
+  seriesPaint,
+  withAlpha,
+  type ChartConfig,
+  type EChartsRenderer,
+  type ResolvedColors,
+} from "@/components/evilcharts/ui/echarts-chart";
 import { dotItemStyle, dotStyle, sampleGradient, type DotVariant } from "@/components/evilcharts/ui/echarts-dot";
 import { LegendOverlay, type LegendVariant } from "@/components/evilcharts/ui/echarts-legend";
-import type { ComposeOption, ImagePatternObject } from "echarts/core";
-import { LineChart, type LineSeriesOption } from "echarts/charts";
-import { motion, useReducedMotion } from "motion/react";
-import * as echarts from "echarts/core";
+import {
+  tooltipBaseOption,
+  tooltipIndicatorHtml,
+  tooltipRow,
+  tooltipShell,
+  type TooltipPosition,
+  type TooltipRoundness,
+  type TooltipVariant,
+} from "@/components/evilcharts/ui/echarts-tooltip";
 
 // Re-export the shared types that were previously declared inline here, so
 // existing consumers/examples keep importing them from the chart module.
@@ -136,31 +138,11 @@ const BRUSH_FILLER_OPACITY = 0; // selected-range wash — evil-brush draws none
 // Public types
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type AreaVariant =
-  | "gradient"
-  | "gradient-reverse"
-  | "solid"
-  | "dotted"
-  | "lines"
-  | "hatched"
-  | "none"; // stroke only — no fill at all
+export type AreaVariant = "gradient" | "gradient-reverse" | "solid" | "dotted" | "lines" | "hatched" | "none"; // stroke only — no fill at all
 export type StrokeVariant = "solid" | "dashed" | "animated-dashed";
 export type StackType = "default" | "stacked" | "expanded";
-export type AreaAnimationType =
-  | "none"
-  | "left-to-right"
-  | "right-to-left"
-  | "center-out"
-  | "edges-in";
-export type CurveType =
-  | "linear"
-  | "smooth"
-  | "bump"
-  | "monotone"
-  | "monotoneX"
-  | "monotoneY"
-  | "natural"
-  | "step";
+export type AreaAnimationType = "none" | "left-to-right" | "right-to-left" | "center-out" | "edges-in";
+export type CurveType = "linear" | "smooth" | "bump" | "monotone" | "monotoneX" | "monotoneY" | "natural" | "step";
 // DotVariant, TooltipVariant, TooltipRoundness, LegendVariant, and ChartConfig
 // now live in the shared @/registry/ui/echarts/* modules and are imported +
 // re-exported at the top of this file.
@@ -450,10 +432,7 @@ function collectConfig(children: ReactNode): CollectedConfig {
 // into a square tile clips the stroke at the corners, which reads as periodic
 // gaps once tiled. Tiles render at devicePixelRatio and scale back down so the
 // texture stays crisp on retina canvases.
-function patternFill(
-  kind: "dotted" | "lines" | "hatched" | "stripe",
-  color: string,
-): ImagePatternObject | null {
+function patternFill(kind: "dotted" | "lines" | "hatched" | "stripe", color: string): ImagePatternObject | null {
   if (typeof document === "undefined") return null;
   const dpr = Math.max(window.devicePixelRatio || 1, 1);
   const canvas = document.createElement("canvas");
@@ -515,7 +494,7 @@ function gradientFillTexture(
   slots: string[],
   width: number,
   height: number,
-  reverse: boolean,
+  reverse: boolean
 ): HTMLCanvasElement | null {
   if (typeof document === "undefined" || width < 1 || height < 1) return null;
 
@@ -550,7 +529,7 @@ function patternFadeTexture(
   kind: "dotted" | "lines" | "hatched",
   color: string,
   width: number,
-  height: number,
+  height: number
 ): HTMLCanvasElement | null {
   const patternObj = patternFill(kind, color);
   if (!patternObj || typeof document === "undefined" || width < 1 || height < 1) return null;
@@ -596,7 +575,7 @@ function fillPaint(
   variant: AreaVariant,
   showUnselected: boolean,
   slots: string[],
-  size: { width: number; height: number },
+  size: { width: number; height: number }
 ): string | echarts.graphic.LinearGradient | ImagePatternObject {
   const base = slots[0] ?? "rgba(120, 120, 120, 1)";
   const multi = slots.length > 1;
@@ -633,7 +612,7 @@ function fillPaint(
           slots.map((color, i) => ({
             offset: i / (slots.length - 1),
             color: withAlpha(color, 0.1),
-          })),
+          }))
         );
       }
       return withAlpha(base, 0.1);
@@ -703,15 +682,7 @@ function shimmerWindowStops(center: number, color: string, peak: number) {
     return peak * Math.sin(((1 - (dist - (half - feather)) / feather) * Math.PI) / 2);
   };
 
-  const offsets = [
-    0,
-    center - half,
-    center - half + feather,
-    center,
-    center + half - feather,
-    center + half,
-    1,
-  ]
+  const offsets = [0, center - half, center - half + feather, center, center + half - feather, center + half, 1]
     .filter((x) => x >= 0 && x <= 1)
     .sort((a, b) => a - b);
 
@@ -838,9 +809,7 @@ function buildMainAxes(ctx: OptionBuildContext): { xAxis: XAxisOption; yAxis: YA
       color: axisLabelColor,
       fontSize: 10,
       margin: 8,
-      formatter: xTickFormatter
-        ? (value: string, index: number) => xTickFormatter(value, index)
-        : undefined,
+      formatter: xTickFormatter ? (value: string, index: number) => xTickFormatter(value, index) : undefined,
     },
   };
 
@@ -936,12 +905,10 @@ function createTooltipFormatter(ctx: OptionBuildContext) {
         const labelText = typeof item?.label === "string" ? item.label : (p.seriesName ?? key);
         const hovered = getHoveredKey();
         const dimmed =
-          (selectedDataKey != null && selectedDataKey !== key) ||
-          (hovered != null && hovered !== key)
+          (selectedDataKey != null && selectedDataKey !== key) || (hovered != null && hovered !== key)
             ? " opacity-30"
             : "";
-        const value =
-          typeof p.value === "number" ? p.value.toLocaleString() : String(p.value ?? "");
+        const value = typeof p.value === "number" ? p.value.toLocaleString() : String(p.value ?? "");
 
         return tooltipRow({
           indicatorHtml: tooltipIndicatorHtml(key, colorsCount),
@@ -984,7 +951,7 @@ function buildTooltipOption(ctx: OptionBuildContext): TooltipComponentOption {
 // itself. Only called when `showBrush` is set.
 function buildBrushOption(
   ctx: OptionBuildContext,
-  brushBottom: number,
+  brushBottom: number
 ): {
   miniGrid: GridComponentOption;
   miniXAxis: XAxisOption;
@@ -1067,7 +1034,7 @@ function buildBrushOption(
 // parity: its skeleton is a single LoadingArea), swept by the shimmer rAF.
 function buildLoadingOption(
   ctx: OptionBuildContext,
-  frame: { grid: GridComponentOption; xAxis: XAxisOption; yAxis: YAxisOption },
+  frame: { grid: GridComponentOption; xAxis: XAxisOption; yAxis: YAxisOption }
 ): EChartsOption {
   const { tokens } = ctx.resolved;
   const curve = curveConfig(ctx.curveType);
@@ -1160,7 +1127,7 @@ function buildAreaSeries(ctx: OptionBuildContext): LineSeriesOption[] {
             Math.max(rendererSize.width - 8, 9),
             0,
             slots.map((color, i) => ({ offset: i / (slots.length - 1), color })),
-            true,
+            true
           )
         : paint;
 
@@ -1189,7 +1156,7 @@ function buildAreaSeries(ctx: OptionBuildContext): LineSeriesOption[] {
                 ...dotItemStyle(
                   restingVisible ? area.dotVariant : area.activeDotVariant,
                   pointColor,
-                  resolved.tokens.background,
+                  resolved.tokens.background
                 ),
                 opacity: dotOpacity,
               },
@@ -1198,7 +1165,7 @@ function buildAreaSeries(ctx: OptionBuildContext): LineSeriesOption[] {
                   ...dotItemStyle(
                     area.activeDotVariant === "none" ? "default" : area.activeDotVariant,
                     pointColor,
-                    resolved.tokens.background,
+                    resolved.tokens.background
                   ),
                   opacity: 1,
                 },
@@ -1451,7 +1418,7 @@ function resolveAreaAtPixel(
   tops: Record<string, number[]>,
   keys: string[],
   x: number,
-  y: number,
+  y: number
 ): string | null {
   if (keys.length < 2) return null;
   if (!chart.containPixel({ gridIndex: 0 }, [x, y])) return null;
@@ -1599,17 +1566,13 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
 
   // Skeleton rows roll lazily on first use — an impure useRef initializer would
   // re-roll Math.random() on every render.
-  const loadingData = useCallback(
-    () => (live.loadingRows ??= getLoadingData(loadingPoints)),
-    [live, loadingPoints],
-  );
+  const loadingData = useCallback(() => (live.loadingRows ??= getLoadingData(loadingPoints)), [live, loadingPoints]);
   const shouldReduceMotion = useReducedMotion();
 
   // Selection is controlled when the `selectedDataKey` prop is provided;
   // otherwise the internal state (seeded by defaultSelectedDataKey) drives it.
   const [internalSelectedKey, setSelectedDataKey] = useState<string | null>(defaultSelectedDataKey);
-  const selectedDataKey =
-    selectedDataKeyProp !== undefined ? selectedDataKeyProp : internalSelectedKey;
+  const selectedDataKey = selectedDataKeyProp !== undefined ? selectedDataKeyProp : internalSelectedKey;
 
   // Hover-highlight mirrors into the legend (React state) and tooltip
   // (live.hoveredKey — its formatter runs on every hover, and pushing an option
@@ -1659,7 +1622,7 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
   // Which series may be clicked to toggle selection (consulted by the click handler).
   const clickableKeys = useMemo(
     () => new Set(areas.filter((area) => area.isClickable).map((area) => area.dataKey)),
-    [areas],
+    [areas]
   );
 
   // Refresh the handlers' snapshot of the latest callbacks/flags every render.
@@ -1696,7 +1659,7 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
       setSelectedDataKey(next);
       live.handlers.onSelectionChange?.(next);
     },
-    [live],
+    [live]
   );
 
   // Reposition the brush overlays from the live refs — safe to call from drag
@@ -1906,19 +1869,11 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
       // only carry seriesIndex — recover the key from the last build's index map,
       // which accounts for the extra `__buffer-`/`__reveal-`/`__mini-` series
       // interleaved between the main ones (a raw seriesKeys lookup would miss).
-      let id =
-        p.seriesId ??
-        (typeof p.seriesIndex === "number" ? live.seriesKeyByIndex[p.seriesIndex] : undefined);
+      let id = p.seriesId ?? (typeof p.seriesIndex === "number" ? live.seriesKeyByIndex[p.seriesIndex] : undefined);
       // Overlapping polygons: the native hit is the topmost series, not the
       // band the pointer is visually inside — resolve geometrically.
       if (typeof p.event?.offsetX === "number" && typeof p.event?.offsetY === "number") {
-        const resolved = resolveAreaAtPixel(
-          chart,
-          live.plottedTops,
-          keys,
-          p.event.offsetX,
-          p.event.offsetY,
-        );
+        const resolved = resolveAreaAtPixel(chart, live.plottedTops, keys, p.event.offsetX, p.event.offsetY);
         if (resolved) id = resolved;
       }
       if (typeof id === "string" && clickable.has(id)) toggleSelection(id);
@@ -1962,16 +1917,12 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
           series: keys.flatMap((key) => [
             {
               id: key,
-              data: on
-                ? sliceToNull(live.revealValues[key] ?? [], idx)
-                : (live.revealValues[key] ?? []),
+              data: on ? sliceToNull(live.revealValues[key] ?? [], idx) : (live.revealValues[key] ?? []),
             },
             {
               id: `${REVEAL_PREFIX}${key}`,
               // Gray tail keeps only the region from the cursor onward.
-              data: on
-                ? sliceFrom(live.revealValues[key] ?? [], idx)
-                : (live.revealValues[key] ?? []),
+              data: on ? sliceFrom(live.revealValues[key] ?? [], idx) : (live.revealValues[key] ?? []),
               lineStyle: { opacity: on ? 0.3 : 0 },
             },
           ]),
@@ -1979,7 +1930,7 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
         // NOT lazy: the highlight dispatched just below re-draws the active dot
         // the setOption wipes, so the option must be committed first — a queued
         // (lazy) update would land after the dispatch and erase the dot again.
-        { silent: true },
+        { silent: true }
       );
       // The per-frame setOption above cancels the axis tooltip's transient hover
       // symbol, so the <ActiveDot> never lands at the cursor. Re-assert it:
@@ -1987,9 +1938,7 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
       // (the active dot) even with showSymbol:false; downplay clears it on exit.
       for (const key of keys) {
         chart.dispatchAction(
-          on
-            ? { type: "highlight", seriesId: key, dataIndex: idx as number }
-            : { type: "downplay", seriesId: key },
+          on ? { type: "highlight", seriesId: key, dataIndex: idx as number } : { type: "downplay", seriesId: key }
         );
       }
     };
@@ -2026,13 +1975,7 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
       // entirely while one exists and resumes once it clears.
       if (live.handlers.selectedDataKey !== null) return;
       applyHoverKey(
-        resolveAreaAtPixel(
-          chart,
-          live.plottedTops,
-          live.handlers.seriesKeys,
-          event.offsetX ?? -1,
-          event.offsetY ?? -1,
-        ),
+        resolveAreaAtPixel(chart, live.plottedTops, live.handlers.seriesKeys, event.offsetX ?? -1, event.offsetY ?? -1)
       );
     };
     const onZrHoverOut = () => {
@@ -2165,8 +2108,7 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
     if (isLoading) live.hasRevealed = false;
     const shouldReveal = !live.hasRevealed && !isLoading;
     if (shouldReveal) live.hasRevealed = true;
-    const revealEnabled =
-      animation && shouldReveal && effectiveAnimation !== "none" && !shouldReduceMotion;
+    const revealEnabled = animation && shouldReveal && effectiveAnimation !== "none" && !shouldReduceMotion;
     if (revealEnabled) live.revealEndsAt = performance.now() + REVEAL_DURATION;
     push(revealEnabled);
 
@@ -2208,7 +2150,7 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
         const offset = -(((now - loopStart) / 1000) % 1) * 6; // 0 → -6 per second
         chart.setOption(
           { series: animatedKeys.map((id) => ({ id, lineStyle: { dashOffset: offset } })) },
-          { silent: true, lazyUpdate: true },
+          { silent: true, lazyUpdate: true }
         );
         raf = requestAnimationFrame(tick);
       };
@@ -2260,14 +2202,7 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
       const maxT = (w + h) / (2 * w);
       const center = phase * (maxT + 2 * LOADING_SHIMMER_BAND) - LOADING_SHIMMER_BAND;
       const clip = (peak: number) =>
-        new echarts.graphic.LinearGradient(
-          0,
-          0,
-          w,
-          w,
-          shimmerWindowStops(center, foreground, peak),
-          true,
-        );
+        new echarts.graphic.LinearGradient(0, 0, w, w, shimmerWindowStops(center, foreground, peak), true);
       chart.setOption(
         {
           series: [
@@ -2279,7 +2214,7 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
             },
           ],
         },
-        { silent: true, lazyUpdate: true },
+        { silent: true, lazyUpdate: true }
       );
       raf = requestAnimationFrame(tick);
     };
@@ -2302,11 +2237,7 @@ export function EChartsAreaChart<TData extends Record<string, unknown>>({
   };
 
   return (
-    <div
-      ref={containerRef}
-      data-chart={chartId}
-      className={`relative flex flex-col text-xs ${className ?? ""}`}
-    >
+    <div ref={containerRef} data-chart={chartId} className={`relative flex flex-col text-xs ${className ?? ""}`}>
       <style dangerouslySetInnerHTML={{ __html: css }} />
 
       <div className="relative min-h-0 w-full flex-1">

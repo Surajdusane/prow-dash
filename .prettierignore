@@ -1,0 +1,11 @@
+.vscode
+.next
+.source
+drizzle
+*.tsbuildinfo
+package-lock.json
+pnpm-lock.yaml
+components.json
+bun.lock
+.eslintrc.js
+node_modules

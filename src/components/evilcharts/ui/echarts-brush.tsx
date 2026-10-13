@@ -1,7 +1,8 @@
-import { withAlpha, type ResolvedColors } from "@/components/evilcharts/ui/echarts-chart";
-import type { DataZoomComponentOption } from "echarts/components";
 import type { FC } from "react";
+import type { DataZoomComponentOption } from "echarts/components";
 import * as echarts from "echarts/core";
+
+import { withAlpha, type ResolvedColors } from "@/components/evilcharts/ui/echarts-chart";
 
 type EChartsInstance = ReturnType<typeof echarts.init>;
 
@@ -65,7 +66,7 @@ export type BrushOverlayElements = {
 export function syncBrushOverlay(
   chart: EChartsInstance,
   store: { brushOverlay: BrushOverlayElements | null },
-  params: BrushOverlayParams | null,
+  params: BrushOverlayParams | null
 ) {
   const zr = chart.getZr();
   if (!zr) return;
@@ -87,10 +88,7 @@ export function syncBrushOverlay(
       frame: rect(101),
       pillLeft: rect(102),
       pillRight: rect(102),
-      grips: Array.from(
-        { length: 6 },
-        () => new echarts.graphic.Circle({ silent: true, z: 103, shape: {} }),
-      ),
+      grips: Array.from({ length: 6 }, () => new echarts.graphic.Circle({ silent: true, z: 103, shape: {} })),
       labelStart: new echarts.graphic.Text({ silent: true, z: 104 }),
       labelEnd: new echarts.graphic.Text({ silent: true, z: 104 }),
     };

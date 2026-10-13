@@ -1,26 +1,6 @@
 "use client";
 
 import {
-  resolveTooltipPosition,
-  roundnessClass,
-  tooltipIndicatorHtml,
-  tooltipRow,
-  tooltipVariantClass,
-  type TooltipPosition,
-  type TooltipRoundness,
-  type TooltipVariant,
-} from "@/components/evilcharts/ui/echarts-tooltip";
-import {
-  DEFAULT_ECHARTS_RENDERER,
-  buildChartCss,
-  getColorsCount,
-  resolveColors,
-  withAlpha,
-  type ChartConfig,
-  type EChartsRenderer,
-  type ResolvedColors,
-} from "@/components/evilcharts/ui/echarts-chart";
-import {
   Children,
   isValidElement,
   useCallback,
@@ -32,28 +12,43 @@ import {
   type FC,
   type ReactNode,
 } from "react";
+import { BarChart, type BarSeriesOption } from "echarts/charts";
 import {
   PolarComponent,
   TooltipComponent,
   type PolarComponentOption,
   type TooltipComponentOption,
 } from "echarts/components";
-import { LegendIndicator, type LegendVariant } from "@/components/evilcharts/ui/echarts-legend";
-import { BarChart, type BarSeriesOption } from "echarts/charts";
-import { motion, useReducedMotion } from "motion/react";
 import type { ComposeOption } from "echarts/core";
 import * as echarts from "echarts/core";
 
+import { motion, useReducedMotion } from "motion/react";
+
+import {
+  buildChartCss,
+  DEFAULT_ECHARTS_RENDERER,
+  getColorsCount,
+  resolveColors,
+  withAlpha,
+  type ChartConfig,
+  type EChartsRenderer,
+  type ResolvedColors,
+} from "@/components/evilcharts/ui/echarts-chart";
+import { LegendIndicator, type LegendVariant } from "@/components/evilcharts/ui/echarts-legend";
+import {
+  resolveTooltipPosition,
+  roundnessClass,
+  tooltipIndicatorHtml,
+  tooltipRow,
+  tooltipVariantClass,
+  type TooltipPosition,
+  type TooltipRoundness,
+  type TooltipVariant,
+} from "@/components/evilcharts/ui/echarts-tooltip";
+
 // Re-export the shared types that were previously declared inline here, so
 // existing consumers/examples keep importing them from the chart module.
-export type {
-  ChartConfig,
-  EChartsRenderer,
-  LegendVariant,
-  TooltipPosition,
-  TooltipRoundness,
-  TooltipVariant,
-};
+export type { ChartConfig, EChartsRenderer, LegendVariant, TooltipPosition, TooltipRoundness, TooltipVariant };
 
 // Modular registration keeps the bundle lean — only the pieces this chart needs.
 // `PolarComponent` bundles the polar coordinate system together with its
@@ -382,15 +377,7 @@ function shimmerWindowStops(center: number, color: string, peak: number) {
     return peak * Math.sin(((1 - (dist - (half - feather)) / feather) * Math.PI) / 2);
   };
 
-  const offsets = [
-    0,
-    center - half,
-    center - half + feather,
-    center,
-    center + half - feather,
-    center + half,
-    1,
-  ]
+  const offsets = [0, center - half, center - half + feather, center, center + half - feather, center + half, 1]
     .filter((x) => x >= 0 && x <= 1)
     .sort((a, b) => a - b);
 
@@ -441,13 +428,7 @@ const BACKGROUND_PATTERNS: Record<BackgroundVariant, FC<PatternProps>> = {
   ),
   grid: ({ id }) => (
     <pattern id={id} x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-      <path
-        className="text-border"
-        d="M 20 0 L 0 0 0 20"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="0.5"
-      />
+      <path className="text-border" d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5" />
     </pattern>
   ),
   "cross-hatch": ({ id }) => (
@@ -462,24 +443,8 @@ const BACKGROUND_PATTERNS: Record<BackgroundVariant, FC<PatternProps>> = {
     </pattern>
   ),
   "diagonal-lines": ({ id }) => (
-    <pattern
-      id={id}
-      x="0"
-      y="0"
-      width="6"
-      height="6"
-      patternUnits="userSpaceOnUse"
-      patternTransform="rotate(45)"
-    >
-      <line
-        className="text-border"
-        x1="0"
-        y1="0"
-        x2="0"
-        y2="6"
-        stroke="currentColor"
-        strokeWidth="0.5"
-      />
+    <pattern id={id} x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line className="text-border" x1="0" y1="0" x2="0" y2="6" stroke="currentColor" strokeWidth="0.5" />
     </pattern>
   ),
   plus: ({ id }) => (
@@ -539,15 +504,7 @@ const BACKGROUND_PATTERNS: Record<BackgroundVariant, FC<PatternProps>> = {
     </pattern>
   ),
   "wiggle-lines": ({ id }) => (
-    <pattern
-      id={id}
-      x="0"
-      y="0"
-      width="52"
-      height="26"
-      patternUnits="userSpaceOnUse"
-      patternTransform="scale(0.6)"
-    >
+    <pattern id={id} x="0" y="0" width="52" height="26" patternUnits="userSpaceOnUse" patternTransform="scale(0.6)">
       <path
         className="text-border"
         d="M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z"
@@ -585,12 +542,7 @@ function ChartBackground({ variant }: { variant: BackgroundVariant }) {
   const Pattern = BACKGROUND_PATTERNS[variant];
 
   return (
-    <svg
-      className="pointer-events-none absolute inset-0 z-0 h-full w-full"
-      width="100%"
-      height="100%"
-      aria-hidden
-    >
+    <svg className="pointer-events-none absolute inset-0 z-0 h-full w-full" width="100%" height="100%" aria-hidden>
       <defs>
         <Pattern id={patternId} />
         {/* Gaussian blur + inset white rect → soft transparent edges. */}
@@ -924,10 +876,7 @@ export function EChartsRadialChart<TData extends Record<string, unknown>>({
 
   // Skeleton rows roll lazily on first use — an impure useRef initializer would
   // re-roll Math.random() on every render.
-  const loadingData = useCallback(
-    () => (live.loadingRows ??= getLoadingData(LOADING_BARS)),
-    [live],
-  );
+  const loadingData = useCallback(() => (live.loadingRows ??= getLoadingData(LOADING_BARS)), [live]);
   const shouldReduceMotion = useReducedMotion();
 
   const [selectedBar, setSelectedBar] = useState<string | null>(defaultSelectedDataKey);
@@ -940,19 +889,13 @@ export function EChartsRadialChart<TData extends Record<string, unknown>>({
 
   // Bar names + values, in data order (index 0 → innermost ring).
   const categories = useMemo(() => data.map((row) => String(row[nameKey])), [data, nameKey]);
-  const values = useMemo(
-    () => data.map((row) => Number(row[radialBar.dataKey]) || 0),
-    [data, radialBar.dataKey],
-  );
+  const values = useMemo(() => data.map((row) => Number(row[radialBar.dataKey]) || 0), [data, radialBar.dataKey]);
 
   // An explicit `max` pins what a full sweep means (gauges). Otherwise a nice
   // ceiling over the data so the largest ring stops just shy of a full wrap
   // (Recharts derives an auto-scaled domain; the exact niced max differs slightly
   // but keeps the same look).
-  const angleMax = useMemo(
-    () => (max != null && max > 0 ? max : niceCeil(Math.max(0, ...values))),
-    [max, values],
-  );
+  const angleMax = useMemo(() => (max != null && max > 0 ? max : niceCeil(Math.max(0, ...values))), [max, values]);
 
   const css = useMemo(() => buildChartCss(chartId, config), [chartId, config]);
   const hasSelection = selectedBar !== null;
@@ -973,13 +916,11 @@ export function EChartsRadialChart<TData extends Record<string, unknown>>({
     (name: string) => {
       setSelectedBar((prev) => {
         const next = prev === name ? null : name;
-        onSelectionChange?.(
-          next === null ? null : { dataKey: next, value: live.valueByName.get(next) ?? 0 },
-        );
+        onSelectionChange?.(next === null ? null : { dataKey: next, value: live.valueByName.get(next) ?? 0 });
         return next;
       });
     },
-    [onSelectionChange, live],
+    [onSelectionChange, live]
   );
 
   // ── Option builder ───────────────────────────────────────────────────────────
@@ -1134,17 +1075,7 @@ export function EChartsRadialChart<TData extends Record<string, unknown>>({
       live.resolved = resolveColors(container, config, configKeys);
       push(false);
     };
-  }, [
-    live,
-    buildOption,
-    chartOptions,
-    isLoading,
-    shouldReduceMotion,
-    config,
-    renderer,
-    configKeys,
-    tooltipSlot,
-  ]);
+  }, [live, buildOption, chartOptions, isLoading, shouldReduceMotion, config, renderer, configKeys, tooltipSlot]);
 
   // ── Loading shimmer — rAF sweeps a bright band, regenerating data off-screen ──
   useEffect(() => {
@@ -1179,11 +1110,11 @@ export function EChartsRadialChart<TData extends Record<string, unknown>>({
         w,
         w,
         shimmerWindowStops(center, foreground, LOADING_SHIMMER_MAX_OPACITY),
-        true,
+        true
       );
       chart.setOption(
         { series: [{ id: LOADING_SERIES_ID, data: loadingData(), itemStyle: { color: clip } }] },
-        { silent: true, lazyUpdate: true },
+        { silent: true, lazyUpdate: true }
       );
       raf = requestAnimationFrame(tick);
     };
@@ -1197,11 +1128,7 @@ export function EChartsRadialChart<TData extends Record<string, unknown>>({
   // the polar plot shrinks to fit, matching how Recharts lays the legend out.
   // `middle` overlays, centered.
   const legendJustify =
-    legendSlot.align === "left"
-      ? "justify-start"
-      : legendSlot.align === "center"
-        ? "justify-center"
-        : "justify-end";
+    legendSlot.align === "left" ? "justify-start" : legendSlot.align === "center" ? "justify-center" : "justify-end";
 
   const renderLegend = (overlay: boolean) => (
     <div
@@ -1223,11 +1150,7 @@ export function EChartsRadialChart<TData extends Record<string, unknown>>({
               if (legendSlot.isClickable) toggleSelection(name);
             }}
           >
-            <LegendIndicator
-              variant={legendSlot.variant}
-              dataKey={name}
-              colorsCount={colorsCount}
-            />
+            <LegendIndicator variant={legendSlot.variant} dataKey={name} colorsCount={colorsCount} />
             {item?.label ?? name}
           </div>
         );
@@ -1241,11 +1164,7 @@ export function EChartsRadialChart<TData extends Record<string, unknown>>({
   const legendMiddle = showLegend && legendSlot.verticalAlign === "middle";
 
   return (
-    <div
-      ref={containerRef}
-      data-chart={chartId}
-      className={`relative flex flex-col text-xs ${className ?? ""}`}
-    >
+    <div ref={containerRef} data-chart={chartId} className={`relative flex flex-col text-xs ${className ?? ""}`}>
       <style dangerouslySetInnerHTML={{ __html: css }} />
 
       {legendTop && renderLegend(false)}

@@ -1,5 +1,5 @@
-import { persist } from "zustand/middleware";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 type Config = {
   packageManager: "npm" | "yarn" | "pnpm" | "bun";
@@ -19,6 +19,6 @@ export const useConfig = create<ConfigStore>()(
     }),
     {
       name: "config",
-    },
-  ),
+    }
+  )
 );

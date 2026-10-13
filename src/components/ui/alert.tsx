@@ -1,5 +1,7 @@
-import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
+
+import { cva, type VariantProps } from "class-variance-authority";
+
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
@@ -10,72 +12,44 @@ const alertVariants = cva(
     },
     variants: {
       variant: {
-        default:
-          "bg-transparent dark:bg-input/32 [&>svg]:text-muted-foreground",
-        error:
-          "border-destructive/32 bg-destructive/4 [&>svg]:text-destructive",
+        default: "bg-transparent dark:bg-input/32 [&>svg]:text-muted-foreground",
+        error: "border-destructive/32 bg-destructive/4 [&>svg]:text-destructive",
         info: "border-info/32 bg-info/4 [&>svg]:text-info",
         success: "border-success/32 bg-success/4 [&>svg]:text-success",
         warning: "border-warning/32 bg-warning/4 [&>svg]:text-warning",
       },
     },
-  },
+  }
 );
 
 export function Alert({
   className,
   variant,
   ...props
-}: React.ComponentProps<"div"> &
-  VariantProps<typeof alertVariants>): React.ReactElement {
-  return (
-    <div
-      className={cn(alertVariants({ variant }), className)}
-      data-slot="alert"
-      role="alert"
-      {...props}
-    />
-  );
+}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>): React.ReactElement {
+  return <div className={cn(alertVariants({ variant }), className)} data-slot="alert" role="alert" {...props} />;
 }
 
-export function AlertTitle({
-  className,
-  ...props
-}: React.ComponentProps<"div">): React.ReactElement {
-  return (
-    <div
-      className={cn("font-medium [svg~&]:col-start-2", className)}
-      data-slot="alert-title"
-      {...props}
-    />
-  );
+export function AlertTitle({ className, ...props }: React.ComponentProps<"div">): React.ReactElement {
+  return <div className={cn("font-medium [svg~&]:col-start-2", className)} data-slot="alert-title" {...props} />;
 }
 
-export function AlertDescription({
-  className,
-  ...props
-}: React.ComponentProps<"div">): React.ReactElement {
+export function AlertDescription({ className, ...props }: React.ComponentProps<"div">): React.ReactElement {
   return (
     <div
-      className={cn(
-        "flex flex-col gap-2.5 text-muted-foreground [svg~&]:col-start-2",
-        className,
-      )}
+      className={cn("text-muted-foreground flex flex-col gap-2.5 [svg~&]:col-start-2", className)}
       data-slot="alert-description"
       {...props}
     />
   );
 }
 
-export function AlertAction({
-  className,
-  ...props
-}: React.ComponentProps<"div">): React.ReactElement {
+export function AlertAction({ className, ...props }: React.ComponentProps<"div">): React.ReactElement {
   return (
     <div
       className={cn(
         "flex gap-1 max-sm:col-start-2 max-sm:mt-2 sm:row-start-1 sm:row-end-3 sm:self-center sm:[[data-slot=alert-description]~&]:col-start-2 sm:[[data-slot=alert-title]~&]:col-start-2 sm:[svg~&]:col-start-2 sm:[svg~[data-slot=alert-description]~&]:col-start-3 sm:[svg~[data-slot=alert-title]~&]:col-start-3",
-        className,
+        className
       )}
       data-slot="alert-action"
       {...props}
