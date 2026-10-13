@@ -3,7 +3,6 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/providers";
-import { RootProvider } from "fumadocs-ui/provider/next";
 
 const interHeading = Inter({ subsets: ["latin"], variable: "--font-heading" });
 
@@ -40,21 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <RootProvider
-          search={{
-            options: {
-              api: "/api/search",
-            },
-          }}
-          theme={{
-            attribute: "class",
-            defaultTheme: "system",
-            enableSystem: true,
-            disableTransitionOnChange: true,
-          }}
-        >
-          <Providers>{children}</Providers>
-        </RootProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

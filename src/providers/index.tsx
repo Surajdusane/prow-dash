@@ -1,3 +1,5 @@
+import { ToastProvider } from "@/components/ui/toast";
+import { TRPCReactProvider } from "@/trpc/client";
 import { ThemeProvider } from "./theme-provider";
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
@@ -8,7 +10,9 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
       enableSystem
       disableTransitionOnChange
     >
-      {children}
+      <TRPCReactProvider>
+        <ToastProvider position="bottom-right">{children}</ToastProvider>
+      </TRPCReactProvider>
     </ThemeProvider>
   );
 };
