@@ -1,0 +1,55 @@
+---
+title: Quick Start
+description: Create your first docs page with a code block.
+---
+
+## New page
+
+Add an MDX file anywhere inside the docs folder:
+
+```mdx title="content/docs/hello.mdx"
+---
+title: Hello
+---
+
+## Hello
+
+Your content here.
+```
+
+## Sidebar order
+
+Control the sidebar from `meta.json`:
+
+```json title="meta.json"
+{
+  "title": "Getting Started",
+  "pages": ["installation", "quick-start"]
+}
+```
+
+<Callout title="Watch Out" type="warn">
+Page names in `meta.json` must match file names without the `.mdx` extension.
+</Callout>
+
+## New section (group)
+
+Folders become collapsible sidebar groups. Each needs its own `meta.json`:
+
+```json title="content/docs/guides/meta.json"
+{
+  "title": "Guides",
+  "pages": ["first-guide"]
+}
+```
+
+Then list the folder name in the parent `meta.json`:
+
+```json title="content/docs/meta.json"
+{
+  "title": "Docs",
+  "pages": ["index", "example", "getting-started", "guides"]
+}
+```
+
+Back to [Installation](/docs/getting-started/installation).
