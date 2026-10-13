@@ -1,0 +1,99 @@
+---
+title: Example
+description: Example docs page showcasing Fumadocs code blocks, callouts, and tabs.
+---
+
+## Code Blocks
+
+Fumadocs renders code blocks with syntax highlighting out of the box. Use a `title` to show a file name:
+
+```ts title="lib/source.ts"
+import { defineDocs } from 'fumadocs-mdx/macro';
+import { loader } from 'fumadocs-core/source';
+
+const docs = defineDocs({
+  dir: 'src/content/docs',
+});
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { source } from '@/lib/source';
+import {
+  DocsBody,
+  DocsDescription,
+  DocsPage,
+  DocsTitle,
+} from 'fumadocs-ui/layouts/docs/page';
+import { notFound } from 'next/navigation';
+import { getMDXComponents } from '@/features/docs/components/mdx';
+import { createRelativeLink } from 'fumadocs-ui/mdx';
+
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  const MDX = page.data.body;
+
+  return (
+    <DocsPage toc={page.data.toc} full={page.data.full}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <MDX
+          components={getMDXComponents({
+            a: createRelativeLink(source, page),
+          })}
+        />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+```css title="app/globals.css"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+```bash title="Terminal"
+bun run dev
+```
+
+## Callouts
+
+<Callout title="Good to Know">
+Fumadocs also supports other content sources, including Content Collections and headless CMS.
+</Callout>
+
+<Callout title="Watch Out" type="warn">
+Make sure the `dir` in `defineDocs` matches your content folder (`src/content/docs`).
+</Callout>
+
+## Tabs
+
+<Tabs items={['npm', 'bun', 'pnpm']}>
+
+```bash tab="npm"
+npm i fumadocs-ui fumadocs-core
+```
+
+```bash tab="bun"
+bun add fumadocs-ui fumadocs-core
+```
+
+```bash tab="pnpm"
+pnpm add fumadocs-ui fumadocs-core
+```
+
+</Tabs>
+
+## Relative Links
+
+You can link to [Hello World](/docs) from here, or use relative paths thanks to `createRelativeLink`.
