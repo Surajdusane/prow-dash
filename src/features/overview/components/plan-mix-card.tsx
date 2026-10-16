@@ -2,6 +2,7 @@
 
 import { EChartsPieChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-pie-chart";
 import { useGetPlanMix } from "@/features/overview/hooks";
+import { chartColor, PLAN_COLOR_PAIRS, PLAN_SWATCHES } from "@/lib/chart-colors";
 import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -11,16 +12,10 @@ const PLAN_LABELS: Record<string, string> = {
   premium: "Premium",
 };
 
-const PLAN_SWATCHES: Record<string, string> = {
-  starter: "bg-[#d97706] dark:bg-[#fbbf24]",
-  standard: "bg-[#0284c7] dark:bg-[#38bdf8]",
-  premium: "bg-[#7c3aed] dark:bg-[#a78bfa]",
-};
-
 const chartConfig = {
-  starter: { label: "Starter", colors: { light: ["#d97706"], dark: ["#fbbf24"] } },
-  standard: { label: "Standard", colors: { light: ["#0284c7"], dark: ["#38bdf8"] } },
-  premium: { label: "Premium", colors: { light: ["#7c3aed"], dark: ["#a78bfa"] } },
+  starter: { label: "Starter", colors: chartColor(PLAN_COLOR_PAIRS.starter) },
+  standard: { label: "Standard", colors: chartColor(PLAN_COLOR_PAIRS.standard) },
+  premium: { label: "Premium", colors: chartColor(PLAN_COLOR_PAIRS.premium) },
 } satisfies ChartConfig;
 
 export function PlanMixCard() {

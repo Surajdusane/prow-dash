@@ -26,7 +26,8 @@ export type CreateLeadParams = {
 
 export type UpdateLeadParams = {
   id: number;
-  visitDate?: string;
+  /** `null` clears a previously set visit date. */
+  visitDate?: string | null;
   converted?: boolean;
   flatsConverted?: number;
 };

@@ -42,3 +42,8 @@ export const formatDateKey = (dateKey: string): string => {
   const [year, monthNumber, day] = dateKey.split("-").map(Number);
   return `${day} ${MONTHS[(monthNumber ?? 1) - 1]} ${year}`;
 };
+
+const dateFormatter = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
+/** Date object → "15 Oct 2026" — for timestamps that cross tRPC as real Dates. */
+export const formatDate = (value: Date): string => dateFormatter.format(value);
