@@ -15,5 +15,10 @@ export const getReadingsSchema = z.object({
   days: z.union([z.literal(30), z.literal(90)]).default(30),
 });
 
+export const getReadingsTrendSchema = z.object({
+  days: z.union([z.literal(30), z.literal(90)]).default(30),
+});
+
 export type GetFleetInput = z.infer<typeof getFleetSchema>;
 export type GetReadingsInput = z.infer<typeof getReadingsSchema>;
+export type GetReadingsTrendInput = z.infer<typeof getReadingsTrendSchema>;

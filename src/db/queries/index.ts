@@ -1,5 +1,6 @@
 export * from "./risk";
 export * from "./utils";
+export * from "./areas";
 export * from "./plans";
 export * from "./tickets";
 export * from "./complaints";

@@ -2,7 +2,9 @@ import { TRPCError } from "@trpc/server";
 
 import {
   createComplaint,
+  getAreaOptions,
   getComplaintTrend,
+  getHouseholdKpis,
   getHouseholdProfile,
   getRiskDistribution,
   getRiskTable,
@@ -21,6 +23,8 @@ import { createTRPCRouter } from "../init";
 import { authorizedProcedure } from "../procedures/authorizedProcedure";
 
 export const customersRouter = createTRPCRouter({
+  getKpis: authorizedProcedure.query(({ ctx: { db } }) => getHouseholdKpis(db)),
+  getAreas: authorizedProcedure.query(({ ctx: { db } }) => getAreaOptions(db)),
   getRiskTable: authorizedProcedure
     .input(getRiskTableSchema)
     .query(({ ctx: { db }, input }) => getRiskTable(db, input)),
