@@ -13,8 +13,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:seed": "tsx src/db/seed/index.ts",
-    "db:reset": "tsx src/db/seed/index.ts --fresh",
+    "db:seed": "tsx --conditions=react-server src/db/seed/index.ts",
+    "db:reset": "tsx --conditions=react-server src/db/seed/index.ts --fresh",
     "db:studio": "drizzle-kit studio",
     "prepare": "husky"
   },
