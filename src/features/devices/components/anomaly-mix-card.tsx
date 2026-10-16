@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { CheckCircle2 } from "lucide-react";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { EChartsPieChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-pie-chart";
 import type { AnomalyRow } from "@/db/queries/devices";
 import { useGetAnomalies } from "@/features/devices/hooks";
@@ -67,11 +68,11 @@ export function AnomalyMixCard() {
 
   if (data.length === 0) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-2 py-10 text-center">
-        <CheckCircle2 className="text-muted-foreground size-5" />
-        <p className="text-sm font-medium">No flagged devices</p>
-        <p className="text-muted-foreground text-sm">Connectivity and water quality are inside bounds.</p>
-      </div>
+      <ChartEmpty
+        icon={<CheckCircle2 />}
+        title="No anomalies — fleet healthy"
+        description="Connectivity and water quality are inside bounds."
+      />
     );
   }
 

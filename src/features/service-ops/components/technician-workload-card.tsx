@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsBarChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-bar-chart";
 import { useGetTechnicianWorkload } from "@/features/service-ops/hooks";
@@ -19,6 +20,15 @@ export function TechnicianWorkloadCard() {
     () => data.map((row) => ({ ...row, label: `${row.technicianName} · ${row.areaName}` })),
     [data]
   );
+
+  if (data.length === 0) {
+    return (
+      <ChartEmpty
+        title="No technician workload"
+        description="Assign open tickets to technicians to see the load split."
+      />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">

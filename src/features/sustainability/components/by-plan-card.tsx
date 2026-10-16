@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useTheme } from "next-themes";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsBarChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-bar-chart";
 import { tooltipRow, tooltipShell } from "@/components/evilcharts/ui/echarts-tooltip";
@@ -106,6 +107,12 @@ export function ByPlanCard() {
       },
     };
   }, [rows, isDark]);
+
+  if (rows.length === 0) {
+    return (
+      <ChartEmpty title="No impact by plan" description="All-time litres served appear once subscriptions go live." />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">

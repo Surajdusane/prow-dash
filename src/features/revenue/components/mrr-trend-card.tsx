@@ -1,5 +1,6 @@
 "use client";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsAreaChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-area-chart";
 import { useGetMrrTrend } from "@/features/revenue/hooks";
@@ -17,6 +18,15 @@ export function MrrTrendCard() {
   const latest = data[data.length - 1];
   const first = data[0];
   const growth = first && first.mrr > 0 && latest ? Math.round(((latest.mrr - first.mrr) / first.mrr) * 100) : null;
+
+  if (data.length === 0) {
+    return (
+      <ChartEmpty
+        title="No MRR history yet"
+        description="Recurring revenue is reconstructed from subscription spans."
+      />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">

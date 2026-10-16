@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { EChartsRadialChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-radial-chart";
 import { useGetFleetStats } from "@/features/devices/hooks";
 import { formatNumber } from "@/lib/format";
@@ -33,6 +34,12 @@ export function FleetOnlineGauge() {
     [tone]
   );
   const chartData = useMemo(() => [{ name: "online", value: data.onlinePct }], [data.onlinePct]);
+
+  if (data.onlinePct === 0 && data.offlineCount === 0 && data.needsServiceCount === 0) {
+    return (
+      <ChartEmpty title="No devices reporting" description="Fleet connectivity appears once dispensers phone home." />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col justify-between gap-4">

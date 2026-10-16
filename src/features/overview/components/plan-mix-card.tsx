@@ -1,5 +1,6 @@
 "use client";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { EChartsPieChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-pie-chart";
 import { useGetPlanMix } from "@/features/overview/hooks";
 import { chartColor, PLAN_COLOR_PAIRS, PLAN_SWATCHES } from "@/lib/chart-colors";
@@ -20,6 +21,10 @@ const chartConfig = {
 
 export function PlanMixCard() {
   const { data } = useGetPlanMix();
+
+  if (data.length === 0) {
+    return <ChartEmpty title="No active subscriptions" description="The plan mix fills in as subscriptions go live." />;
+  }
 
   const total = data.reduce((sum, slice) => sum + slice.count, 0);
 

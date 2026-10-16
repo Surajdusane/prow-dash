@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TableEmpty } from "@/components/dashboard/table-empty";
 import { useGetCohortRetention } from "@/features/revenue/hooks";
 import { COHORT_MAX_COLUMNS, COHORT_VISIBLE_COLUMNS, cohortAgeMonths, retentionShade } from "@/features/revenue/utils";
 import { formatMonth, formatNumber } from "@/lib/format";
@@ -85,26 +86,34 @@ export function CohortRetentionCard(): React.ReactElement {
           </TableHeader>
 
           <TableBody>
-            {data.map((row) => {
-              const ageMonths = cohortAgeMonths(row.cohortMonth);
+            {data.length === 0 ? (
+              <TableEmpty
+                colSpan={columnCount + 2}
+                title="No cohorts yet"
+                description="Retention appears once households start joining."
+              />
+            ) : (
+              data.map((row) => {
+                const ageMonths = cohortAgeMonths(row.cohortMonth);
 
-              return (
-                <TableRow key={row.cohortMonth}>
-                  <TableCell className="pl-6 font-medium">{formatMonth(row.cohortMonth)}</TableCell>
-                  <TableCell className="text-muted-foreground text-right tabular-nums">
-                    {formatNumber(row.size)}
-                  </TableCell>
-                  {Array.from({ length: columnCount }, (_, index) => (
-                    <TableCell key={index} className="p-1">
-                      <RetentionCell
-                        pct={row.retention[index] ?? 0}
-                        hasData={index <= ageMonths && index < row.retention.length}
-                      />
+                return (
+                  <TableRow key={row.cohortMonth}>
+                    <TableCell className="pl-6 font-medium">{formatMonth(row.cohortMonth)}</TableCell>
+                    <TableCell className="text-muted-foreground text-right tabular-nums">
+                      {formatNumber(row.size)}
                     </TableCell>
-                  ))}
-                </TableRow>
-              );
-            })}
+                    {Array.from({ length: columnCount }, (_, index) => (
+                      <TableCell key={index} className="p-1">
+                        <RetentionCell
+                          pct={row.retention[index] ?? 0}
+                          hasData={index <= ageMonths && index < row.retention.length}
+                        />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })
+            )}
           </TableBody>
         </Table>
 

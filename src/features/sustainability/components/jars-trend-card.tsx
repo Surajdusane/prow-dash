@@ -1,5 +1,6 @@
 "use client";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsAreaChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-area-chart";
 import { useGetImpactMonthlyTrend } from "@/features/sustainability/hooks";
@@ -17,6 +18,12 @@ export function JarsTrendCard() {
 
   const chartData = data.map((point) => ({ ...point, label: formatMonth(point.month) }));
   const latest = data[data.length - 1];
+
+  if (data.length === 0) {
+    return (
+      <ChartEmpty title="No jars avoided yet" description="Cumulative jars appear once subscriptions are active." />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">

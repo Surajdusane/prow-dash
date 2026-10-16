@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsBarChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-bar-chart";
 import { tooltipIndicatorHtml, tooltipRow, tooltipShell } from "@/components/evilcharts/ui/echarts-tooltip";
@@ -71,6 +72,15 @@ export function AreaDemandCard() {
     }),
     [chartData]
   );
+
+  if (data.length === 0) {
+    return (
+      <ChartEmpty
+        title="No ticket demand yet"
+        description="Tickets raised in the last 90 days will appear here, per area."
+      />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">

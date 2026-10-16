@@ -1,5 +1,6 @@
 "use client";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsAreaChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-area-chart";
 import { useGetRevenueTrend } from "@/features/overview/hooks";
@@ -15,6 +16,15 @@ export function RevenueTrendCard() {
 
   const chartData = data.map((point) => ({ ...point, label: formatMonth(point.month) }));
   const latest = data[data.length - 1];
+
+  if (data.length === 0) {
+    return (
+      <ChartEmpty
+        title="No billing history yet"
+        description="The billed vs collected trend appears once payments are recorded."
+      />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">

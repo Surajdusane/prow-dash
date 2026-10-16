@@ -1,5 +1,6 @@
 "use client";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { EChartsPieChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-pie-chart";
 import { useGetRiskDistribution } from "@/features/customers/hooks";
 import { RISK_BAND_LABELS, RISK_BAND_SWATCHES } from "@/features/customers/utils";
@@ -20,6 +21,10 @@ export function RiskDistributionCard() {
     (a, b) => ["low", "medium", "high"].indexOf(a.band) - ["low", "medium", "high"].indexOf(b.band)
   );
   const total = data.reduce((sum, band) => sum + band.count, 0);
+
+  if (data.length === 0) {
+    return <ChartEmpty title="No households to score" description="Risk bands appear once households are active." />;
+  }
 
   return (
     <div className="flex h-full flex-col items-center gap-4 p-2 sm:flex-row sm:gap-6">

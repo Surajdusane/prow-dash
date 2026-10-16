@@ -1,5 +1,6 @@
 "use client";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsAreaChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-area-chart";
 import { useGetHouseholdGrowth } from "@/features/overview/hooks";
@@ -15,6 +16,12 @@ export function HouseholdGrowthCard() {
 
   const chartData = data.map((point) => ({ ...point, label: formatMonth(point.month) }));
   const latest = data[data.length - 1];
+
+  if (data.length === 0) {
+    return (
+      <ChartEmpty title="No household data yet" description="Cumulative growth appears once households onboard." />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">

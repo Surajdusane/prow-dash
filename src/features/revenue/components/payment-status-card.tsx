@@ -1,5 +1,6 @@
 "use client";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsBarChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-bar-chart";
 import { useGetPaymentStatus } from "@/features/revenue/hooks";
@@ -25,6 +26,15 @@ export function PaymentStatusCard() {
 
   const chartData = data.map((point) => ({ ...point, label: formatMonth(point.month) }));
   const latest = data[data.length - 1];
+
+  if (data.length === 0) {
+    return (
+      <ChartEmpty
+        title="No payment history"
+        description="Payment outcomes per billing month appear once billing runs."
+      />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">

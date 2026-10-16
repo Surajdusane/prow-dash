@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { EChartsRadialChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-radial-chart";
 import { useGetSlaStats } from "@/features/service-ops/hooks";
 import { formatNumber } from "@/lib/format";
@@ -24,6 +25,15 @@ export function SlaGaugeCard() {
     [tone]
   );
   const chartData = useMemo(() => [{ name: "slaMet", value: data.slaMetPct90d }], [data.slaMetPct90d]);
+
+  if (data.open === 0 && data.slaMetPct90d === 0) {
+    return (
+      <ChartEmpty
+        title="No SLA data yet"
+        description="SLA performance is scored once tickets resolve within 90 days."
+      />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-2">
