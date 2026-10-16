@@ -225,6 +225,48 @@ export async function getRiskTable(db: Database, params: GetRiskTableParams): Pr
   return { rows, total: totals?.total ?? 0 };
 }
 
+export type HouseholdKpis = {
+  activeHouseholds: number;
+  /** Active households with riskScore ≥ 67 (the "high" band). */
+  highRiskCount: number;
+  /** Households cancelled in the last 90 days. */
+  churned90d: number;
+  /** Average tenure of the active book, in days. */
+  avgTenureDays: number;
+};
+
+/** Headline churn numbers for the Customers KPI row. */
+export async function getHouseholdKpis(db: Database): Promise<HouseholdKpis> {
+  const now = new Date();
+  const todayKey = toDateKey(now);
+  const ninetyAgo = toDateKey(addDays(now, -90));
+
+  const [row] = await db
+    .select({
+      activeHouseholds: sql<number>`count(*) filter (where ${households.status} = 'active')`.mapWith(Number),
+      highRiskCount:
+        sql<number>`count(*) filter (where ${households.status} = 'active' and ${households.riskScore} >= ${RISK_BAND_THRESHOLDS.high})`.mapWith(
+          Number
+        ),
+      churned90d:
+        sql<number>`count(*) filter (where ${households.status} = 'cancelled' and ${households.cancelDate} >= ${ninetyAgo})`.mapWith(
+          Number
+        ),
+      avgTenureDays:
+        sql<number>`coalesce(avg(${todayKey}::date - ${households.joinDate}) filter (where ${households.status} = 'active'), 0)`.mapWith(
+          Number
+        ),
+    })
+    .from(households);
+
+  return {
+    activeHouseholds: row?.activeHouseholds ?? 0,
+    highRiskCount: row?.highRiskCount ?? 0,
+    churned90d: row?.churned90d ?? 0,
+    avgTenureDays: Math.round(row?.avgTenureDays ?? 0),
+  };
+}
+
 /** Risk-band split of the active book (drives the donut chart + high-risk KPI). */
 export async function getRiskDistribution(db: Database): Promise<RiskDistributionRow[]> {
   const [row] = await db

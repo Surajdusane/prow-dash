@@ -20,7 +20,13 @@ const icons = {
   "/sustainability": Leaf,
 } as const;
 
-const items = [
+type MenuItem = {
+  path: string;
+  name: string;
+  children?: { path: string; name: string }[];
+};
+
+const items: MenuItem[] = [
   {
     path: "/",
     name: "Overview",
@@ -36,6 +42,10 @@ const items = [
   {
     path: "/devices",
     name: "Devices",
+    children: [
+      { path: "/devices", name: "Overview" },
+      { path: "/devices/fleet", name: "Fleet" },
+    ],
   },
   {
     path: "/revenue",
@@ -56,11 +66,7 @@ const items = [
 ];
 
 interface ItemProps {
-  item: {
-    path: string;
-    name: string;
-    children?: { path: string; name: string }[];
-  };
+  item: MenuItem;
   isActive: boolean;
   isExpanded: boolean;
   isItemExpanded: boolean;
@@ -219,11 +225,14 @@ export function MainMenu({ onSelect, isExpanded = false }: Props) {
   const part = pathname?.split("/")[1];
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
-  // Reset expanded item when sidebar expands/collapses
+  // Keep the open section in sync with the route: the section that owns the
+  // current child page opens, and any other section collapses on navigation.
+  // Sidebar expand/collapse resets through the same rule.
   useEffect(() => {
+    const owner = items.find((item) => item.children?.some((child) => child.path === pathname));
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setExpandedItem(null);
-  }, [isExpanded]);
+    setExpandedItem(owner?.path ?? null);
+  }, [isExpanded, pathname]);
 
   return (
     <div className="mt-6 w-full">

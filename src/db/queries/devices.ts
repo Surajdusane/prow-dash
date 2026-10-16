@@ -33,6 +33,7 @@ export type FleetRow = {
   areaName: string;
   lastReadingAt: Date | null;
   latestTds: number | null;
+  latestPh: number | null;
   latestPurity: number | null;
   flag: FleetFlag;
 };
@@ -88,6 +89,17 @@ export type FleetStats = {
   offlineCount: number;
 };
 
+export type GetReadingsTrendParams = {
+  days: 30 | 90;
+};
+
+export type ReadingsTrendPoint = {
+  /** `YYYY-MM-DD` — stable chart x-axis key. */
+  day: string;
+  avgTds: number;
+  avgPurity: number;
+};
+
 const READING_LOOKBACK_DAYS = 30;
 const STALE_DAYS = 7;
 /**
@@ -106,6 +118,7 @@ function latestReadingsSubquery(db: Database, now: Date) {
       dispenserId: readings.dispenserId,
       recordedAt: readings.recordedAt,
       tdsPpm: readings.tdsPpm,
+      ph: readings.ph,
       purityPct: readings.purityPct,
     })
     .from(readings)
@@ -160,6 +173,7 @@ export async function getFleet(db: Database, params: GetFleetParams): Promise<Fl
         areaName: areas.name,
         lastReadingAt: latest.recordedAt,
         latestTds: latest.tdsPpm,
+        latestPh: latest.ph,
         latestPurity: latest.purityPct,
       })
       .from(dispensers)
@@ -185,6 +199,7 @@ export async function getFleet(db: Database, params: GetFleetParams): Promise<Fl
       const latestPurity = asNumber(row.latestPurity);
       return {
         ...row,
+        latestPh: asNumber(row.latestPh),
         latestPurity,
         flag: deriveFlag({ ...row, latestPurity }),
       };
@@ -238,6 +253,33 @@ export async function getReadings(db: Database, params: GetReadingsParams): Prom
       purityPct: asNumber(row.purityPct) ?? 0,
     })),
   };
+}
+
+/**
+ * Fleet-wide daily telemetry averages. Readings land every 2–3 days per
+ * dispenser, so one bucket per day across the whole fleet reads as a smooth
+ * trend line instead of a per-device zig-zag.
+ */
+export async function getReadingsTrend(db: Database, params: GetReadingsTrendParams): Promise<ReadingsTrendPoint[]> {
+  const since = startOfDay(addDays(new Date(), -params.days));
+  const dayExpr = sql<string>`to_char(date_trunc('day', ${readings.recordedAt}), 'YYYY-MM-DD')`;
+
+  const rows = await db
+    .select({
+      day: dayExpr,
+      avgTds: sql<number>`coalesce(avg(${readings.tdsPpm}), 0)`.mapWith(Number),
+      avgPurity: sql<number>`coalesce(avg(${readings.purityPct}), 0)`.mapWith(Number),
+    })
+    .from(readings)
+    .where(gte(readings.recordedAt, since))
+    .groupBy(dayExpr)
+    .orderBy(dayExpr);
+
+  return rows.map((row) => ({
+    day: row.day,
+    avgTds: Math.round(row.avgTds),
+    avgPurity: roundTo(row.avgPurity),
+  }));
 }
 
 /**

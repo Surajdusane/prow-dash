@@ -15,6 +15,9 @@
   --animate-toast-success-even: toast-success-even 0.32s cubic-bezier(0.5, 1, 0.89, 1);
   --animate-toast-error-odd: toast-error-odd 0.28s cubic-bezier(0.5, 1, 0.89, 1);
   --animate-toast-error-even: toast-error-even 0.28s cubic-bezier(0.5, 1, 0.89, 1);
+  --animate-hire-shine: hire-shine 3s ease-in-out infinite;
+  --animate-hire-frame: hire-frame 3s ease-in-out infinite;
+  --animate-hire-frame-extend: hire-frame-extend 3s ease-in-out infinite;
   --font-heading: var(--font-heading);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
@@ -138,6 +141,33 @@
     }
     100% {
       translate: 0 0;
+    }
+  }
+  @keyframes hire-shine {
+    0% {
+      left: -75%;
+    }
+    40%,
+    100% {
+      left: 125%;
+    }
+  }
+  @keyframes hire-frame {
+    0%,
+    100% {
+      height: 60%;
+    }
+    45% {
+      height: 90%;
+    }
+  }
+  @keyframes hire-frame-extend {
+    0%,
+    100% {
+      height: 20%;
+    }
+    45% {
+      height: 90%;
     }
   }
 }
