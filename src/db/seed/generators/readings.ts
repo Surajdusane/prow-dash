@@ -156,6 +156,36 @@ export function simulateDispenserLife(
     cycleStart = end;
   }
 
+  // Service-life tail: after the last completed change (or after a recent
+  // install) fewer than 15 days may remain. Telemetry should keep flowing to
+  // activeEnd — the next change is still pending, so this cycle is truncated
+  // and emits no filter-change events.
+  const tailDays = daysBetween(cycleStart, ctx.activeEnd);
+  if (tailDays >= 1) {
+    const scheduledDays = randInt(faker, FILTER_CHANGE_MIN_DAYS, FILTER_CHANGE_MAX_DAYS);
+    const baseline = randInt(faker, 105, 140);
+    const ceiling = highInfra ? randInt(faker, 480, 560) : randInt(faker, 385, 470);
+    const midDate = addDays(cycleStart, Math.round(scheduledDays / 2));
+
+    cycles.push({
+      start: cycleStart,
+      scheduledEnd: addDays(cycleStart, scheduledDays),
+      end: ctx.activeEnd,
+      baseline,
+      ceiling,
+      speed: Number(
+        (
+          infraDriftFactor(ctx.infrastructureAgeYears) *
+          seasonalityMultiplier(midDate) *
+          planIntensity *
+          randFloat(faker, 0.94, 1.06, 2)
+        ).toFixed(2)
+      ),
+      repair: null,
+      truncated: true,
+    });
+  }
+
   return { cycles, filterChangeDates, repairs };
 }
 
