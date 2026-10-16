@@ -1,16 +1,19 @@
 import { cache } from "react";
+import { db } from "@/db";
 import { initTRPC } from "@trpc/server";
 import SuperJSON from "superjson";
 
 export const createTRPCContext = cache(async () => {
-  return {};
+  return { db };
 });
+
+export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
 
 // Avoid exporting the entire t-object
 // since it's not very descriptive.
 // For instance, the use of a t variable
 // is common in i18n libraries.
-const t = initTRPC.create({
+const t = initTRPC.context<TRPCContext>().create({
   /**
    * @see https://trpc.io/docs/server/data-transformers
    */

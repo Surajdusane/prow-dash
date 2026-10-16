@@ -1,19 +1,22 @@
-import { z } from "zod";
-
-import { baseProcedure, createTRPCRouter } from "../init";
+import { createTRPCRouter } from "../init";
+import { customersRouter } from "./customers";
+import { devicesRouter } from "./devices";
+import { impactRouter } from "./impact";
+import { leadsRouter } from "./leads";
+import { overviewRouter } from "./overview";
+import { revenueRouter } from "./revenue";
+import { serviceOpsRouter } from "./service-ops";
+import { societiesRouter } from "./societies";
 
 export const appRouter = createTRPCRouter({
-  hello: baseProcedure
-    .input(
-      z.object({
-        text: z.string(),
-      })
-    )
-    .query((opts) => {
-      return {
-        greeting: `hello ${opts.input.text}`,
-      };
-    }),
+  overview: overviewRouter,
+  serviceOps: serviceOpsRouter,
+  customers: customersRouter,
+  devices: devicesRouter,
+  revenue: revenueRouter,
+  societies: societiesRouter,
+  leads: leadsRouter,
+  impact: impactRouter,
 });
 
 // export type definition of API
