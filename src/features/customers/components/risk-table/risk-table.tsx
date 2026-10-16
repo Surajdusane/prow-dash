@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SortableTableHead } from "@/components/dashboard/sortable-table-head";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 import type { RiskSort } from "@/db/queries/customers";
 import { useGetRiskTable } from "@/features/customers/hooks";
@@ -22,7 +23,6 @@ import { formatDateKey, formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import { RiskScoreCell } from "./risk-score-cell";
-import { SortableTableHead } from "./sortable-head";
 import { RiskTableToolbar } from "./toolbar";
 
 function formatTenure(days: number): string {

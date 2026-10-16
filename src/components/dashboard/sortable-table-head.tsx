@@ -3,15 +3,14 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
 import { TableHead } from "@/components/ui/table";
-import type { RiskSort } from "@/db/queries/customers";
 import { cn } from "@/lib/utils";
 
 /**
- * Sortable column header. Sorting runs server-side — clicking only flips the
- * `sort`/`dir` input keys, so the table keeps its current rows while the next
- * ordering loads.
+ * Sortable column header, generic over the server's sort-key union. Sorting
+ * runs server-side — clicking only flips the `sort`/`dir` input keys, so the
+ * table keeps its current rows while the next ordering loads.
  */
-export function SortableTableHead({
+export function SortableTableHead<T extends string>({
   label,
   column,
   activeColumn,
@@ -21,13 +20,13 @@ export function SortableTableHead({
   className,
 }: {
   label: string;
-  column: RiskSort;
-  activeColumn: RiskSort;
+  column: T;
+  activeColumn: T;
   direction: "asc" | "desc";
-  onSort: (column: RiskSort) => void;
+  onSort: (column: T) => void;
   align?: "left" | "right";
   className?: string;
-}) {
+}): React.ReactElement {
   const active = column === activeColumn;
   const Icon = active ? (direction === "asc" ? ArrowUp : ArrowDown) : ArrowUpDown;
 
