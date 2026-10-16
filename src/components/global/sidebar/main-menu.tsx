@@ -124,7 +124,7 @@ const ChildItem = ({
         {/* Child item text */}
         <div
           className={cn(
-            "mr-[15px] ml-[35px] flex h-8 items-center",
+            "mr-3.75 ml-8.75 flex h-8 items-center",
             "border-l pl-3",
             "transition-all duration-200 ease-out",
             showChild ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0"
@@ -170,21 +170,21 @@ const Item = ({ item, isActive, isExpanded, isItemExpanded, onToggle, onSelect }
           {/* Background that expands */}
           <div
             className={cn(
-              "ease-&lsqb;cubic-bezier(0.4,0,0.2,1)&rsqb; mr-[15px] ml-[15px] h-10 border border-transparent transition-all duration-200",
+              "ease-&lsqb;cubic-bezier(0.4,0,0.2,1)&rsqb; mr-3.75 ml-3.75 h-10 border border-transparent transition-all duration-200",
               isActive && "dark:bg-secondary dark:border-border border-[#DCDAD2] bg-[#F2F1EF]",
               isExpanded ? "w-[calc(100%-30px)]" : "w-10"
             )}
           />
 
           {/* Icon - always in same position from sidebar edge */}
-          <div className="group-hover:text-primary pointer-events-none absolute top-0 left-[15px] flex h-10 w-10 items-center justify-center text-black dark:text-[#666666]">
+          <div className="group-hover:text-primary pointer-events-none absolute top-0 left-3.75 flex h-10 w-10 items-center justify-center text-black dark:text-[#666666]">
             <div className={cn(isActive && "dark:text-white")}>
               <Icon />
             </div>
           </div>
 
           {isExpanded && (
-            <div className="pointer-events-none absolute top-0 right-1 left-[55px] flex h-10 items-center">
+            <div className="pointer-events-none absolute top-0 right-1 left-13.75 flex h-10 items-center">
               <span
                 className={cn(
                   "group-hover:text-primary text-sm font-medium text-[#666] transition-opacity duration-200 ease-in-out",

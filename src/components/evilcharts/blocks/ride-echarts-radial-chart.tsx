@@ -187,7 +187,7 @@ export function EChartsRideRadialChart() {
         <div className="grid min-h-0 flex-1 grid-cols-3 gap-2 border-t pt-1.5 sm:pt-3">
           {METRICS.map(({ name, value, goal, unit, icon: Icon, tint }) => (
             <div key={name} className="flex min-h-0 flex-col items-center justify-center gap-1 sm:gap-2">
-              <div className="relative min-h-0 w-full max-w-[104px] flex-1 sm:aspect-square sm:min-h-auto sm:flex-initial">
+              <div className="relative min-h-0 w-full max-w-26 flex-1 sm:aspect-square sm:min-h-auto sm:flex-initial">
                 <EChartsRadialChart
                   data={[{ name, value: share(value, goal) }]}
                   config={chartConfig}

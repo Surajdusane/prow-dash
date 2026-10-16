@@ -72,7 +72,14 @@ product goes to the merchant's actual store (Shopify, etc).
 
 - use tailwindcss
 - use coss skills and shadcn skills for implimenting already install components or you can install required components use this following example `bunx --bun shadcn@latest add @coss/button` if required component not found.
-- also use evils chart for all the charts with shadcn
+
+## Charts
+
+- Use the installed evilcharts (`src/components/evilcharts`) first:
+  - `charts/` — `EChartsAreaChart`, `EChartsBarChart`, `EChartsLineChart`, `EChartsPieChart`, `EChartsRadialChart`, `EChartsRadarChart`, `EChartsComposedChart`.
+  - `blocks/` — ready-made dashboard blocks; copy/adapt their composition (all previewed in `dashboard/home/page.tsx`).
+- Charts are client components; always render inside a fixed-height or `h-full` container.
+- Only if evilcharts can't meet the requirement, install shadcn charts: `bunx --bun shadcn@latest add chart`.
 
 ## How to impliment features
 
