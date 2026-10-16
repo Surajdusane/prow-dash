@@ -1,5 +1,6 @@
 import { Header } from "@/components/global/header";
 import { Sidebar } from "@/components/global/sidebar";
+import { ConfirmationDialog } from "@/hooks/use-confirm";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,6 +10,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
         <Header />
         <div className="px-6 py-6">{children}</div>
       </div>
+      <ConfirmationDialog />
     </div>
   );
 }

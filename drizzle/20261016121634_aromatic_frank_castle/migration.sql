@@ -1,0 +1,20 @@
+CREATE INDEX "complaints_household_date_idx" ON "complaints" ("household_id","date");--> statement-breakpoint
+CREATE INDEX "complaints_date_idx" ON "complaints" ("date");--> statement-breakpoint
+CREATE INDEX "dispensers_household_idx" ON "dispensers" ("household_id");--> statement-breakpoint
+CREATE INDEX "dispensers_online_idx" ON "dispensers" ("is_online");--> statement-breakpoint
+CREATE INDEX "households_society_idx" ON "households" ("society_id");--> statement-breakpoint
+CREATE INDEX "households_status_idx" ON "households" ("status");--> statement-breakpoint
+CREATE INDEX "leads_visit_date_idx" ON "leads" ("visit_date");--> statement-breakpoint
+CREATE INDEX "leads_converted_idx" ON "leads" ("converted");--> statement-breakpoint
+CREATE INDEX "payments_billing_month_idx" ON "payments" ("billing_month");--> statement-breakpoint
+CREATE INDEX "payments_subscription_idx" ON "payments" ("subscription_id");--> statement-breakpoint
+CREATE INDEX "payments_household_idx" ON "payments" ("household_id");--> statement-breakpoint
+CREATE INDEX "readings_dispenser_recorded_idx" ON "readings" ("dispenser_id","recorded_at");--> statement-breakpoint
+CREATE INDEX "readings_recorded_idx" ON "readings" ("recorded_at");--> statement-breakpoint
+CREATE INDEX "service_tickets_status_idx" ON "service_tickets" ("status");--> statement-breakpoint
+CREATE INDEX "service_tickets_raised_date_idx" ON "service_tickets" ("raised_date");--> statement-breakpoint
+CREATE INDEX "service_tickets_technician_idx" ON "service_tickets" ("technician_id");--> statement-breakpoint
+CREATE INDEX "societies_area_idx" ON "societies" ("area_id");--> statement-breakpoint
+CREATE INDEX "subscriptions_status_idx" ON "subscriptions" ("status");--> statement-breakpoint
+CREATE INDEX "subscriptions_household_idx" ON "subscriptions" ("household_id");--> statement-breakpoint
+CREATE INDEX "subscriptions_plan_idx" ON "subscriptions" ("plan_id");

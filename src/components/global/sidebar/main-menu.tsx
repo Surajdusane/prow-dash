@@ -4,87 +4,54 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { Building2, Cpu, LayoutDashboard, Leaf, Megaphone, Users, Wallet, Wrench } from "lucide-react";
+
 import { Icons } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
 const icons = {
-  "/": () => <Icons.Overview size={20} />,
-  "/documents": () => <Icons.Invoice size={20} />,
-  "/transactions": () => <Icons.Transactions size={20} />,
-  "/tracker": () => <Icons.Tracker size={20} />,
-  "/customers": () => <Icons.Customers size={20} />,
-  "/vault": () => <Icons.Vault size={20} />,
-  "/settings": () => <Icons.Settings size={20} />,
-  "/apps": () => <Icons.Apps size={20} />,
-  "/inbox": () => <Icons.Inbox2 size={20} />,
+  "/": LayoutDashboard,
+  "/service-ops": Wrench,
+  "/customers": Users,
+  "/devices": Cpu,
+  "/revenue": Wallet,
+  "/societies": Building2,
+  "/leads": Megaphone,
+  "/sustainability": Leaf,
 } as const;
 
 const items = [
   {
     path: "/",
-    name: "Workflows",
+    name: "Overview",
   },
   {
-    path: "/documents",
-    name: "Documents",
-  },
-  {
-    path: "/inbox",
-    name: "Inbox",
-    children: [{ path: "/inbox/settings", name: "Settings" }],
-  },
-  {
-    path: "/transactions",
-    name: "Transactions",
-    children: [
-      {
-        path: "/transactions/categories",
-        name: "Categories",
-      },
-      {
-        path: "/transactions?step=connect",
-        name: "Connect bank",
-      },
-      {
-        path: "/transactions?step=import&hide=true",
-        name: "Import",
-      },
-      { path: "/transactions?createTransaction=true", name: "Create new" },
-    ],
-  },
-  {
-    path: "/tracker",
-    name: "Tracker",
-    children: [{ path: "/tracker?create=true", name: "Create new" }],
+    path: "/service-ops",
+    name: "Service Ops",
   },
   {
     path: "/customers",
     name: "Customers",
-    children: [{ path: "/customers?createCustomer=true", name: "Create new" }],
   },
   {
-    path: "/vault",
-    name: "Vault",
+    path: "/devices",
+    name: "Devices",
   },
   {
-    path: "/apps",
-    name: "Apps",
-    children: [
-      { path: "/apps", name: "All" },
-      { path: "/apps?tab=installed", name: "Installed" },
-    ],
+    path: "/revenue",
+    name: "Revenue",
   },
   {
-    path: "/settings",
-    name: "Settings",
-    children: [
-      { path: "/settings", name: "General" },
-      { path: "/settings/billing", name: "Billing" },
-      { path: "/settings/accounts", name: "Bank Connections" },
-      { path: "/settings/members", name: "Members" },
-      { path: "/settings/notifications", name: "Notifications" },
-      { path: "/settings/developer", name: "Developer" },
-    ],
+    path: "/societies",
+    name: "Societies",
+  },
+  {
+    path: "/leads",
+    name: "Leads",
+  },
+  {
+    path: "/sustainability",
+    name: "Sustainability",
   },
 ];
 
@@ -179,7 +146,7 @@ const Item = ({ item, isActive, isExpanded, isItemExpanded, onToggle, onSelect }
           {/* Icon - always in same position from sidebar edge */}
           <div className="group-hover:text-primary pointer-events-none absolute top-0 left-3.75 flex h-10 w-10 items-center justify-center text-black dark:text-[#666666]">
             <div className={cn(isActive && "dark:text-white")}>
-              <Icon />
+              <Icon size={20} />
             </div>
           </div>
 
