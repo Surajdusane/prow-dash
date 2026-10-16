@@ -6,6 +6,7 @@ import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead } from "@/components/dashboard/sortable-table-head";
+import { TableEmpty } from "@/components/dashboard/table-empty";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 import type { SocietySort } from "@/db/queries/societies";
 import { useGetSocietyList } from "@/features/societies/hooks";
@@ -157,11 +158,11 @@ function SocietyTableRows({
 
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} className="text-muted-foreground py-10 text-center">
-                No societies match these filters.
-              </TableCell>
-            </TableRow>
+            <TableEmpty
+              colSpan={6}
+              title="No societies match these filters"
+              description="Try a different area, or clear the search."
+            />
           ) : (
             rows.map((row) => (
               <TableRow key={row.societyId} className="cursor-pointer" onClick={() => openSociety(row.societyId)}>

@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsBarChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-bar-chart";
 import { tooltipIndicatorHtml, tooltipRow, tooltipShell } from "@/components/evilcharts/ui/echarts-tooltip";
@@ -82,6 +83,15 @@ export function AreaPenetrationCard() {
     }),
     [chartData]
   );
+
+  if (rows.length === 0) {
+    return (
+      <ChartEmpty
+        title="No societies to measure"
+        description="Penetration appears once societies onboard households."
+      />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">

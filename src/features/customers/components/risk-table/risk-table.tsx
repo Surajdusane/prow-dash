@@ -7,6 +7,7 @@ import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SortableTableHead } from "@/components/dashboard/sortable-table-head";
+import { TableEmpty } from "@/components/dashboard/table-empty";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 import type { RiskSort } from "@/db/queries/customers";
 import { useGetRiskTable } from "@/features/customers/hooks";
@@ -140,11 +141,11 @@ function RiskTableRows({
 
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={9} className="text-muted-foreground py-10 text-center">
-                No households match these filters.
-              </TableCell>
-            </TableRow>
+            <TableEmpty
+              colSpan={9}
+              title="No households match these filters"
+              description="Try a different risk band, area or status."
+            />
           ) : (
             rows.map((row) => (
               <TableRow key={row.householdId} className="cursor-pointer" onClick={() => openHousehold(row.householdId)}>

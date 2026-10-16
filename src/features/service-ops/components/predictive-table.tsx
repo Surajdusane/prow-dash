@@ -1,9 +1,12 @@
 "use client";
 
+import { CheckCircle2 } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TableEmpty } from "@/components/dashboard/table-empty";
 import { useGetPredictive } from "@/features/service-ops/hooks";
 import { useServiceOpsUiStore } from "@/features/service-ops/store";
 import { formatNumber } from "@/lib/format";
@@ -47,11 +50,12 @@ export function PredictiveTable() {
           </TableHeader>
           <TableBody>
             {data.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-muted-foreground py-8 text-center">
-                  No dispensers are flagged right now.
-                </TableCell>
-              </TableRow>
+              <TableEmpty
+                colSpan={7}
+                icon={<CheckCircle2 />}
+                title="No predicted services"
+                description="Dispensers trending toward a filter change will surface here."
+              />
             ) : (
               data.map((row) => (
                 <TableRow key={row.dispenserId}>

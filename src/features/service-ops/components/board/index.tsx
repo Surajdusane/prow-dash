@@ -134,14 +134,11 @@ export function ServiceBoard() {
         {tickets === undefined ? (
           <BoardColumnsSkeleton />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-1 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-4">
             {BOARD_COLUMNS.map((column) => (
-              <BoardColumn
-                key={column.id}
-                column={column}
-                tickets={columns[column.id]}
-                onOpenTicket={setSelectedTicket}
-              />
+              <div key={column.id} className="w-[82vw] max-w-sm shrink-0 snap-start md:w-auto md:max-w-none">
+                <BoardColumn column={column} tickets={columns[column.id]} onOpenTicket={setSelectedTicket} />
+              </div>
             ))}
           </div>
         )}

@@ -3,6 +3,7 @@
 import { useDeferredValue, useMemo, useState } from "react";
 
 import { Tabs, TabsList, TabsTab } from "@/components/ui/tabs";
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsComposedChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-composed-chart";
 import { useGetReadingsTrend } from "@/features/devices/hooks";
@@ -26,9 +27,10 @@ function TrendChart({ days }: { days: 30 | 90 }) {
 
   if (points.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground text-sm">No telemetry in the last {days} days.</p>
-      </div>
+      <ChartEmpty
+        title={`No telemetry in the last ${days} days`}
+        description="Fleet averages appear as devices report in."
+      />
     );
   }
 

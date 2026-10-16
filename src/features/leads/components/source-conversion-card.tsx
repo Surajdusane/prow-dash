@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsBarChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-bar-chart";
 import { tooltipIndicatorHtml, tooltipRow, tooltipShell } from "@/components/evilcharts/ui/echarts-tooltip";
@@ -81,6 +82,10 @@ export function SourceConversionCard() {
     }),
     [chartData]
   );
+
+  if (data.length === 0) {
+    return <ChartEmpty title="No leads by source" description="Channel performance appears once leads are captured." />;
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">

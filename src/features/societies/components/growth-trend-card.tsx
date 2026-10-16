@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsAreaChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-area-chart";
 import { useGetGrowthTrend } from "@/features/societies/hooks";
@@ -34,6 +35,15 @@ export function GrowthTrendCard() {
 
   const chartData = useMemo(() => data.map((point) => ({ ...point, label: formatMonth(point.month) })), [data]);
   const latest = data[data.length - 1];
+
+  if (data.length === 0) {
+    return (
+      <ChartEmpty
+        title="No household growth yet"
+        description="Cumulative households per area appear as societies onboard."
+      />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">

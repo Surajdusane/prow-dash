@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TableEmpty } from "@/components/dashboard/table-empty";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 import { useGetLeadList } from "@/features/leads/hooks";
 import { useLeadsUiStore } from "@/features/leads/store";
@@ -88,11 +89,11 @@ function LeadsTableRows({
 
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} className="text-muted-foreground py-10 text-center">
-                No leads match these filters.
-              </TableCell>
-            </TableRow>
+            <TableEmpty
+              colSpan={6}
+              title="No leads match these filters"
+              description="Adjust the stage, source or search to widen the list."
+            />
           ) : (
             rows.map((row) => (
               <TableRow key={row.id}>

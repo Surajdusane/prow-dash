@@ -2,10 +2,13 @@
 
 import { Suspense, useDeferredValue, useState } from "react";
 
+import { CheckCircle2 } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TableEmpty } from "@/components/dashboard/table-empty";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 import { useGetOverdue } from "@/features/revenue/hooks";
 import {
@@ -85,11 +88,12 @@ function OverdueTableRows({
 
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={7} className="text-muted-foreground py-10 text-center">
-                No late or failed payments — collections are on track.
-              </TableCell>
-            </TableRow>
+            <TableEmpty
+              colSpan={7}
+              icon={<CheckCircle2 />}
+              title="No overdue payments"
+              description="Late and failed payments land here — collections are on track."
+            />
           ) : (
             rows.map((row) => (
               <TableRow key={row.paymentId}>

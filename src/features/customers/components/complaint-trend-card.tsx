@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsLineChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-line-chart";
 import { useGetComplaintTrend } from "@/features/customers/hooks";
@@ -37,6 +38,15 @@ export function ComplaintTrendCard() {
       ),
     [data]
   );
+
+  if (data.length === 0) {
+    return (
+      <ChartEmpty
+        title="No complaints in range"
+        description="Nothing was raised in the last 12 months — boards stay quiet."
+      />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">

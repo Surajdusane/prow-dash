@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TableEmpty } from "@/components/dashboard/table-empty";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 import { useGetFleet } from "@/features/devices/hooks";
 import { useDevicesUiStore } from "@/features/devices/store";
@@ -112,11 +113,11 @@ function FleetTableRows({ state, onPageChange }: { state: FleetTableState; onPag
 
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={11} className="text-muted-foreground py-10 text-center">
-                No devices match these filters.
-              </TableCell>
-            </TableRow>
+            <TableEmpty
+              colSpan={11}
+              title="No devices match these filters"
+              description="Try clearing the online or dispenser type filters."
+            />
           ) : (
             rows.map((row) => (
               <TableRow key={row.dispenserId} className="cursor-pointer" onClick={() => openDispenser(row.dispenserId)}>

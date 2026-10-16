@@ -275,11 +275,39 @@ export async function getReadingsTrend(db: Database, params: GetReadingsTrendPar
     .groupBy(dayExpr)
     .orderBy(dayExpr);
 
-  return rows.map((row) => ({
-    day: row.day,
-    avgTds: Math.round(row.avgTds),
-    avgPurity: roundTo(row.avgPurity),
-  }));
+  return downsampleTrend(
+    rows.map((row) => ({
+      day: row.day,
+      avgTds: Math.round(row.avgTds),
+      avgPurity: roundTo(row.avgPurity),
+    }))
+  );
+}
+
+/** Chart budget: keep trend payloads at or under 60 points (a 90-day window lands ~90 daily buckets). */
+const TREND_MAX_POINTS = 60;
+
+/**
+ * Folds a long daily series into evenly sized averaged buckets — the last
+ * point of each bucket labels it — so a 90-day window renders at ~45 points
+ * without changing the trend's shape.
+ */
+function downsampleTrend(points: ReadingsTrendPoint[]): ReadingsTrendPoint[] {
+  if (points.length <= TREND_MAX_POINTS) return points;
+
+  const bucketSize = Math.ceil(points.length / TREND_MAX_POINTS);
+  const result: ReadingsTrendPoint[] = [];
+
+  for (let index = 0; index < points.length; index += bucketSize) {
+    const bucket = points.slice(index, index + bucketSize);
+    const last = bucket[bucket.length - 1]!;
+    const avgTds = bucket.reduce((sum, point) => sum + point.avgTds, 0) / bucket.length;
+    const avgPurity = bucket.reduce((sum, point) => sum + point.avgPurity, 0) / bucket.length;
+
+    result.push({ day: last.day, avgTds: Math.round(avgTds), avgPurity: roundTo(avgPurity) });
+  }
+
+  return result;
 }
 
 /**

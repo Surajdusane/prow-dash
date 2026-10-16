@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useTheme } from "next-themes";
 
+import { ChartEmpty } from "@/components/dashboard/chart-empty";
 import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsBarChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-bar-chart";
 import { tooltipRow, tooltipShell } from "@/components/evilcharts/ui/echarts-tooltip";
@@ -120,6 +121,15 @@ export function FunnelCard() {
       },
     };
   }, [rows, isDark]);
+
+  if (data.length === 0) {
+    return (
+      <ChartEmpty
+        title="No leads in the funnel"
+        description="Stages fill in as leads move from visits to conversions."
+      />
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4">
