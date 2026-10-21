@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Building2, Cpu, LayoutDashboard, Leaf, Megaphone, Users, Wallet, Wrench } from "lucide-react";
+import { BookOpen, Building2, Cpu, LayoutDashboard, Leaf, Megaphone, Users, Wallet, Wrench } from "lucide-react";
 
 import { Icons } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -18,11 +18,14 @@ const icons = {
   "/societies": Building2,
   "/leads": Megaphone,
   "/sustainability": Leaf,
+  "/api-docs": BookOpen,
 } as const;
 
 type MenuItem = {
   path: string;
   name: string;
+  /** Opens in a new tab — used for the standalone Scalar reference page. */
+  newTab?: boolean;
   children?: { path: string; name: string }[];
 };
 
@@ -62,6 +65,11 @@ const items: MenuItem[] = [
   {
     path: "/sustainability",
     name: "Sustainability",
+  },
+  {
+    path: "/api-docs",
+    name: "API Docs",
+    newTab: true,
   },
 ];
 
@@ -138,7 +146,14 @@ const Item = ({ item, isActive, isExpanded, isItemExpanded, onToggle, onSelect }
 
   return (
     <div className="group">
-      <Link prefetch href={item.path} onClick={() => onSelect?.()} className="group">
+      <Link
+        prefetch={!item.newTab}
+        href={item.path}
+        target={item.newTab ? "_blank" : undefined}
+        rel={item.newTab ? "noreferrer" : undefined}
+        onClick={() => onSelect?.()}
+        className="group"
+      >
         <div className="relative">
           {/* Background that expands */}
           <div
