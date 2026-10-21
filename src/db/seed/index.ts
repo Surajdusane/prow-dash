@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { en, Faker } from "@faker-js/faker";
 import { count, sql } from "drizzle-orm";
 import type { InferInsertModel } from "drizzle-orm";
@@ -31,6 +31,8 @@ import { generateSocieties } from "@/db/seed/generators/societies";
 import { buildDispenserTickets, type TechnicianRef, type TicketSeed } from "@/db/seed/generators/tickets";
 import { addMonths, historyWindowStart, startOfDay, toDateKey } from "@/db/seed/patterns";
 import { AREA_SEEDS, PLAN_SEEDS, TECHNICIAN_SEEDS } from "@/db/seed/reference";
+
+const db = getDb();
 
 /* ---------------------------------------------------------
    Constants
