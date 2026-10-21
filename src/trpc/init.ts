@@ -1,10 +1,10 @@
 import { cache } from "react";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { initTRPC } from "@trpc/server";
 import SuperJSON from "superjson";
 
 export const createTRPCContext = cache(async () => {
-  return { db };
+  return { db: getDb() };
 });
 
 export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
