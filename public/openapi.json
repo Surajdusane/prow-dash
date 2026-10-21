@@ -1,0 +1,4823 @@
+{
+  "openapi": "3.1.1",
+  "jsonSchemaDialect": "https://spec.openapis.org/oas/3.1/dialect/base",
+  "info": {
+    "title": "ProWater Ops API",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "/api/trpc"
+    }
+  ],
+  "paths": {
+    "/overview.getKpis": {
+      "get": {
+        "operationId": "overview.getKpis",
+        "tags": [
+          "overview"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OverviewKpis"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/overview.getRevenueTrend": {
+      "get": {
+        "operationId": "overview.getRevenueTrend",
+        "tags": [
+          "overview"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/BillingTrendPoint"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/overview.getHouseholdGrowth": {
+      "get": {
+        "operationId": "overview.getHouseholdGrowth",
+        "tags": [
+          "overview"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HouseholdGrowthPoint"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/overview.getPlanMix": {
+      "get": {
+        "operationId": "overview.getPlanMix",
+        "tags": [
+          "overview"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PlanMixSlice"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/overview.getAreaHealth": {
+      "get": {
+        "operationId": "overview.getAreaHealth",
+        "tags": [
+          "overview"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AreaHealthRow"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/serviceOps.getBoard": {
+      "get": {
+        "operationId": "serviceOps.getBoard",
+        "tags": [
+          "serviceOps"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/BoardTicket"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": true,
+            "style": "deepObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "areaId": {},
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "filter_change",
+                        "repair",
+                        "installation",
+                        "inspection"
+                      ]
+                    },
+                    "search": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/serviceOps.getAreaDemand": {
+      "get": {
+        "operationId": "serviceOps.getAreaDemand",
+        "tags": [
+          "serviceOps"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AreaDemandRow"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/serviceOps.getPredictive": {
+      "get": {
+        "operationId": "serviceOps.getPredictive",
+        "tags": [
+          "serviceOps"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PredictiveRow"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/serviceOps.getSlaStats": {
+      "get": {
+        "operationId": "serviceOps.getSlaStats",
+        "tags": [
+          "serviceOps"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SlaStats"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/serviceOps.getTechnicianWorkload": {
+      "get": {
+        "operationId": "serviceOps.getTechnicianWorkload",
+        "tags": [
+          "serviceOps"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/TechnicianWorkloadRow"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/serviceOps.getHouseholdsLite": {
+      "get": {
+        "operationId": "serviceOps.getHouseholdsLite",
+        "tags": [
+          "serviceOps"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HouseholdLite"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/serviceOps.createTicket": {
+      "post": {
+        "operationId": "serviceOps.createTicket",
+        "tags": [
+          "serviceOps"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BoardTicket"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "householdId": {},
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "filter_change",
+                      "repair",
+                      "installation",
+                      "inspection"
+                    ]
+                  }
+                },
+                "required": [
+                  "householdId",
+                  "type"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/serviceOps.updateStatus": {
+      "post": {
+        "operationId": "serviceOps.updateStatus",
+        "tags": [
+          "serviceOps"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BoardTicket"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {},
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "open",
+                      "in_progress",
+                      "resolved"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "status"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/serviceOps.assign": {
+      "post": {
+        "operationId": "serviceOps.assign",
+        "tags": [
+          "serviceOps"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/BoardTicket"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {},
+                  "technicianId": {}
+                },
+                "required": [
+                  "id",
+                  "technicianId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/serviceOps.remove": {
+      "post": {
+        "operationId": "serviceOps.remove",
+        "tags": [
+          "serviceOps"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {}
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customers.getKpis": {
+      "get": {
+        "operationId": "customers.getKpis",
+        "tags": [
+          "customers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/HouseholdKpis"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/customers.getAreas": {
+      "get": {
+        "operationId": "customers.getAreas",
+        "tags": [
+          "customers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AreaOption"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/customers.getRiskTable": {
+      "get": {
+        "operationId": "customers.getRiskTable",
+        "tags": [
+          "customers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RiskTableResult"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": true,
+            "style": "deepObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "page": {},
+                    "limit": {},
+                    "sort": {
+                      "type": "string",
+                      "enum": [
+                        "joinDate",
+                        "complaints",
+                        "risk",
+                        "tenure",
+                        "latePayments"
+                      ]
+                    },
+                    "dir": {
+                      "type": "string",
+                      "enum": [
+                        "asc",
+                        "desc"
+                      ]
+                    },
+                    "riskBand": {
+                      "type": "string",
+                      "enum": [
+                        "low",
+                        "medium",
+                        "high"
+                      ]
+                    },
+                    "areaId": {},
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "active",
+                        "cancelled"
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/customers.getRiskDistribution": {
+      "get": {
+        "operationId": "customers.getRiskDistribution",
+        "tags": [
+          "customers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/RiskDistributionRow"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/customers.getComplaintTrend": {
+      "get": {
+        "operationId": "customers.getComplaintTrend",
+        "tags": [
+          "customers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ComplaintTrendPoint"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/customers.getById": {
+      "get": {
+        "operationId": "customers.getById",
+        "tags": [
+          "customers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "$ref": "#/components/schemas/HouseholdProfile"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": true,
+            "style": "deepObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "householdId": {}
+                  },
+                  "required": [
+                    "householdId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/customers.recomputeRisk": {
+      "post": {
+        "operationId": "customers.recomputeRisk",
+        "tags": [
+          "customers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "householdId": {}
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customers.createComplaint": {
+      "post": {
+        "operationId": "customers.createComplaint",
+        "tags": [
+          "customers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ComplaintRow"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "householdId": {},
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "water_quality",
+                      "service_delay",
+                      "billing",
+                      "device_malfunction",
+                      "other"
+                    ]
+                  },
+                  "severity": {
+                    "type": "string",
+                    "enum": [
+                      "low",
+                      "medium",
+                      "high"
+                    ]
+                  },
+                  "date": {
+                    "type": "string",
+                    "description": "`YYYY-MM-DD`; defaults to today server-side."
+                  }
+                },
+                "required": [
+                  "householdId",
+                  "category",
+                  "severity"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customers.resolveComplaint": {
+      "post": {
+        "operationId": "customers.resolveComplaint",
+        "tags": [
+          "customers"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ComplaintRow"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {}
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/devices.getAreas": {
+      "get": {
+        "operationId": "devices.getAreas",
+        "tags": [
+          "devices"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AreaOption"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/devices.getFleet": {
+      "get": {
+        "operationId": "devices.getFleet",
+        "tags": [
+          "devices"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FleetResult"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": true,
+            "style": "deepObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "page": {},
+                    "limit": {},
+                    "areaId": {},
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "standard",
+                        "premium",
+                        "own_device"
+                      ]
+                    },
+                    "online": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/devices.getReadings": {
+      "get": {
+        "operationId": "devices.getReadings",
+        "tags": [
+          "devices"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ReadingsResult"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": true,
+            "style": "deepObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "dispenserId": {},
+                    "days": {
+                      "type": "number",
+                      "enum": [
+                        30,
+                        90
+                      ]
+                    }
+                  },
+                  "required": [
+                    "dispenserId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/devices.getReadingsTrend": {
+      "get": {
+        "operationId": "devices.getReadingsTrend",
+        "tags": [
+          "devices"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ReadingsTrendPoint"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": true,
+            "style": "deepObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "days": {
+                      "type": "number",
+                      "enum": [
+                        30,
+                        90
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/devices.getAnomalies": {
+      "get": {
+        "operationId": "devices.getAnomalies",
+        "tags": [
+          "devices"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AnomalyRow"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/devices.getFleetStats": {
+      "get": {
+        "operationId": "devices.getFleetStats",
+        "tags": [
+          "devices"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FleetStats"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/revenue.getKpis": {
+      "get": {
+        "operationId": "revenue.getKpis",
+        "tags": [
+          "revenue"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/RevenueKpis"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/revenue.getMrrTrend": {
+      "get": {
+        "operationId": "revenue.getMrrTrend",
+        "tags": [
+          "revenue"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/MrrTrendPoint"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/revenue.getPlanMixTrend": {
+      "get": {
+        "operationId": "revenue.getPlanMixTrend",
+        "tags": [
+          "revenue"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PlanMixTrendPoint"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/revenue.getPaymentStatusByMonth": {
+      "get": {
+        "operationId": "revenue.getPaymentStatusByMonth",
+        "tags": [
+          "revenue"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PaymentStatusPoint"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/revenue.getCohortRetention": {
+      "get": {
+        "operationId": "revenue.getCohortRetention",
+        "tags": [
+          "revenue"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CohortRetentionRow"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/revenue.getOverdue": {
+      "get": {
+        "operationId": "revenue.getOverdue",
+        "tags": [
+          "revenue"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OverduePaymentsResult"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": true,
+            "style": "deepObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "page": {},
+                    "limit": {}
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/revenue.markPaid": {
+      "post": {
+        "operationId": "revenue.markPaid",
+        "tags": [
+          "revenue"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OverduePaymentRow"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paymentId": {}
+                },
+                "required": [
+                  "paymentId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/societies.getKpis": {
+      "get": {
+        "operationId": "societies.getKpis",
+        "tags": [
+          "societies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SocietiesKpis"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/societies.getList": {
+      "get": {
+        "operationId": "societies.getList",
+        "tags": [
+          "societies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SocietyListResult"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": true,
+            "style": "deepObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "page": {},
+                    "limit": {},
+                    "areaId": {},
+                    "sort": {
+                      "type": "string",
+                      "enum": [
+                        "name",
+                        "totalFlats",
+                        "penetration",
+                        "subscribed",
+                        "openTickets",
+                        "avgTds30d"
+                      ]
+                    },
+                    "dir": {
+                      "type": "string",
+                      "enum": [
+                        "asc",
+                        "desc"
+                      ]
+                    },
+                    "search": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/societies.getGrowthTrend": {
+      "get": {
+        "operationId": "societies.getGrowthTrend",
+        "tags": [
+          "societies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/GrowthTrendPoint"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/societies.getAreaPenetration": {
+      "get": {
+        "operationId": "societies.getAreaPenetration",
+        "tags": [
+          "societies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AreaPenetrationRow"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/societies.getById": {
+      "get": {
+        "operationId": "societies.getById",
+        "tags": [
+          "societies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SocietyDetail"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": true,
+            "style": "deepObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "societyId": {}
+                  },
+                  "required": [
+                    "societyId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/leads.getKpis": {
+      "get": {
+        "operationId": "leads.getKpis",
+        "tags": [
+          "leads"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LeadsKpis"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/leads.getFunnel": {
+      "get": {
+        "operationId": "leads.getFunnel",
+        "tags": [
+          "leads"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/FunnelStage"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/leads.getBySource": {
+      "get": {
+        "operationId": "leads.getBySource",
+        "tags": [
+          "leads"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/LeadBySourceRow"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/leads.getList": {
+      "get": {
+        "operationId": "leads.getList",
+        "tags": [
+          "leads"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LeadListResult"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": true,
+            "style": "deepObject",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "page": {},
+                    "limit": {},
+                    "source": {
+                      "type": "string"
+                    },
+                    "converted": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/leads.create": {
+      "post": {
+        "operationId": "leads.create",
+        "tags": [
+          "leads"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LeadMutationRow"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "type": "string"
+                  },
+                  "societyName": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "other",
+                      "rwa_secretary",
+                      "resident",
+                      "builder"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "source"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/leads.update": {
+      "post": {
+        "operationId": "leads.update",
+        "tags": [
+          "leads"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LeadMutationRow"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {},
+                  "visitDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "`null` clears a previously set visit date — the UI's \"clear\" affordance."
+                  },
+                  "converted": {
+                    "type": "boolean"
+                  },
+                  "flatsConverted": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/impact.getTotals": {
+      "get": {
+        "operationId": "impact.getTotals",
+        "tags": [
+          "impact"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ImpactTotals"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/impact.getMonthlyTrend": {
+      "get": {
+        "operationId": "impact.getMonthlyTrend",
+        "tags": [
+          "impact"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ImpactMonthlyPoint"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/impact.getByPlan": {
+      "get": {
+        "operationId": "impact.getByPlan",
+        "tags": [
+          "impact"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ImpactByPlanRow"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result"
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OverviewKpis": {
+        "type": "object",
+        "properties": {
+          "activeHouseholds": {
+            "type": "number"
+          },
+          "mrr": {
+            "type": "number"
+          },
+          "churnRate90d": {
+            "type": "number",
+            "description": "90-day churn % — cancellations ÷ households active at the start of the window."
+          },
+          "openTickets": {
+            "type": "number"
+          },
+          "newThisMonth": {
+            "type": "number"
+          },
+          "avgPurity7d": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "activeHouseholds",
+          "mrr",
+          "churnRate90d",
+          "openTickets",
+          "newThisMonth",
+          "avgPurity7d"
+        ],
+        "additionalProperties": false
+      },
+      "BillingTrendPoint": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "description": "`YYYY-MM`"
+          },
+          "billed": {
+            "type": "number"
+          },
+          "collected": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "month",
+          "billed",
+          "collected"
+        ],
+        "additionalProperties": false
+      },
+      "HouseholdGrowthPoint": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "description": "`YYYY-MM`"
+          },
+          "active": {
+            "type": "number"
+          },
+          "cancelled": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "month",
+          "active",
+          "cancelled"
+        ],
+        "additionalProperties": false
+      },
+      "PlanMixSlice": {
+        "type": "object",
+        "properties": {
+          "plan": {
+            "type": "string",
+            "enum": [
+              "starter",
+              "standard",
+              "premium"
+            ],
+            "description": "Shared plan reference for the analytics queries — mirrors the documented\r\nassumptions in the master plan (§6). Plan pricing itself lives in the DB;\r\nlitres-per-day is a documented estimate used by /sustainability."
+          },
+          "count": {
+            "type": "number"
+          },
+          "share": {
+            "type": "number",
+            "description": "Share of active subscriptions, 0–100."
+          }
+        },
+        "required": [
+          "plan",
+          "count",
+          "share"
+        ],
+        "additionalProperties": false
+      },
+      "AreaHealthRow": {
+        "type": "object",
+        "properties": {
+          "areaId": {
+            "type": "number"
+          },
+          "area": {
+            "type": "string"
+          },
+          "households": {
+            "type": "number"
+          },
+          "openTickets": {
+            "type": "number"
+          },
+          "avgTds30d": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "slaMetPct90d": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "areaId",
+          "area",
+          "households",
+          "openTickets",
+          "avgTds30d",
+          "slaMetPct90d"
+        ],
+        "additionalProperties": false
+      },
+      "BoardTicket": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "filter_change",
+              "repair",
+              "installation",
+              "inspection"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "in_progress",
+              "resolved"
+            ]
+          },
+          "raisedDate": {
+            "type": "string"
+          },
+          "resolvedDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "slaMet": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "technicianId": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "technicianName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "householdId": {
+            "type": "number"
+          },
+          "residentName": {
+            "type": "string"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "societyId": {
+            "type": "number"
+          },
+          "societyName": {
+            "type": "string"
+          },
+          "areaId": {
+            "type": "number"
+          },
+          "areaName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "status",
+          "raisedDate",
+          "resolvedDate",
+          "slaMet",
+          "technicianId",
+          "technicianName",
+          "householdId",
+          "residentName",
+          "flatNumber",
+          "societyId",
+          "societyName",
+          "areaId",
+          "areaName"
+        ],
+        "additionalProperties": false
+      },
+      "AreaDemandRow": {
+        "type": "object",
+        "properties": {
+          "areaId": {
+            "type": "number"
+          },
+          "area": {
+            "type": "string"
+          },
+          "infraAgeYears": {
+            "type": "number"
+          },
+          "households": {
+            "type": "number"
+          },
+          "tickets90d": {
+            "type": "number"
+          },
+          "per100Households": {
+            "type": "number"
+          },
+          "avgResolutionDays": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "areaId",
+          "area",
+          "infraAgeYears",
+          "households",
+          "tickets90d",
+          "per100Households",
+          "avgResolutionDays"
+        ],
+        "additionalProperties": false
+      },
+      "PredictiveRow": {
+        "type": "object",
+        "properties": {
+          "dispenserId": {
+            "type": "number"
+          },
+          "householdId": {
+            "type": "number"
+          },
+          "residentName": {
+            "type": "string"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "societyName": {
+            "type": "string"
+          },
+          "areaName": {
+            "type": "string"
+          },
+          "filterAgeDays": {
+            "type": "number"
+          },
+          "latestTds": {
+            "type": "number"
+          },
+          "tdsSlope7d": {
+            "type": "number",
+            "description": "Linear slope of the last 4–6 readings, % of the latest TDS per week (signed)."
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dispenserId",
+          "householdId",
+          "residentName",
+          "flatNumber",
+          "societyName",
+          "areaName",
+          "filterAgeDays",
+          "latestTds",
+          "tdsSlope7d",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "SlaStats": {
+        "type": "object",
+        "properties": {
+          "open": {
+            "type": "number"
+          },
+          "overdue7d": {
+            "type": "number"
+          },
+          "avgResolutionDays": {
+            "type": "number"
+          },
+          "slaMetPct90d": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "open",
+          "overdue7d",
+          "avgResolutionDays",
+          "slaMetPct90d"
+        ],
+        "additionalProperties": false
+      },
+      "TechnicianWorkloadRow": {
+        "type": "object",
+        "properties": {
+          "technicianId": {
+            "type": "number"
+          },
+          "technicianName": {
+            "type": "string"
+          },
+          "areaName": {
+            "type": "string"
+          },
+          "openTickets": {
+            "type": "number"
+          },
+          "resolved30d": {
+            "type": "number"
+          },
+          "avgResolutionDays": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "technicianId",
+          "technicianName",
+          "areaName",
+          "openTickets",
+          "resolved30d",
+          "avgResolutionDays"
+        ],
+        "additionalProperties": false
+      },
+      "HouseholdLite": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "label": {
+            "type": "string"
+          },
+          "residentName": {
+            "type": "string"
+          },
+          "societyName": {
+            "type": "string"
+          },
+          "areaName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "residentName",
+          "societyName",
+          "areaName"
+        ],
+        "additionalProperties": false
+      },
+      "HouseholdKpis": {
+        "type": "object",
+        "properties": {
+          "activeHouseholds": {
+            "type": "number"
+          },
+          "highRiskCount": {
+            "type": "number",
+            "description": "Active households with riskScore ≥ 67 (the \"high\" band)."
+          },
+          "churned90d": {
+            "type": "number",
+            "description": "Households cancelled in the last 90 days."
+          },
+          "avgTenureDays": {
+            "type": "number",
+            "description": "Average tenure of the active book, in days."
+          }
+        },
+        "required": [
+          "activeHouseholds",
+          "highRiskCount",
+          "churned90d",
+          "avgTenureDays"
+        ],
+        "additionalProperties": false
+      },
+      "AreaOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "RiskTableResult": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RiskTableRow"
+            }
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "rows",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "RiskTableRow": {
+        "type": "object",
+        "properties": {
+          "householdId": {
+            "type": "number"
+          },
+          "residentName": {
+            "type": "string"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "societyName": {
+            "type": "string"
+          },
+          "areaId": {
+            "type": "number"
+          },
+          "areaName": {
+            "type": "string"
+          },
+          "planName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "starter",
+              "standard",
+              "premium"
+            ]
+          },
+          "tenureDays": {
+            "type": "number"
+          },
+          "riskScore": {
+            "type": "number"
+          },
+          "complaints90d": {
+            "type": "number"
+          },
+          "latePayments6mo": {
+            "type": "number"
+          },
+          "lastComplaintDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "cancelled"
+            ]
+          }
+        },
+        "required": [
+          "householdId",
+          "residentName",
+          "flatNumber",
+          "societyName",
+          "areaId",
+          "areaName",
+          "planName",
+          "tenureDays",
+          "riskScore",
+          "complaints90d",
+          "latePayments6mo",
+          "lastComplaintDate",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "RiskDistributionRow": {
+        "type": "object",
+        "properties": {
+          "band": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "count": {
+            "type": "number"
+          },
+          "share": {
+            "type": "number",
+            "description": "Share of active households, 0–100."
+          }
+        },
+        "required": [
+          "band",
+          "count",
+          "share"
+        ],
+        "additionalProperties": false
+      },
+      "ComplaintTrendPoint": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "description": "`YYYY-MM`"
+          },
+          "water_quality": {
+            "type": "number"
+          },
+          "service_delay": {
+            "type": "number"
+          },
+          "billing": {
+            "type": "number"
+          },
+          "device_malfunction": {
+            "type": "number"
+          },
+          "other": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "month",
+          "water_quality",
+          "service_delay",
+          "billing",
+          "device_malfunction",
+          "other"
+        ],
+        "additionalProperties": false
+      },
+      "HouseholdProfile": {
+        "type": "object",
+        "properties": {
+          "household": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "residentName": {
+                "type": "string"
+              },
+              "flatNumber": {
+                "type": "string"
+              },
+              "phone": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "joinDate": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "cancelled"
+                ]
+              },
+              "cancelDate": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "riskScore": {
+                "type": "number"
+              },
+              "societyName": {
+                "type": "string"
+              },
+              "areaName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "residentName",
+              "flatNumber",
+              "phone",
+              "joinDate",
+              "status",
+              "cancelDate",
+              "riskScore",
+              "societyName",
+              "areaName"
+            ],
+            "additionalProperties": false
+          },
+          "subscription": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number"
+                  },
+                  "planName": {
+                    "type": "string",
+                    "enum": [
+                      "starter",
+                      "standard",
+                      "premium"
+                    ],
+                    "description": "Shared plan reference for the analytics queries — mirrors the documented\r\nassumptions in the master plan (§6). Plan pricing itself lives in the DB;\r\nlitres-per-day is a documented estimate used by /sustainability."
+                  },
+                  "monthlyPrice": {
+                    "type": "number"
+                  },
+                  "startDate": {
+                    "type": "string"
+                  },
+                  "endDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "cancelled",
+                      "paused"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "planName",
+                  "monthlyPrice",
+                  "startDate",
+                  "endDate",
+                  "status"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dispenser": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "standard",
+                      "premium",
+                      "own_device"
+                    ]
+                  },
+                  "installDate": {
+                    "type": "string"
+                  },
+                  "lastFilterChangeDate": {
+                    "type": "string"
+                  },
+                  "isOnline": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "installDate",
+                  "lastFilterChangeDate",
+                  "isOnline"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "readings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "recordedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "tdsPpm": {
+                  "type": "number"
+                },
+                "ph": {
+                  "type": "number"
+                },
+                "purityPct": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "recordedAt",
+                "tdsPpm",
+                "ph",
+                "purityPct"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "tickets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "filter_change",
+                    "repair",
+                    "installation",
+                    "inspection"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "open",
+                    "in_progress",
+                    "resolved"
+                  ]
+                },
+                "raisedDate": {
+                  "type": "string"
+                },
+                "resolvedDate": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "slaMet": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "technicianName": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "status",
+                "raisedDate",
+                "resolvedDate",
+                "slaMet",
+                "technicianName"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "complaints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ComplaintRow"
+            }
+          },
+          "payments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number"
+                },
+                "billingMonth": {
+                  "type": "string"
+                },
+                "amount": {
+                  "type": "number"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "paid",
+                    "late",
+                    "failed",
+                    "pending"
+                  ]
+                },
+                "paidDate": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "billingMonth",
+                "amount",
+                "status",
+                "paidDate"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "household",
+          "subscription",
+          "dispenser",
+          "readings",
+          "tickets",
+          "complaints",
+          "payments"
+        ],
+        "additionalProperties": false
+      },
+      "ComplaintRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "householdId": {
+            "type": "number"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "water_quality",
+              "service_delay",
+              "billing",
+              "device_malfunction",
+              "other"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "date": {
+            "type": "string"
+          },
+          "resolved": {
+            "type": "boolean"
+          },
+          "resolutionDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "householdId",
+          "category",
+          "severity",
+          "date",
+          "resolved",
+          "resolutionDate"
+        ],
+        "additionalProperties": false
+      },
+      "FleetResult": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FleetRow"
+            }
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "rows",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "FleetRow": {
+        "type": "object",
+        "properties": {
+          "dispenserId": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "premium",
+              "own_device"
+            ]
+          },
+          "isOnline": {
+            "type": "boolean"
+          },
+          "installDate": {
+            "type": "string"
+          },
+          "lastFilterChangeDate": {
+            "type": "string"
+          },
+          "filterAgeDays": {
+            "type": "number"
+          },
+          "householdId": {
+            "type": "number"
+          },
+          "residentName": {
+            "type": "string"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "societyId": {
+            "type": "number"
+          },
+          "societyName": {
+            "type": "string"
+          },
+          "areaId": {
+            "type": "number"
+          },
+          "areaName": {
+            "type": "string"
+          },
+          "lastReadingAt": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "latestTds": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "latestPh": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "latestPurity": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "flag": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "offline",
+              "tds_high",
+              "purity_low",
+              "filter_due"
+            ]
+          }
+        },
+        "required": [
+          "dispenserId",
+          "type",
+          "isOnline",
+          "installDate",
+          "lastFilterChangeDate",
+          "filterAgeDays",
+          "householdId",
+          "residentName",
+          "flatNumber",
+          "societyId",
+          "societyName",
+          "areaId",
+          "areaName",
+          "lastReadingAt",
+          "latestTds",
+          "latestPh",
+          "latestPurity",
+          "flag"
+        ],
+        "additionalProperties": false
+      },
+      "ReadingsResult": {
+        "type": "object",
+        "properties": {
+          "dispenser": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "standard",
+                  "premium",
+                  "own_device"
+                ]
+              },
+              "isOnline": {
+                "type": "boolean"
+              },
+              "installDate": {
+                "type": "string"
+              },
+              "lastFilterChangeDate": {
+                "type": "string"
+              },
+              "householdId": {
+                "type": "number"
+              },
+              "residentName": {
+                "type": "string"
+              },
+              "flatNumber": {
+                "type": "string"
+              },
+              "societyName": {
+                "type": "string"
+              },
+              "areaName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "isOnline",
+              "installDate",
+              "lastFilterChangeDate",
+              "householdId",
+              "residentName",
+              "flatNumber",
+              "societyName",
+              "areaName"
+            ],
+            "additionalProperties": false
+          },
+          "readings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "recordedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "tdsPpm": {
+                  "type": "number"
+                },
+                "ph": {
+                  "type": "number"
+                },
+                "purityPct": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "recordedAt",
+                "tdsPpm",
+                "ph",
+                "purityPct"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "dispenser",
+          "readings"
+        ],
+        "additionalProperties": false
+      },
+      "ReadingsTrendPoint": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "string",
+            "description": "`YYYY-MM-DD` — stable chart x-axis key."
+          },
+          "avgTds": {
+            "type": "number"
+          },
+          "avgPurity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "day",
+          "avgTds",
+          "avgPurity"
+        ],
+        "additionalProperties": false
+      },
+      "AnomalyRow": {
+        "type": "object",
+        "properties": {
+          "dispenserId": {
+            "type": "number"
+          },
+          "householdId": {
+            "type": "number"
+          },
+          "residentName": {
+            "type": "string"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "societyName": {
+            "type": "string"
+          },
+          "areaId": {
+            "type": "number"
+          },
+          "areaName": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "premium",
+              "own_device"
+            ]
+          },
+          "isOnline": {
+            "type": "boolean"
+          },
+          "lastReadingAt": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "latestTds": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "latestPurity": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "staleDays": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "medium",
+              "high"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "dispenserId",
+          "householdId",
+          "residentName",
+          "flatNumber",
+          "societyName",
+          "areaId",
+          "areaName",
+          "type",
+          "isOnline",
+          "lastReadingAt",
+          "latestTds",
+          "latestPurity",
+          "staleDays",
+          "severity",
+          "reasons"
+        ],
+        "additionalProperties": false
+      },
+      "FleetStats": {
+        "type": "object",
+        "properties": {
+          "onlinePct": {
+            "type": "number"
+          },
+          "avgPurity7d": {
+            "type": "number"
+          },
+          "needsServiceCount": {
+            "type": "number"
+          },
+          "offlineCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "onlinePct",
+          "avgPurity7d",
+          "needsServiceCount",
+          "offlineCount"
+        ],
+        "additionalProperties": false
+      },
+      "RevenueKpis": {
+        "type": "object",
+        "properties": {
+          "mrr": {
+            "type": "number"
+          },
+          "arpu": {
+            "type": "number"
+          },
+          "activeSubs": {
+            "type": "number"
+          },
+          "failedPctThisMonth": {
+            "type": "number"
+          },
+          "collectionsRate90d": {
+            "type": "number",
+            "description": "Collected ÷ billed over the last three billing months, 0–100."
+          }
+        },
+        "required": [
+          "mrr",
+          "arpu",
+          "activeSubs",
+          "failedPctThisMonth",
+          "collectionsRate90d"
+        ],
+        "additionalProperties": false
+      },
+      "MrrTrendPoint": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "description": "`YYYY-MM`"
+          },
+          "mrr": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "month",
+          "mrr"
+        ],
+        "additionalProperties": false
+      },
+      "PlanMixTrendPoint": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "description": "`YYYY-MM`"
+          },
+          "starter": {
+            "type": "number"
+          },
+          "standard": {
+            "type": "number"
+          },
+          "premium": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "month",
+          "starter",
+          "standard",
+          "premium"
+        ],
+        "additionalProperties": false
+      },
+      "PaymentStatusPoint": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "description": "`YYYY-MM`"
+          },
+          "paid": {
+            "type": "number"
+          },
+          "late": {
+            "type": "number"
+          },
+          "failed": {
+            "type": "number"
+          },
+          "pending": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "month",
+          "paid",
+          "late",
+          "failed",
+          "pending"
+        ],
+        "additionalProperties": false
+      },
+      "CohortRetentionRow": {
+        "type": "object",
+        "properties": {
+          "cohortMonth": {
+            "type": "string",
+            "description": "`YYYY-MM`"
+          },
+          "size": {
+            "type": "number"
+          },
+          "retention": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "% of the cohort still active at each month-end since joining (k = 0, 1, …)."
+          }
+        },
+        "required": [
+          "cohortMonth",
+          "size",
+          "retention"
+        ],
+        "additionalProperties": false
+      },
+      "OverduePaymentsResult": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OverduePaymentRow"
+            }
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "rows",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "OverduePaymentRow": {
+        "type": "object",
+        "properties": {
+          "paymentId": {
+            "type": "number"
+          },
+          "householdId": {
+            "type": "number"
+          },
+          "residentName": {
+            "type": "string"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "societyName": {
+            "type": "string"
+          },
+          "billingMonth": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "paid",
+              "late",
+              "failed",
+              "pending"
+            ]
+          },
+          "paidDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "paymentId",
+          "householdId",
+          "residentName",
+          "flatNumber",
+          "societyName",
+          "billingMonth",
+          "amount",
+          "status",
+          "paidDate"
+        ],
+        "additionalProperties": false
+      },
+      "SocietiesKpis": {
+        "type": "object",
+        "properties": {
+          "societies": {
+            "type": "number"
+          },
+          "avgPenetration": {
+            "type": "number",
+            "description": "Active households ÷ flats covered, 0–100."
+          },
+          "flatsCovered": {
+            "type": "number"
+          },
+          "areas": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "societies",
+          "avgPenetration",
+          "flatsCovered",
+          "areas"
+        ],
+        "additionalProperties": false
+      },
+      "SocietyListResult": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SocietyListRow"
+            }
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "rows",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "SocietyListRow": {
+        "type": "object",
+        "properties": {
+          "societyId": {
+            "type": "number"
+          },
+          "societyName": {
+            "type": "string"
+          },
+          "areaId": {
+            "type": "number"
+          },
+          "areaName": {
+            "type": "string"
+          },
+          "totalFlats": {
+            "type": "number"
+          },
+          "subscribed": {
+            "type": "number"
+          },
+          "penetrationPct": {
+            "type": "number"
+          },
+          "onboardedDate": {
+            "type": "string"
+          },
+          "openTickets": {
+            "type": "number"
+          },
+          "avgTds30d": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "societyId",
+          "societyName",
+          "areaId",
+          "areaName",
+          "totalFlats",
+          "subscribed",
+          "penetrationPct",
+          "onboardedDate",
+          "openTickets",
+          "avgTds30d"
+        ],
+        "additionalProperties": false
+      },
+      "GrowthTrendPoint": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "description": "`YYYY-MM`"
+          }
+        },
+        "required": [
+          "month"
+        ],
+        "additionalProperties": {
+          "type": [
+            "string",
+            "number"
+          ]
+        }
+      },
+      "AreaPenetrationRow": {
+        "type": "object",
+        "properties": {
+          "areaId": {
+            "type": "number"
+          },
+          "area": {
+            "type": "string"
+          },
+          "households": {
+            "type": "number"
+          },
+          "totalFlats": {
+            "type": "number"
+          },
+          "penetrationPct": {
+            "type": "number"
+          },
+          "infraAgeYears": {
+            "type": "number"
+          },
+          "ticketsPer100": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "areaId",
+          "area",
+          "households",
+          "totalFlats",
+          "penetrationPct",
+          "infraAgeYears",
+          "ticketsPer100"
+        ],
+        "additionalProperties": false
+      },
+      "SocietyDetail": {
+        "type": "object",
+        "properties": {
+          "society": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              },
+              "areaName": {
+                "type": "string"
+              },
+              "totalFlats": {
+                "type": "number"
+              },
+              "onboardedDate": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "areaName",
+              "totalFlats",
+              "onboardedDate"
+            ],
+            "additionalProperties": false
+          },
+          "subscribed": {
+            "type": "number"
+          },
+          "penetrationPct": {
+            "type": "number"
+          },
+          "openTickets": {
+            "type": "number"
+          },
+          "avgTds30d": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "planBreakdown": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "plan": {
+                  "type": "string",
+                  "enum": [
+                    "starter",
+                    "standard",
+                    "premium"
+                  ],
+                  "description": "Shared plan reference for the analytics queries — mirrors the documented\r\nassumptions in the master plan (§6). Plan pricing itself lives in the DB;\r\nlitres-per-day is a documented estimate used by /sustainability."
+                },
+                "count": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "plan",
+                "count"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "topRisk": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "householdId": {
+                  "type": "number"
+                },
+                "flatNumber": {
+                  "type": "string"
+                },
+                "residentName": {
+                  "type": "string"
+                },
+                "riskScore": {
+                  "type": "number"
+                },
+                "tenureDays": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "householdId",
+                "flatNumber",
+                "residentName",
+                "riskScore",
+                "tenureDays"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "society",
+          "subscribed",
+          "penetrationPct",
+          "openTickets",
+          "avgTds30d",
+          "planBreakdown",
+          "topRisk"
+        ],
+        "additionalProperties": false
+      },
+      "LeadsKpis": {
+        "type": "object",
+        "properties": {
+          "totalLeads": {
+            "type": "number"
+          },
+          "visitRate": {
+            "type": "number"
+          },
+          "conversionRate": {
+            "type": "number"
+          },
+          "flatsConvertedQtd": {
+            "type": "number",
+            "description": "Flats converted on leads created in the current quarter."
+          }
+        },
+        "required": [
+          "totalLeads",
+          "visitRate",
+          "conversionRate",
+          "flatsConvertedQtd"
+        ],
+        "additionalProperties": false
+      },
+      "FunnelStage": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "type": "string",
+            "enum": [
+              "leads",
+              "converted",
+              "visits"
+            ]
+          },
+          "count": {
+            "type": "number"
+          },
+          "pctOfLeads": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "stage",
+          "count",
+          "pctOfLeads"
+        ],
+        "additionalProperties": false
+      },
+      "LeadBySourceRow": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "leads": {
+            "type": "number"
+          },
+          "visits": {
+            "type": "number"
+          },
+          "converted": {
+            "type": "number"
+          },
+          "conversionRate": {
+            "type": "number",
+            "description": "Converted ÷ leads, 0–100."
+          }
+        },
+        "required": [
+          "source",
+          "leads",
+          "visits",
+          "converted",
+          "conversionRate"
+        ],
+        "additionalProperties": false
+      },
+      "LeadListResult": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeadListRow"
+            }
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "rows",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "LeadListRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "societyName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "other",
+              "rwa_secretary",
+              "resident",
+              "builder"
+            ]
+          },
+          "source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "visitDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "converted": {
+            "type": "boolean"
+          },
+          "flatsConverted": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "societyName",
+          "role",
+          "source",
+          "visitDate",
+          "converted",
+          "flatsConverted",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "LeadMutationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "societyName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "other",
+              "rwa_secretary",
+              "resident",
+              "builder"
+            ]
+          },
+          "source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "visitDate": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "converted": {
+            "type": "boolean"
+          },
+          "flatsConverted": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "societyName",
+          "role",
+          "source",
+          "visitDate",
+          "converted",
+          "flatsConverted",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "ImpactTotals": {
+        "type": "object",
+        "properties": {
+          "litresServed": {
+            "type": "number"
+          },
+          "jarsAvoided": {
+            "type": "number"
+          },
+          "householdsServed": {
+            "type": "number"
+          },
+          "monthsLive": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "litresServed",
+          "jarsAvoided",
+          "householdsServed",
+          "monthsLive"
+        ],
+        "additionalProperties": false
+      },
+      "ImpactMonthlyPoint": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "description": "`YYYY-MM`"
+          },
+          "litres": {
+            "type": "number"
+          },
+          "jarsAvoided": {
+            "type": "number"
+          },
+          "cumulativeLitres": {
+            "type": "number"
+          },
+          "cumulativeJarsAvoided": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "month",
+          "litres",
+          "jarsAvoided",
+          "cumulativeLitres",
+          "cumulativeJarsAvoided"
+        ],
+        "additionalProperties": false
+      },
+      "ImpactByPlanRow": {
+        "type": "object",
+        "properties": {
+          "plan": {
+            "type": "string",
+            "enum": [
+              "starter",
+              "standard",
+              "premium"
+            ],
+            "description": "Shared plan reference for the analytics queries — mirrors the documented\r\nassumptions in the master plan (§6). Plan pricing itself lives in the DB;\r\nlitres-per-day is a documented estimate used by /sustainability."
+          },
+          "litres": {
+            "type": "number"
+          },
+          "jarsAvoided": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "plan",
+          "litres",
+          "jarsAvoided"
+        ],
+        "additionalProperties": false
+      },
+      "DefaultErrorShape": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "number",
+            "enum": [
+              -32700,
+              -32600,
+              -32603,
+              -32001,
+              -32002,
+              -32003,
+              -32004,
+              -32005,
+              -32008,
+              -32009,
+              -32012,
+              -32013,
+              -32015,
+              -32022,
+              -32028,
+              -32029,
+              -32099
+            ]
+          },
+          "data": {
+            "$ref": "#/components/schemas/DefaultErrorData"
+          }
+        },
+        "required": [
+          "message",
+          "code",
+          "data"
+        ],
+        "additionalProperties": false
+      },
+      "DefaultErrorData": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "PARSE_ERROR",
+              "BAD_REQUEST",
+              "INTERNAL_SERVER_ERROR",
+              "NOT_IMPLEMENTED",
+              "BAD_GATEWAY",
+              "SERVICE_UNAVAILABLE",
+              "GATEWAY_TIMEOUT",
+              "UNAUTHORIZED",
+              "PAYMENT_REQUIRED",
+              "FORBIDDEN",
+              "NOT_FOUND",
+              "METHOD_NOT_SUPPORTED",
+              "TIMEOUT",
+              "CONFLICT",
+              "PRECONDITION_FAILED",
+              "PAYLOAD_TOO_LARGE",
+              "UNSUPPORTED_MEDIA_TYPE",
+              "UNPROCESSABLE_CONTENT",
+              "PRECONDITION_REQUIRED",
+              "TOO_MANY_REQUESTS",
+              "CLIENT_CLOSED_REQUEST"
+            ]
+          },
+          "httpStatus": {
+            "type": "number"
+          },
+          "path": {
+            "type": "string"
+          },
+          "stack": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "httpStatus"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "Error response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "$ref": "#/components/schemas/DefaultErrorShape"
+                }
+              },
+              "required": [
+                "error"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

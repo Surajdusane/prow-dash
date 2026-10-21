@@ -139,16 +139,44 @@ Neon branch or the database a deployment is reading.
 
 ### Scripts
 
-| Script                | Purpose                                                    |
-| --------------------- | ---------------------------------------------------------- |
-| `bun run dev`         | Development server                                          |
-| `bun run build`       | Production build (no DB connection needed at build time)    |
-| `bun run check-types` | TypeScript + Next typegen                                   |
-| `bun run lint`        | ESLint                                                      |
-| `bun run db:migrate`  | Apply Drizzle migrations                                    |
-| `bun run db:seed`     | Seed an empty database                                      |
-| `bun run db:reset`    | Truncate + reseed (the reset button)                        |
-| `bun run db:studio`   | Drizzle Studio                                              |
+| Script                     | Purpose                                                  |
+| -------------------------- | -------------------------------------------------------- |
+| `bun run dev`              | Development server                                       |
+| `bun run build`            | Production build (no DB connection needed at build time) |
+| `bun run check-types`      | TypeScript + Next typegen                                |
+| `bun run lint`             | ESLint                                                   |
+| `bun run openapi:generate` | Regenerate the OpenAPI spec at `public/openapi.json`     |
+| `bun run db:migrate`       | Apply Drizzle migrations                                 |
+| `bun run db:seed`          | Seed an empty database                                   |
+| `bun run db:reset`         | Truncate + reseed (the reset button)                     |
+| `bun run db:studio`        | Drizzle Studio                                           |
+
+### API reference (OpenAPI)
+
+The tRPC router is published as an OpenAPI 3.1 document at `/openapi.json`
+([`public/openapi.json`](./public/openapi.json)). An interactive Scalar reference is
+served from it at `/api-docs` (also linked in the sidebar). The document is
+regenerated before every `bun run build`, or on demand:
+
+```bash
+bun run openapi:generate
+```
+
+The document is derived from the router's types, so input schemas, unions,
+nullability and JSDoc descriptions stay in sync with `src/trpc`. Paths are relative
+to the tRPC endpoint (`/api/trpc`); set `OPENAPI_SERVER_URL` before generating to
+point at another origin.
+
+Because the API uses SuperJSON, an OpenAPI-generated client must serialise inputs
+and deserialise outputs with the same transformer. For Hey API, pass it when
+configuring the generated client:
+
+```ts
+configureTRPCHeyApiClient(client, {
+  baseUrl: process.env.NEXT_PUBLIC_APP_URL!,
+  transformer: superjson,
+});
+```
 
 ## Deploy notes
 
