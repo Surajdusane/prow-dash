@@ -4,7 +4,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { BookOpen, Building2, Cpu, LayoutDashboard, Leaf, Megaphone, Users, Wallet, Wrench } from "lucide-react";
+import {
+  BookOpen,
+  Building2,
+  Cpu,
+  FileText,
+  LayoutDashboard,
+  Leaf,
+  Megaphone,
+  Users,
+  Wallet,
+  Wrench,
+} from "lucide-react";
 
 import { Icons } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -18,6 +29,7 @@ const icons = {
   "/societies": Building2,
   "/leads": Megaphone,
   "/sustainability": Leaf,
+  "/docs": FileText,
   "/api-docs": BookOpen,
 } as const;
 
@@ -65,6 +77,11 @@ const items: MenuItem[] = [
   {
     path: "/sustainability",
     name: "Sustainability",
+  },
+  {
+    path: "/docs",
+    name: "Case Study",
+    newTab: true,
   },
   {
     path: "/api-docs",

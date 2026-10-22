@@ -1,4 +1,4 @@
 {
-  "title": "Docs",
-  "pages": ["index", "example", "getting-started"]
+  "title": "ProWater Case Study",
+  "pages": ["index", "overview", "ideas", "routes", "architecture", "engineering", "about"]
 }

@@ -1,0 +1,15 @@
+{
+  "title": "Route by Route",
+  "pages": [
+    "index",
+    "overview",
+    "service-ops",
+    "customers",
+    "devices",
+    "fleet",
+    "revenue",
+    "societies",
+    "leads",
+    "sustainability"
+  ]
+}

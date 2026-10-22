@@ -1,5 +1,7 @@
 # ProWater — Ops & Monitoring Dashboard
 
+> **Case study:** open `/docs` for the recruiter-facing walkthrough — problem, design decisions, route-by-route code maps, and engineering notes.
+
 An internal operations dashboard for **ProWater**, a fictional piped RO drinking-water
 subscription service in Bangalore. It models the full business chain — societies →
 households → subscriptions → IoT dispensers → field service → complaints → billing —
@@ -65,7 +67,7 @@ trends) and tables page at 25 rows, so no route accidentally ships a full-table 
 | `/sustainability`    | Estimated litres served and 20 L jars avoided (method note included), cumulative litres by month, contribution by plan.                                                                                                                                                                            |
 
 Also in the repo: `/dev/charts`, the chart gallery used as the visual design reference while
-building (deliberately not in the sidebar), and `/docs`, a Fumadocs scaffold.
+building (deliberately not in the sidebar), and `/docs`, the recruiter-facing case study.
 
 ## How the data was simulated
 

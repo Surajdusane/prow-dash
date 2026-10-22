@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       tree={source.getPageTree()}
       {...baseOptions()}
       sidebar={{
-        collapsible: false,
+        collapsible: true,
         className: "docs-compact-sidebar",
       }}
     >
