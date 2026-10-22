@@ -1,4 +1,298 @@
 ---
-title: Customers
-description: Churn risk, complaints, and the household drawer.
+title: "/customers — Churn risk"
+description:
+  Score the book, surface high-risk households, and act on complaints before
+  they cancel.
 ---
+
+<RouteMeta
+  live="/customers"
+  time="7 min"
+  repoPath="src/app/(root)/(dashboard)/customers/page.tsx"
+/>
+
+## Why this route exists
+
+Retention is cheaper than acquisition, but a churn rate does not tell support
+who to call. This route ranks households, shows the evidence behind each score,
+and makes the next action available in the same place — answering **who, why,
+and what now**.
+
+## What I chose — and what I left out
+
+| Option                          | Why I rejected it                     | What I chose instead                             |
+| ------------------------------- | ------------------------------------- | ------------------------------------------------ |
+| A churn-rate trend chart        | Shows the outcome, not who to call    | Risk table first, trends second                  |
+| A single risk-score column      | A number nobody can defend in a call  | Score, band, signals, and a household drawer     |
+| One global list with no filters | Too broad for a support shift         | Band, area, and status filters                   |
+| An ML churn probability         | No labelled outcomes; hard to explain | A transparent 0–100 heuristic with named weights |
+
+## What's on screen
+
+Live route: `/customers`; the household drawer is the detail state. The route is
+`force-dynamic`, and `batchPrefetchCustomers()` warms the KPIs, first table
+page, distribution, complaint trend, and area options. The drawer query is
+excluded and fetches on open.
+
+### KPI row
+
+Four tiles from `getKpis`: active, high-risk (active and score 67 or above),
+cancelled in the last 90 days, and average tenure of the active book. The
+high-risk tile adds its share of the book.
+
+**Data:** `getKpis` → `households`; share from `getRiskDistribution`. **Code:**
+
+- <SourceLink
+    path="src/features/customers/components/kpi-row.tsx"
+    label="kpi-row.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/customers.ts"
+    symbol="getHouseholdKpis"
+    label="customers.ts"
+  />
+
+### Risk table
+
+Every household, highest risk first, 25 per page. Columns are household (flat
+and resident), society and area, plan, tenure, risk score, complaints in 90
+days, late plus failed payments in six months, last complaint, and status. The
+risk cell combines a mini bar with a band-coloured score badge, so the band is
+visible without a separate column.
+
+Visible columns sort server-side (`tenure`, `risk`, `complaints`,
+`latePayments`); the toolbar filters by risk band, area, and household status.
+The default includes cancelled households — switch to Active for a call list.
+
+**Data:** `getRiskTable` → `households`, `societies`, `areas`, `subscriptions`,
+`plans`, `complaints`, `payments`. **Code:**
+
+- <SourceLink
+    path="src/features/customers/components/risk-table/risk-table.tsx"
+    label="risk-table.tsx"
+  />
+- <SourceLink
+    path="src/features/customers/hooks/use-get-risk-table.ts"
+    label="use-get-risk-table.ts"
+  />
+
+"Last complaint" is the latest complaint **inside the 90-day window**; "Never"
+means none in 90 days, not none ever.
+
+### Risk distribution donut
+
+The active book split into low (below 34), medium (34–66), and high (67 and
+above), with counts and shares in the legend. The centre shows the total active
+book, so the chart answers "how concentrated is risk?" rather than merely "how
+many households?"
+
+**Data:** `getRiskDistribution` → `households.risk_score`, active only.
+**Code:**
+
+<SourceLink
+  path="src/features/customers/components/risk-distribution-card.tsx"
+  label="risk-distribution-card.tsx"
+/>
+
+### Complaint trend
+
+Five lines, one per category — water quality, service delay, billing, device
+malfunction, other — over 12 months. The mix explains what kind of risk is
+rising: a water-quality spike and a billing spike call for different
+interventions. Months are zero-filled.
+
+**Data:** `getComplaintTrend` → `complaints`. **Code:**
+
+- <SourceLink
+    path="src/features/customers/components/complaint-trend-card.tsx"
+    label="complaint-trend-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/customers.ts"
+    symbol="getComplaintTrend"
+    label="customers.ts"
+  />
+
+### Household drawer
+
+A row opens a right-side drawer with the evidence behind the score:
+
+- the risk ring, status, area, resident, and join date;
+- a 30-day TDS and purity sparkline;
+- subscription and dispenser details, including connectivity and filter age;
+- the latest five of 50 tickets, with SLA badges, and six of 50 complaints, with
+  inline resolve;
+- the latest six of 36 payments, with status badges.
+
+The drawer owns a non-suspense query, so opening a row never refetches the
+table, and it keeps the last id through the close animation.
+
+**Data:** `getById` → `households`, `subscriptions`, `plans`, `dispensers`,
+`readings`, `service_tickets`, `complaints`, `payments`. **Code:**
+
+- <SourceLink
+    path="src/features/customers/components/household-drawer/household-drawer.tsx"
+    label="household-drawer.tsx"
+  />
+- <SourceLink
+    path="src/features/customers/hooks/use-get-household-profile.ts"
+    label="use-get-household-profile.ts"
+  />
+- <SourceLink
+    path="src/db/queries/customers.ts"
+    symbol="getHouseholdProfile"
+    label="customers.ts"
+  />
+
+### Add and resolve complaints
+
+"Add complaint" opens a category and severity dialog; unresolved complaints have
+inline Resolve buttons. Both toast on success and failure. Adding refreshes the
+profile, trend, and table; resolving refreshes the profile and table. Neither
+re-scores — stored scores change only on recompute, so the donut and KPIs are
+untouched here.
+
+**Code:**
+
+- <SourceLink
+    path="src/features/customers/components/household-drawer/add-complaint-dialog.tsx"
+    label="add-complaint-dialog.tsx"
+  />
+- <SourceLink
+    path="src/features/customers/components/household-drawer/complaints-list.tsx"
+    label="complaints-list.tsx"
+  />
+- <SourceLink
+    path="src/features/customers/hooks/use-create-complaint.ts"
+    label="use-create-complaint.ts"
+  />
+- <SourceLink
+    path="src/features/customers/hooks/use-resolve-complaint.ts"
+    label="use-resolve-complaint.ts"
+  />
+
+### Recompute risk
+
+The header button asks for confirmation, then re-scores every household from
+current complaint, payment, SLA, and tenure signals. The toast reports how many
+households were written. The mutation invalidates the risk table, the
+distribution, the KPIs, and any open profile, so the table visibly re-sorts.
+
+**Code:**
+
+- <SourceLink
+    path="src/features/customers/components/recompute-risk-button.tsx"
+    label="recompute-risk-button.tsx"
+  />
+- <SourceLink
+    path="src/features/customers/hooks/use-recompute-risk.ts"
+    label="use-recompute-risk.ts"
+  />
+- <SourceLink
+    path="src/db/queries/risk.ts"
+    symbol="recomputeAllRiskScores"
+    label="risk.ts"
+  />
+
+## The data behind it
+
+The seed puts about **13%** of households in a risk cohort: a 60–120 day window
+with two to four complaints and late or failed payments across that window.
+About **60%** cancel one to three months after it. Everyone else gets Poisson
+complaints and an 8% base churn rate.
+
+Risk is computed by one shared function, not hard-coded in the seed. The seed
+calls `recomputeAllRiskScores()` after inserting complaints, payments, and
+tickets, so seeded scores and the in-app button use the same code path.
+
+The weights are readable:
+
+- **Complaints (max 45):** 9 per complaint in 90 days, plus 5 per high-severity
+  complaint and 5 per unresolved complaint.
+- **Payments (max 45):** 7 per late payment and 11 per failed payment over six
+  months.
+- **SLA (max 16):** 4 per missed-SLA ticket in 12 months.
+- **Tenure (max 8):** 8 points under 90 days, 5 under 180, 2 under a year.
+
+The result is clamped to 0–100 and banded at 34 and 67.
+
+**Code:**
+
+- <SourceLink
+    path="src/db/queries/risk.ts"
+    symbol="computeHouseholdRisk"
+    label="computeHouseholdRisk"
+  />
+- <SourceLink
+    path="src/db/seed/generators/households.ts"
+    label="households.ts"
+  />
+- <SourceLink
+    path="src/db/seed/generators/complaints.ts"
+    label="complaints.ts"
+  />
+- <SourceLink path="src/db/seed/generators/payments.ts" label="payments.ts" />
+
+## Chart → data → code
+
+| Section           | Visual     | Why this visual                  | Data source           | Component                    |
+| ----------------- | ---------- | -------------------------------- | --------------------- | ---------------------------- |
+| KPI row           | KPI tiles  | Fast scan of the book            | `getKpis`             | `kpi-row.tsx`                |
+| Risk table        | Table      | Triage list with server sorting  | `getRiskTable`        | `risk-table/*`               |
+| Risk distribution | Donut      | Part-to-whole across three bands | `getRiskDistribution` | `risk-distribution-card.tsx` |
+| Complaint trend   | Multi-line | Category trends over 12 months   | `getComplaintTrend`   | `complaint-trend-card.tsx`   |
+| Household detail  | Drawer     | Evidence on demand               | `getById`             | `household-drawer/*`         |
+
+## Interactions
+
+- **Sort, filter, page.** Every change is a tRPC input, not client-side slicing;
+  filters reset to page 1 and rows dim until the next page resolves.
+- **Open a household.** Only Zustand state changes; the drawer fetches its own
+  profile and leaves the table untouched.
+- **Add or resolve a complaint.** Toast, then invalidate the affected profile
+  and list. Adding also refreshes the trend; both refresh the risk table.
+- **Recompute risk.** Confirmation, toast with the household count, then
+  invalidate table, distribution, KPIs, and profile. No optimistic scoring —
+  showing a new rank before the server re-scores would mislead.
+
+## Code map
+
+| Layer           | File                                            | What it does                              |
+| --------------- | ----------------------------------------------- | ----------------------------------------- |
+| Page            | `src/app/(root)/(dashboard)/customers/page.tsx` | Prefetch + Suspense layout                |
+| Server prefetch | `src/features/customers/server/index.ts`        | `batchPrefetchCustomers`                  |
+| Hooks           | `src/features/customers/hooks/*`                | KPIs, table, charts, drawer, mutations    |
+| Components      | `src/features/customers/components/*`           | Table, charts, drawer, dialogs            |
+| Router          | `src/trpc/routers/customers.ts`                 | Procedures and mutations                  |
+| Query           | `src/db/queries/customers.ts`                   | Table, KPIs, distribution, trend, profile |
+| Query           | `src/db/queries/risk.ts`                        | Scoring, bands, recompute                 |
+| Query           | `src/db/queries/complaints.ts`                  | Complaint history and mutations           |
+| Seed            | `src/db/seed/generators/households.ts`          | Risk cohort and churn windows             |
+| Seed            | `src/db/seed/generators/complaints.ts`          | Complaint clusters and severity           |
+| Seed            | `src/db/seed/generators/payments.ts`            | Late and failed payments in the window    |
+
+## What to notice as a reviewer
+
+1. Filter to **High** risk and open a household. The drawer shows the exact
+   complaints, payments, and SLA-missed tickets behind the score.
+2. Read
+   <SourceLink
+     path="src/db/queries/risk.ts"
+     symbol="computeHouseholdRisk"
+     label="risk.ts"
+   />
+   — one function with named weights.
+3. Resolve a complaint, then click **Recompute risk**. The table re-sorts and
+   the donut re-reads the rewritten scores.
+
+## Trade-offs & next
+
+- The score is a ranking heuristic, not a calibrated probability. Weights are
+  hand-tuned and global, with no per-plan or per-area calibration and no outcome
+  tracking to fit them against real cancellations.
+- Adding or resolving a complaint does not automatically re-score, so the donut
+  can lag the evidence.
+- No suggested next action: the page says who to call and why, not whether to
+  offer a discount, a filter change, or an apology call.
+- Table state is local, so filters and sort reset on navigation; the drawer caps
+  history at 50 tickets, 50 complaints, and 36 payments.

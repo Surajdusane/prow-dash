@@ -1,4 +1,356 @@
 ---
-title: Code Flow
-description: How a route prefetches, hydrates, renders, and mutates data.
+title: Code flow
+description:
+  One feature, seven layers — from a Drizzle query to a server prefetch, a
+  client hook, and a rendered chart.
 ---
+
+## The seven layers
+
+Every feature follows the same path:
+
+```text
+1. DB query / mutation      src/db/queries/*
+2. Zod schema               src/trpc/schema/*
+3. tRPC procedure           src/trpc/routers/*
+4. Server prefetch          src/features/<feature>/server/index.ts
+5. Feature hook             src/features/<feature>/hooks/*
+6. Client component         src/features/<feature>/components/*
+7. Route page               src/app/(root)/(dashboard)/<route>/page.tsx
+```
+
+1. **DB query or mutation.** The SQL lives in `src/db/queries/*`, typed by the
+   Drizzle schema. It returns rows or aggregates, not UI strings.
+2. **Zod schema.** Inputs that need validation get a schema in
+   `src/trpc/schema/*`, with the input type inferred from it.
+3. **tRPC procedure.** The router validates, calls the query, and returns the
+   result. It does not format the response.
+4. **Server prefetch.** A feature `server/index.ts` wraps the procedure's
+   `queryOptions()` in `prefetch` or `batchPrefetch`.
+5. **Feature hook.** A `"use client"` hook calls `useSuspenseQuery` with the
+   same options. Mutations use `useMutation`.
+6. **Client component.** The component owns presentation: chart config, labels,
+   empty state, loading skeleton.
+7. **Route page.** A server component prefetches, hydrates, and wraps sections
+   in Suspense and an error boundary.
+
+The rule is simple: **no client page fetches data directly.** Every query goes
+through the same tRPC procedure, whether it runs in the server prefetch or in
+the browser. There is no `fetch` in a component, no `useEffect` bootstrap, and
+no mock JSON path that bypasses the router.
+
+## A real trace: complaint trend
+
+The complaint trend is small enough to follow end to end and rich enough to
+touch every layer.
+
+1. <SourceLink
+     path="src/db/queries/customers.ts"
+     symbol="getComplaintTrend"
+     label="getComplaintTrend"
+   />
+   groups `complaints` by month and category with `to_char(date_trunc('month',
+   date), 'YYYY-MM')`, then zero-fills the last 12 months so a quiet month is a
+   zero, not a gap.
+2. <SourceLink path="src/trpc/routers/customers.ts" label="customers.ts" />
+   exposes it as `customers.getComplaintTrend`, a query with no input.
+3. <SourceLink
+     path="src/features/customers/server/index.ts"
+     label="customers/server"
+   />
+   defines `prefetchComplaintTrend()` as
+   `prefetch(trpc.customers.getComplaintTrend.queryOptions())`.
+4. <SourceLink
+     path="src/app/(root)/(dashboard)/customers/page.tsx"
+     label="customers/page.tsx"
+   />
+   calls `batchPrefetchCustomers()`, which includes the complaint trend, and
+   wraps each section in its own `Suspense`.
+5. <SourceLink
+     path="src/features/customers/hooks/use-get-complaint-trend.ts"
+     label="use-get-complaint-trend.ts"
+   />
+   calls `useSuspenseQuery(trpc.customers.getComplaintTrend.queryOptions())`.
+6. <SourceLink
+     path="src/features/customers/components/complaint-trend-card.tsx"
+     label="complaint-trend-card.tsx"
+   />
+   renders a five-line `EChartsLineChart`, one line per category, inside a 300px
+   container. It formats month labels with `formatMonth` and sums the trailing
+   12 months for the legend.
+7. The browser hydrates from the same cache entry the server wrote. The chart
+   does not issue a second request on mount.
+
+| Layer     | File                                                         | Symbol                        |
+| --------- | ------------------------------------------------------------ | ----------------------------- |
+| Query     | `src/db/queries/customers.ts`                                | `getComplaintTrend`           |
+| Router    | `src/trpc/routers/customers.ts`                              | `customers.getComplaintTrend` |
+| Prefetch  | `src/features/customers/server/index.ts`                     | `prefetchComplaintTrend`      |
+| Hook      | `src/features/customers/hooks/use-get-complaint-trend.ts`    | `useGetComplaintTrend`        |
+| Component | `src/features/customers/components/complaint-trend-card.tsx` | `ComplaintTrendCard`          |
+| Page      | `src/app/(root)/(dashboard)/customers/page.tsx`              | `CustomersPage`               |
+
+This is the general shape. `prefetchRiskTable` and `useGetRiskTable` use the
+same options with the table's filters; `prefetchBoard` and `useGetBoard` do the
+same for the kanban. Different options mean different keys, and the prefetch
+silently misses.
+
+## The route page pattern
+
+The server page warms the cache and sets loading and failure boundaries:
+
+```tsx
+export const dynamic = "force-dynamic";
+
+export default function Page() {
+  batchPrefetchFeature();
+
+  return (
+    <HydrateClient>
+      <FeatureErrorBoundary>
+        <Suspense fallback={<Skeleton />}>
+          <ClientSection />
+        </Suspense>
+      </FeatureErrorBoundary>
+    </HydrateClient>
+  );
+}
+```
+
+The real page has four Suspense boundaries: KPI row, risk table, risk
+distribution, and complaint trend.
+
+- **`force-dynamic`** because the demo reads live data. Every recruiter-facing
+  page exports it, so the build needs no database and requests stay live.
+- **`batchPrefetch` is fire-and-forget.** It starts the queries; `HydrateClient`
+  serializes the per-request cache, pending promises included.
+- **Each section gets its own Suspense boundary.** A slow table does not block
+  the KPI row, and each skeleton appears exactly where its content will land.
+- **The error boundary is per feature, with retry.** `CustomersErrorBoundary`
+  renders a card with a **Retry** button that calls `resetErrorBoundary`; it is
+  a client component because the server page cannot pass a render function.
+
+## The prefetch implementation
+
+<SourceLink path="src/trpc/server.tsx" label="src/trpc/server.tsx" /> is small
+and worth reading in full:
+
+- `getQueryClient = cache(makeQueryClient)` gives the server one query client
+  per request. React's `cache` prevents a second client during a suspended
+  render.
+- `prefetch` checks `queryOptions.queryKey[1]?.type === "infinite"` and calls
+  `prefetchInfiniteQuery` or `prefetchQuery` accordingly.
+- `batchPrefetch` loops over the options and fires the same call. It does not
+  `await` each one, so the queries start concurrently instead of forming a
+  sequential chain.
+- `HydrateClient` calls `dehydrate(queryClient)` and wraps the route in
+  TanStack's `HydrationBoundary`.
+
+The dehydration rules live in
+
+<SourceLink path="src/trpc/query-client.ts" label="query-client.ts" />. Queries
+are stale after 30 seconds, SuperJSON serializes the dehydrated payload, and
+`shouldDehydrateQuery` includes queries whose status is `pending`. That last
+rule is why the client can start in a pending state and suspend until the server
+promise resolves, instead of requiring every prefetch to finish before the page
+streams.
+
+The prefetch list is a manual contract. A hook missing from `batchPrefetchX` has
+no server entry; it suspends and fetches after hydration — not broken, but a
+waterfall the prefetch was meant to remove.
+
+## The client hook pattern
+
+Hooks are thin: they do not format chart data or own empty states.
+
+```ts
+"use client";
+
+export const useGetX = () => {
+  const trpc = useTRPC();
+  return useSuspenseQuery(trpc.feature.getX.queryOptions());
+};
+```
+
+`useGetComplaintTrend` is exactly this shape. `ComplaintTrendCard` decides that
+a point's `month` becomes a label and that the five categories become five
+lines. If the hook formatted months, the data would be harder to reuse.
+
+Mutations use `useMutation` with `mutationOptions`. Each one follows the same
+contract: `onSuccess` shows a toast and invalidates the affected keys, `onError`
+shows a toast, and `onSettled` performs the refresh so a failed optimistic
+update still reconciles with the server.
+
+## The mutation path
+
+A kanban drag is the stateful path in the app. The hook in
+
+<SourceLink
+  path="src/features/service-ops/hooks/use-update-ticket-status.ts"
+  label="use-update-ticket-status.ts"
+/>
+owns it:
+
+1. The hook calls `trpc.serviceOps.updateStatus.mutationOptions`.
+2. `onMutate` cancels the board query, snapshots every matching board entry with
+   `getQueriesData`, and writes the new status into the cache immediately. If
+   the new status is `resolved`, it stamps today's date and preserves the
+   existing `slaMet` value, because the optimistic client cannot know the
+   server's elapsed hours.
+3. The mutation runs. On failure, `onError` restores every snapshot and shows
+   the error toast.
+4. On success, a toast reports the ticket id and new status.
+5. `onSettled` invalidates the board, SLA stats, and technician workload. The
+   refetch replaces the optimistic row with the server's computed `slaMet`.
+6. The server is the source of truth; the optimistic state is temporary.
+
+The database side recomputes `slaMet` from the ticket's `raised_date` and the
+`SLA_HOURS` target when the status becomes `resolved`, and clears both
+`resolved_date` and `slaMet` when a ticket is reopened.
+
+<SourceLink
+  path="src/db/queries/tickets.ts"
+  symbol="updateTicketStatus"
+  label="updateTicketStatus"
+/>
+is the implementation.
+
+Optimistic UI is appropriate for the kanban because the drop already happened on
+screen. Waiting for a round trip to move the card would make the board feel
+broken. It is not appropriate for **Mark paid**: a payment mutation should show
+a pending button, then confirm from the server, because the row represents
+money.
+
+<SourceLink
+  path="src/features/revenue/hooks/use-mark-paid.ts"
+  label="use-mark-paid.ts"
+/>
+has no `onMutate`; the button reads `isPending`, then the hook toasts and
+invalidates revenue KPIs, payment status by month, and the overdue list.
+
+## Query keys and invalidation
+
+`queryOptions()` provides stable keys, and `queryKey()` returns the same key
+without fetching. Invalidate the smallest set the mutation actually affects.
+
+Concrete examples from the code:
+
+- **Resolve complaint** invalidates the household profile and the risk table. It
+  does not invalidate the complaint trend, distribution, or KPIs: resolving a
+  complaint changes its `resolved` flag but not its month or category, and the
+  stored risk score is not rewritten until recompute.
+- **Create complaint** invalidates the profile, the complaint trend, and the
+  risk table. The trend changes because a new dated row exists; the distribution
+  and KPIs do not, because they read stored scores.
+- **Recompute risk** invalidates the risk table, distribution, KPIs, and any
+  open profile. That is the one mutation that rewrites `risk_score`.
+- **Update ticket status** invalidates the board, SLA stats, and technician
+  workload. It does not invalidate area demand or the overview KPIs; those are
+  90-day aggregates and refresh on the next visit. If a single ticket had to
+  move the executive view immediately, the list would need to grow.
+- **Mark paid** invalidates revenue KPIs, payment status by month, and the
+  overdue list. MRR and plan mix do not change when a payment is collected, so
+  they are left alone.
+
+Do not invalidate the whole client; a refetch storm hides which query depends on
+which mutation.
+
+## Error and empty states
+
+The three states are separate:
+
+- **Loading** is Suspense. Each section has a skeleton shaped like its final
+  content: `CustomersKpiRowSkeleton`, `RiskTableSkeleton`, `ChartCardSkeleton`.
+  The skeleton holds the same height, so the page does not jump.
+- **Failure** is the feature error boundary. It renders a retry card and
+  explains that a cold database is a likely cause. Query hooks do not catch and
+  swallow errors.
+- **Empty** is a deliberate state, not an error. `ComplaintTrendCard` renders a
+  `ChartEmpty` when there are no complaints; tables have their own empty rows.
+  “No complaints in range” and “the request failed” should never look the same.
+
+Mutation failures surface as toasts and leave the underlying list intact. A
+failed status change restores the board snapshot; a failed complaint submission
+keeps the dialog open.
+
+## Why this flow
+
+- **Server prefetch removes the client waterfall.** The route starts all queries
+  before the browser renders the first client component.
+- **One cache means server and client share data.** The prefetch and the hook
+  use the same query key, so hydration is a cache fill, not a second request.
+- **Thin routers keep DB logic reusable.** The risk query is used by the seed
+  and the app; the complaint trend is used by the prefetch and the hook.
+- **Feature folders keep each route's code together.** Query, schema, router,
+  prefetch, hook, and component for Customers live under
+  `src/features/customers` and `src/trpc`.
+- **Invalidation is explicit.** Each mutation declares its blast radius, which
+  makes stale-data bugs easier to reason about than a global refresh.
+
+## Trade-offs
+
+- **More files per feature than a single page component.** A chart has a query,
+  schema entry, router procedure, prefetch function, hook, component, and page
+  import. It pays off when a second route reuses the query, and is overhead for
+  a one-off.
+- **The prefetch list must be kept in sync with the hooks.** A missing entry
+  causes a client fetch after hydration. There is no compile-time check that
+  every hook used by a section was prefetched.
+- **`force-dynamic` gives up static caching.** Every dashboard request hits the
+  database. That is the right trade for a live demo and the wrong trade for a
+  read-heavy public site with tolerant freshness.
+- **Optimistic updates add rollback complexity.** The kanban has to snapshot,
+  cancel, restore, and then invalidate. Every new optimistic mutation adds
+  another failure path to test.
+- **Invalidation lists can drift.** Ticket status does not refresh area demand
+  or the overview; resolving a complaint intentionally leaves the trend alone.
+  Those are defensible choices, but they are conventions held in hooks, not
+  constraints enforced by the type system.
+- **The same query options are written twice** — once in the server prefetch and
+  once in the hook. They must match, or hydration misses and the client fetches.
+  A shared options factory would remove the duplication at the cost of an
+  indirection.
+
+## Code links
+
+- <SourceLink path="src/trpc/server.tsx" label="server.tsx" /> — `prefetch`,
+  `batchPrefetch`, `HydrateClient`.
+- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" /> — stale
+  time, SuperJSON dehydration, pending queries.
+- <SourceLink path="src/trpc/client.tsx" label="client.tsx" /> — browser
+  provider and batch link.
+- <SourceLink
+    path="src/features/customers/server/index.ts"
+    label="customers/server"
+  />
+  — `batchPrefetchCustomers`.
+- <SourceLink
+    path="src/features/customers/hooks/use-get-complaint-trend.ts"
+    label="use-get-complaint-trend.ts"
+  />
+  — the thin query hook.
+- <SourceLink
+    path="src/features/customers/components/complaint-trend-card.tsx"
+    label="complaint-trend-card.tsx"
+  />
+  — the rendered chart.
+- <SourceLink
+    path="src/app/(root)/(dashboard)/customers/page.tsx"
+    label="customers/page.tsx"
+  />
+  — prefetch, Suspense, error boundary.
+- <SourceLink
+    path="src/features/service-ops/hooks/use-update-ticket-status.ts"
+    label="use-update-ticket-status.ts"
+  />
+  — optimistic mutation and rollback.
+- <SourceLink
+    path="src/features/customers/hooks/use-resolve-complaint.ts"
+    label="use-resolve-complaint.ts"
+  />
+  — a narrow invalidation set.
+- <SourceLink
+    path="src/features/revenue/hooks/use-mark-paid.ts"
+    label="use-mark-paid.ts"
+  />
+  — a non-optimistic money mutation.

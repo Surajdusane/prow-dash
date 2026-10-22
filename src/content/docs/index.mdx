@@ -1,4 +1,231 @@
 ---
 title: Start Here
-description: The business problem, the build, and where the code lives.
+description:
+  A full-stack ops dashboard for a piped RO water business, built to turn
+  service telemetry and customer signals into two predictive workflows.
 ---
+
+import { CONTACT_URL, GITHUB_URL, LIVE_URL } from "@/features/docs/constants";
+
+ProWater is a full-stack ops dashboard for a piped RO water business: I modeled
+the domain, simulated 24 months of causal data, and built two predictive
+workflows — area-level service demand and household churn risk — behind a typed
+tRPC API and a server-rendered Next.js UI.
+
+<p className="not-prose flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+  <a href={LIVE_URL} className="font-medium underline underline-offset-4">
+    {"Live demo"}
+  </a>
+  <a href={GITHUB_URL} className="font-medium underline underline-offset-4">
+    {"GitHub"}
+  </a>
+  <a href={CONTACT_URL} className="font-medium underline underline-offset-4">
+    {"Hire me"}
+  </a>
+</p>
+
+<p className="not-prose text-muted-foreground flex flex-wrap gap-x-3 gap-y-1 text-xs">
+  <span>Next.js 16</span>
+  <span>tRPC</span>
+  <span>Drizzle</span>
+  <span>Neon</span>
+  <span>ECharts</span>
+  <span>Fumadocs</span>
+</p>
+
+## The two questions
+
+<Cards>
+  <Card
+    title="Where will service demand concentrate next, before complaints pile up?"
+    description="Predictive service demand — TDS trend + filter age → ranked queue."
+    href="/docs/ideas/predictive-service-demand"
+  />
+  <Card
+    title="Which households are about to churn, and why?"
+    description="Complaint-based risk — complaints + payment behaviour + SLA misses → 0–100 score."
+    href="/docs/ideas/churn-risk"
+  />
+</Cards>
+
+## By the numbers
+
+| What                    | Count     |
+| ----------------------- | --------- |
+| Simulated history       | 24 months |
+| Postgres tables         | 12        |
+| Households              | ~1,150    |
+| Telemetry readings      | ~250k     |
+| Service tickets         | ~7k       |
+| Dashboard routes        | 9         |
+| Mock JSON in the client | 0         |
+
+## Start here
+
+<Cards>
+  <Card
+    title="5-minute version"
+    description="The problem, the build, and what to inspect first."
+    href="/docs/overview/short"
+  />
+  <Card
+    title="20-minute case study"
+    description="Research, schema, stack decisions, seed, feature loop, and trade-offs."
+    href="/docs/overview/long"
+  />
+  <Card
+    title="Predictive service demand"
+    description="How TDS trend and filter age become a ranked worklist."
+    href="/docs/ideas/predictive-service-demand"
+  />
+  <Card
+    title="Churn risk"
+    description="How complaints, payments, and SLA misses become a 0–100 score."
+    href="/docs/ideas/churn-risk"
+  />
+  <Card
+    title="Route by route"
+    description="Every dashboard route, its question, and its code map."
+    href="/docs/routes"
+  />
+  <Card
+    title="Code entry points"
+    description="How a query becomes a prefetched, hydrated route."
+    href="/docs/architecture/code-flow"
+  />
+</Cards>
+
+## Reviewer's guide — what to watch
+
+1. **[/service-ops](/service-ops)** — Drag a kanban card; it mutates
+   optimistically and persists. Then open the predictive table and compare the
+   top rows with the area demand chart. Code:
+   <SourceLink
+     path="src/features/service-ops/hooks/use-update-ticket-status.ts"
+     label="use-update-ticket-status.ts"
+   />
+   ,
+   <SourceLink
+     path="src/db/queries/service-ops.ts"
+     symbol="getPredictive"
+     label="service-ops.ts"
+   />
+   .
+2. **[/customers](/customers)** — Filter to high risk, open a household drawer,
+   read the complaint, payment, and SLA signals, then hit “Recompute risk”.
+   Code:
+   <SourceLink
+     path="src/db/queries/risk.ts"
+     symbol="computeHouseholdRisk"
+     label="risk.ts"
+   />
+   ,
+   <SourceLink
+     path="src/features/customers/components/household-drawer/index.tsx"
+     label="household-drawer"
+   />
+   .
+3. **[/revenue](/revenue)** — Read the cohort retention matrix, then mark an
+   overdue payment paid and watch the revenue queries invalidate together. Code:
+   <SourceLink
+     path="src/features/revenue/hooks/use-mark-paid.ts"
+     label="use-mark-paid.ts"
+   />
+   ,
+   <SourceLink
+     path="src/db/queries/revenue.ts"
+     symbol="getCohortRetention"
+     label="revenue.ts"
+   />
+   .
+4. **[/](/)** — Scan the six KPIs, billed vs collected, and area health. Code:
+   <SourceLink
+     path="src/db/queries/overview.ts"
+     symbol="getOverviewKpis"
+     label="overview.ts"
+   />
+   .
+5. **Network tab** — One batched tRPC prefetch per route, not a client-side
+   fetch waterfall. Code:
+   <SourceLink
+     path="src/features/service-ops/server/index.ts"
+     label="service-ops/server"
+   />
+   ,
+   <SourceLink
+     path="src/trpc/server.tsx"
+     symbol="batchPrefetch"
+     label="trpc/server.tsx"
+   />
+   .
+6. **Seed** — Run `bun run db:reset` and confirm the same patterns reappear.
+   Code: <SourceLink path="src/db/seed/index.ts" label="seed/index.ts" />.
+
+## What this proves
+
+| Capability                                             | Evidence                                                                  | Where to look                                                                                                    |
+| ------------------------------------------------------ | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| [Domain research](/docs/architecture/data-model)       | 12-table model of households → dispensers → telemetry → service → billing | <SourceLink path="src/db/schema.ts" label="schema.ts" />                                                         |
+| [Product thinking](/docs/overview/short)               | Two ops decisions, 9 routes, deliberate omissions                         | [Route map](/docs/routes)                                                                                        |
+| [Data engineering](/docs/architecture/data-simulation) | Deterministic 24-month simulation with causal tickets                     | <SourceLink path="src/db/seed/index.ts" label="seed/index.ts" />                                                 |
+| [Backend/API](/docs/architecture/api)                  | Thin tRPC routers, Zod inputs, typed Drizzle queries                      | <SourceLink path="src/trpc/routers/_app.ts" label="_app.ts" />                                                   |
+| [Frontend craft](/docs/routes)                         | Server prefetch, Suspense, skeletons, drawers, optimistic DnD             | <SourceLink path="src/app/(root)/(dashboard)/service-ops/page.tsx" label="service-ops/page.tsx" />               |
+| [Performance](/docs/engineering/performance)           | Indexed queries, windows, pagination, ≤60 chart points                    | <SourceLink path="src/trpc/server.tsx" symbol="batchPrefetch" label="trpc/server.tsx" />                         |
+| [Type safety](/docs/architecture/code-flow)            | DB → query → router → hook → component                                    | <SourceLink path="src/features/customers/hooks/use-get-complaint-trend.ts" label="use-get-complaint-trend.ts" /> |
+| [Communication](/docs/overview/long)                   | This case study, method notes, trade-offs                                 | [Full case study](/docs/overview/long)                                                                           |
+| Ownership                                              | Seed, migrations, build, reset, deployment notes                          | <a href={`${GITHUB_URL}#readme`} className="font-medium underline underline-offset-4">README</a>                 |
+
+## Code entry points
+
+- <SourceLink path="src/db/schema.ts" label="src/db/schema.ts" /> — the domain
+  model.
+- <SourceLink path="src/db/seed/index.ts" label="src/db/seed/index.ts" /> — the
+  ten-stage simulation.
+- <SourceLink
+    path="src/db/queries/risk.ts"
+    symbol="computeHouseholdRisk"
+    label="src/db/queries/risk.ts"
+  />
+  — the shared churn score.
+- <SourceLink
+    path="src/db/queries/service-ops.ts"
+    symbol="getPredictive"
+    label="src/db/queries/service-ops.ts"
+  />
+  — the predictive service query.
+- <SourceLink
+    path="src/features/service-ops/server/index.ts"
+    label="src/features/service-ops/server/index.ts"
+  />
+  — the server prefetch.
+- <SourceLink
+    path="src/trpc/routers/_app.ts"
+    label="src/trpc/routers/_app.ts"
+  />
+  — the API surface.
+
+## A note on the data
+
+<Callout type="info" title="Simulated by design">
+  All company names, people, payments, and telemetry are simulated. The seed is
+  deterministic (`faker.seed(42)`) and anchored to the day it runs, so the
+  dashboard’s patterns are real to the dataset, not random rows. Read the [data
+  simulation notes](/docs/architecture/data-simulation).
+</Callout>
+
+---
+
+<p className="not-prose flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium">
+  <a href={LIVE_URL} className="underline underline-offset-4">
+    {"Live demo"}
+  </a>
+  <a href={GITHUB_URL} className="underline underline-offset-4">
+    {"GitHub"}
+  </a>
+  <a href={CONTACT_URL} className="underline underline-offset-4">
+    {"Hire me"}
+  </a>
+  <span className="text-muted-foreground font-normal">
+    {"Built by Suraj Dusane."}
+  </span>
+</p>

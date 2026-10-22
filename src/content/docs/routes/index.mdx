@@ -1,4 +1,116 @@
 ---
-title: Route Index
-description: Every dashboard route and the operational question it answers.
+title: Route by route
+description:
+  The nine dashboard routes, the decision each one supports, and how to verify
+  the code behind it.
 ---
+
+ProWater has nine dashboard routes. Each one exists to move a specific decision
+forward, and each is documented the same way so you can compare the reasoning
+across routes instead of reading nine unrelated walkthroughs.
+
+## How to read these pages
+
+Every route page follows the same order:
+
+1. **Why this route exists** — the business question and the decision it
+   supports.
+2. **What I chose, and what I left out** — the alternatives I rejected and the
+   composition I shipped.
+3. **What's on screen** — what the user sees, why that visual, which query feeds
+   it, and where the component lives.
+4. **The data behind it** — seed logic, table windows, and formulas.
+5. **Chart → data → code** — a table mapping each section to its query and
+   component.
+6. **Interactions** — mutations, optimistic updates, invalidation, and toasts.
+7. **Code map** — the page → prefetch → hook → component → router → query chain.
+8. **What to notice as a reviewer** — three concrete clicks or files.
+9. **Trade-offs and next steps** — what the route deliberately does not do.
+
+Each page is self-contained. Jump to the route you care about; you do not need
+to read them in order.
+
+## Route map
+
+| Route                                            | Decision it supports                  | Main visuals                                                      | Primary query                                                                                                                                  |
+| ------------------------------------------------ | ------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`/`](/docs/routes/overview)                     | Is the business healthy this month?   | Six KPIs · billing area · growth area · plan donut · area table   | <SourceLink path="src/db/queries/overview.ts" label="overview.ts" />                                                                           |
+| [`/service-ops`](/docs/routes/service-ops)       | Who needs service next?               | Kanban · predictive table · area bars · SLA gauge · workload bars | <SourceLink path="src/db/queries/service-ops.ts" label="service-ops.ts" />, <SourceLink path="src/db/queries/tickets.ts" label="tickets.ts" /> |
+| [`/customers`](/docs/routes/customers)           | Who is about to churn?                | Risk table · risk donut · complaint trend · household drawer      | <SourceLink path="src/db/queries/customers.ts" label="customers.ts" />, <SourceLink path="src/db/queries/risk.ts" label="risk.ts" />           |
+| [`/devices`](/docs/routes/devices)               | Which devices need attention?         | Anomaly donut · telemetry trend · online gauge · anomaly feed     | <SourceLink path="src/db/queries/devices.ts" label="devices.ts" />                                                                             |
+| [`/devices/fleet`](/docs/routes/fleet)           | What is the state of every dispenser? | Filterable fleet table · dispenser drawer                         | <SourceLink path="src/db/queries/devices.ts" label="devices.ts" />                                                                             |
+| [`/revenue`](/docs/routes/revenue)               | Where is revenue leaking?             | MRR trend · plan mix · payment outcomes · cohort matrix · overdue | <SourceLink path="src/db/queries/revenue.ts" label="revenue.ts" />                                                                             |
+| [`/societies`](/docs/routes/societies)           | Where should we expand?               | Onboarding growth · penetration bars · society table              | <SourceLink path="src/db/queries/societies.ts" label="societies.ts" />                                                                         |
+| [`/leads`](/docs/routes/leads)                   | Is the funnel working?                | Funnel · source conversion · lead table                           | <SourceLink path="src/db/queries/leads.ts" label="leads.ts" />                                                                                 |
+| [`/sustainability`](/docs/routes/sustainability) | What impact can we claim?             | Impact tiles · litres and jars trends · by-plan bars              | <SourceLink path="src/db/queries/impact.ts" label="impact.ts" />                                                                               |
+
+The decisions are deliberately narrow. A route that tried to answer all nine
+questions would answer none of them well; the overview is the only page allowed
+to summarize, because its job is triage, not analysis.
+
+## Chart selection rules
+
+The visual follows the data shape, not the other way round:
+
+- **Trend over time** → area or line.
+- **Category comparison** → bar; horizontal when labels are long.
+- **Part-to-whole at a point** → donut.
+- **Composition over time** → stacked bar or stacked area.
+- **Single percentage against a target** → semi-radial gauge.
+- **Ranking** → sorted horizontal bar.
+- **Cohort retention** → matrix.
+- **Action list** → table plus drawer.
+- **Fast scan of headline numbers** → KPI tiles.
+- **Multiple metrics per entity** → table, not five small charts.
+
+A few consequences are visible in the pages: area demand uses bars because it
+compares volume and density across eight areas; technician workload is
+horizontal because names are long and the ranking matters; the SLA card is a
+semi-radial because one percentage is the whole story.
+
+## The shared anatomy
+
+```text
+Route page (server)
+  → feature server prefetch
+  → HydrateClient
+  → Suspense + skeleton
+  → client hook
+  → chart/table/drawer
+```
+
+The server page calls one `batchPrefetch*` function from the feature's `server`
+folder, wraps the tree in `HydrateClient`, and gives each section its own
+`Suspense` boundary with a skeleton shaped like the final content. Client
+components use suspense hooks against the same query keys. The full path is
+traced in [Code flow](/docs/architecture/code-flow).
+
+One deliberate exception: the Service Ops kanban uses a non-suspense query with
+`keepPreviousData`, so changing a filter keeps the toolbar and columns mounted
+while the next result loads. The first board still comes from the same server
+prefetch. Read the non-suspense board hook:
+
+<SourceLink
+  path="src/features/service-ops/hooks/use-get-board.ts"
+  label="use-get-board.ts"
+/>
+
+## Reviewer shortcuts
+
+1. **Start with [/service-ops](/service-ops).** Drag a card, watch it persist,
+   then compare the predictive queue with the area demand bars. The high-stress
+   areas should line up.
+2. **Then [/customers](/customers).** Filter to high risk, open a household, and
+   read the evidence behind the score before recomputing it.
+3. **Then [/revenue](/revenue).** Read the cohort retention matrix top to
+   bottom: newer cohorts retain worse, which is the revenue story.
+4. **Then [/devices](/devices).** Follow one dispenser from telemetry anomaly to
+   the fleet table and the ticket you can raise from the drawer.
+5. **Finish at [/](/).** The executive page is the summary; the other routes are
+   the work behind it.
+
+<Callout type="info" title="What the route pages optimize for">
+  A route page is not a feature tour. It records the decision, the visual that
+  supports it, the query that feeds it, and the trade-off that remains. If a
+  sentence cannot be tied to a file, it does not belong on the page.
+</Callout>

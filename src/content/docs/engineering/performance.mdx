@@ -1,4 +1,391 @@
 ---
 title: Performance
-description: Prefetch boundaries, query budgets, chart caps, and table paging.
+description:
+  Server prefetch, batched queries, Suspense, bounded windows and indexed access
+  — the choices that keep a data-heavy dashboard fast.
 ---
+
+A shift lead opening `/service-ops` should see a board, not a spinner chain. The
+dashboard has nine routes and 38 queries prefetched across them — two to six per
+route. The performance work is mostly about removing waterfalls, bounding
+payloads, and pushing work into Postgres.
+
+## The performance problem
+
+A naive version of this dashboard would fetch after mount. Each card would call
+`useEffect`, wait for its own response, and render a spinner in the meantime.
+The requests would waterfall, the browser would receive whole tables instead of
+pages, and charts would be rebuilt on every parent render.
+
+That version is slow for reasons that have nothing to do with Neon or ECharts.
+It makes the browser wait for work the server can start immediately, and it
+sends rows the route never displays. The rest of this page is what was done
+instead.
+
+## Server prefetch, then hydrate
+
+Every dashboard route is a server component. The Service Ops route calls
+`batchPrefetchServiceOps()` before it returns JSX, and each feature owns a
+server module that lists its queries.
+
+**Code:**
+
+- <SourceLink
+    path="src/app/(root)/(dashboard)/service-ops/page.tsx"
+    label="service-ops/page.tsx"
+  />
+- <SourceLink
+    path="src/features/service-ops/server/index.ts"
+    label="service-ops/server/index.ts"
+  />
+
+`HydrateClient` then dehydrates the per-request TanStack Query cache into the
+client. Client hooks read the same query keys, so the first paint uses the
+prefetched state instead of issuing a browser fetch. The mechanism lives in the
+tRPC server module, and the cache rules live in the query client.
+
+**Code:**
+
+- <SourceLink
+    path="src/trpc/server.tsx"
+    symbol="HydrateClient"
+    label="trpc/server.tsx"
+  />
+- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" />
+
+The subtle part is that the server render is not blocked on the queries:
+
+- `prefetch` calls `void queryClient.prefetchQuery(...)`, so the page render
+  continues while the query is in flight.
+- `shouldDehydrateQuery` includes `query.state.status === "pending"`, so the
+  dehydrated payload contains the pending promise, not just settled data.
+- The client `useSuspenseQuery` suspends on that promise. React can stream the
+  route shell and each Suspense fallback first, then fill in the section when
+  the server promise resolves.
+
+The shell renders while queries resolve, and client and server share one state
+machine instead of racing two fetches.
+
+The server prefetch is in-process: the tRPC options proxy executes the router
+with the request context, so there is no internal HTTP hop. The HTTP batch link
+is for client-initiated work, covered below.
+
+## Batched prefetch
+
+`batchPrefetch` loops over an array of query options and fires each one on the
+same request-scoped client. The client is created with React `cache`, so every
+query in a request shares one cache. One route is one prefetch pass, not one
+awaited query after another.
+
+**Code:**
+
+<SourceLink
+  path="src/trpc/server.tsx"
+  symbol="batchPrefetch"
+  label="trpc/server.tsx"
+/>
+
+On the browser, the tRPC client uses `httpBatchLink`. A mutation plus its
+invalidated refetches therefore travel as one HTTP request rather than one
+request per procedure.
+
+**Code:** <SourceLink path="src/trpc/client.tsx" label="trpc/client.tsx" />
+
+“Batch” here does not mean one SQL statement. It means the route does not
+serialise a request per card. The database still runs separate, focused queries;
+they are just started together.
+
+## Suspense per section
+
+Each card or table has its own `<Suspense>` boundary. On the Service Ops route,
+the KPI row, board, area-demand chart, SLA gauge, workload chart, and predictive
+table each have a fallback. A slow predictive query cannot hold the board.
+
+The fallbacks are shaped like the content they replace. The shared skeletons
+provide a chart card with a 280 px panel and a table card with real row slots.
+Feature skeletons go further — the risk table renders its actual column heads
+over shimmer rows, so the table does not jump when data arrives.
+
+**Code:**
+
+- <SourceLink
+    path="src/app/(root)/(dashboard)/service-ops/page.tsx"
+    label="service-ops/page.tsx"
+  />
+- <SourceLink
+    path="src/components/dashboard/skeletons.tsx"
+    label="skeletons.tsx"
+  />
+
+## Bounded data
+
+No route asks for “all rows” and filters in the browser. The caps are explicit:
+
+- Overview charts use 18 monthly buckets for billing and 24 for household
+  growth; revenue uses 18-month MRR and plan-mix windows.
+- The complaint trend is 12 months × five categories, zero-filled in the query,
+  not raw complaint rows.
+- The fleet telemetry trend keeps at most 60 points. A 90-day window is folded
+  into averaged buckets before it reaches the chart.
+- The predictive queue is capped at 25 ranked dispensers; the anomaly feed is
+  capped at 100. The service board ships every open/in-progress ticket plus at
+  most 60 resolved tickets from the last 30 days.
+- Every paged table requests 25 rows. The risk, fleet, society, leads, and
+  overdue tables all use the same pagination contract.
+- The device drawer fetches one dispenser's 30- or 90-day series, not the
+  fleet's readings.
+
+**Code:**
+
+- <SourceLink
+    path="src/db/queries/customers.ts"
+    symbol="getComplaintTrend"
+    label="customers.ts"
+  />
+- <SourceLink
+    path="src/db/queries/devices.ts"
+    symbol="downsampleTrend"
+    label="devices.ts"
+  />
+- <SourceLink path="src/trpc/schema/common.ts" label="common.ts" />
+- <SourceLink
+    path="src/features/devices/components/device-drawer/device-drawer.tsx"
+    label="device-drawer.tsx"
+  />
+
+Table pages, chart windows, and drawer histories stay bounded.
+
+## Server-side pagination, sorting, filtering
+
+The risk, fleet, society, leads, and overdue tables accept page, limit, and
+their relevant filters or sort keys. The query applies `limit`/`offset` and runs
+a matching `count` in the same `Promise.all`, so the client receives one page
+plus the total.
+
+**Code:**
+
+- Risk:
+  <SourceLink
+    path="src/db/queries/customers.ts"
+    symbol="getRiskTable"
+    label="customers.ts"
+  />
+- Fleet:
+  <SourceLink
+    path="src/db/queries/devices.ts"
+    symbol="getFleet"
+    label="devices.ts"
+  />
+- Societies:
+  <SourceLink
+    path="src/db/queries/societies.ts"
+    symbol="getSocietyList"
+    label="societies.ts"
+  />
+- Leads:
+  <SourceLink
+    path="src/db/queries/leads.ts"
+    symbol="getLeadList"
+    label="leads.ts"
+  />
+- Overdue:
+  <SourceLink
+    path="src/db/queries/payments.ts"
+    symbol="getOverduePayments"
+    label="payments.ts"
+  />
+
+Table state lives in the feature component, not the URL. Each feature maps its
+state to a tRPC input and omits unset filters, so the server prefetch key and
+the first client render key are identical. The risk table uses
+`useDeferredValue` to keep the current rows on screen while the next page loads,
+which avoids a fallback flash on every sort.
+
+**Code:**
+
+<SourceLink
+  path="src/features/customers/components/risk-table/risk-table.tsx"
+  label="risk-table.tsx"
+/>
+
+The database filters, sorts, and pages; the client renders 25 rows.
+
+## Indexes aligned with access patterns
+
+The schema has indexes for the read paths that repeat on every request. These
+are the actual indexes in the schema, not aspirational ones:
+
+| Access pattern              | Index                                                              |
+| --------------------------- | ------------------------------------------------------------------ |
+| Latest readings and windows | `readings_dispenser_recorded_idx` on `(dispenser_id, recorded_at)` |
+| Readings by recency         | `readings_recorded_idx` on `recorded_at`                           |
+| Risk complaint windows      | `complaints_household_date_idx` on `(household_id, date)`          |
+| Board columns               | `service_tickets_status_idx`, `service_tickets_raised_date_idx`    |
+| Technician load             | `service_tickets_technician_idx` on `technician_id`                |
+| Household filters           | `households_status_idx`, `households_society_idx`                  |
+| Billing and overdue         | `payments_household_idx`, `payments_billing_month_idx`             |
+| Fleet filters               | `dispensers_online_idx`, `dispensers_household_idx`                |
+| MRR and plan mix            | `subscriptions_status_idx`, `subscriptions_household_idx`          |
+
+**Code:** <SourceLink path="src/db/schema.ts" label="schema.ts" />
+
+Two honest caveats. The risk table sorts by `households.risk_score`, which is
+not indexed; at roughly 1,150 households that sort is cheap, but at 100k rows I
+would add a `(status, risk_score)` index. Payments use separate household and
+billing-month indexes rather than one composite index, which is adequate at
+about 25,000 payment rows but would be the first thing to revisit at a larger
+volume.
+
+## Parallel queries
+
+Independent aggregates run in parallel. `getOverviewKpis` runs household,
+revenue, ticket, and purity aggregates in one `Promise.all`. `getAreaDemand`
+runs areas, households, tickets, and resolution aggregates the same way.
+
+**Code:**
+
+- <SourceLink
+    path="src/db/queries/overview.ts"
+    symbol="getOverviewKpis"
+    label="overview.ts"
+  />
+- <SourceLink
+    path="src/db/queries/service-ops.ts"
+    symbol="getAreaDemand"
+    label="service-ops.ts"
+  />
+
+Dependent work stays sequential. The household profile first resolves the
+household row, then fetches its subscription, dispenser, tickets, payments, and
+complaints in parallel; only the readings query waits for the dispenser id.
+Parallelising that one would require guessing which dispenser to read.
+
+## Chart rendering
+
+Charts are client components under a server-rendered shell. Each sits in a
+fixed-height container, so ECharts gets a measurable box before it initialises.
+
+ECharts is imported modularly. The area chart registers only the line series,
+grid, tooltip, and data-zoom components it uses. A route that does not render a
+chart — the fleet table, for example — does not pull the chart modules into its
+client graph.
+
+Non-trivial transformations are memoised before they reach the chart. The
+complaint trend builds its labels and 12-month total in `useMemo`. Empty arrays
+are handled before a chart is mounted, using the shared empty state, so an empty
+query renders a titled card rather than an empty canvas.
+
+**Code:**
+
+- <SourceLink
+    path="src/components/dashboard/chart-card.tsx"
+    label="chart-card.tsx"
+  />
+- <SourceLink
+    path="src/components/evilcharts/charts/echarts-area-chart.tsx"
+    label="echarts-area-chart.tsx"
+  />
+- <SourceLink
+    path="src/features/customers/components/complaint-trend-card.tsx"
+    label="complaint-trend-card.tsx"
+  />
+- <SourceLink
+    path="src/components/dashboard/chart-empty.tsx"
+    label="chart-empty.tsx"
+  />
+
+Chart cards are leaves. They subscribe to one query each, and the route shell
+above them is a server component, so there is no page-level client state object
+that redraws every chart when one filter changes.
+
+## Caching and freshness
+
+TanStack Query uses a 30-second stale time. Client navigation within that window
+reuses cached data; a mutation invalidates only the affected query keys.
+
+**Code:** <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" />
+
+All nine dashboard routes export `force-dynamic`. That keeps the public demo
+live and lets the build run without a database. The cost is that there is no
+static HTML cache and no Redis or CDN layer in front of the queries. Every
+request reaches Neon, which is the correct trade-off for a demo whose mutations
+are visible to every visitor.
+
+## Known costs
+
+- **Neon cold start.** The first query after an idle period adds roughly a
+  second. This is documented in the README and is the reason the error
+  boundaries mention retrying after a cold database.
+- **ECharts bundle.** ECharts is the heaviest client library the dashboard
+  ships. The modular registration keeps it smaller than a full import, but it is
+  still the main JavaScript cost on chart routes.
+- **`force-dynamic`.** No static caching for dashboard pages. Fresh data is
+  worth it here; a read-only marketing page would not make the same choice.
+- **No raster dashboard assets.** The dashboard is chart- and table-heavy, not
+  image-heavy. Charts are drawn at runtime, so there are no large images to
+  optimise.
+- **Slow seed.** Seeding ~250,000 readings and the surrounding history takes
+  minutes. It runs offline and is never part of a request.
+
+**Code:** <SourceLink path="README.md" label="README.md" />
+
+## How to verify
+
+1. Open DevTools → Network on `/service-ops` and hard-reload.
+2. Expect one document request with the data already in the payload. The
+   prefetched queries should not appear as a chain of `/api/trpc` requests.
+3. Drag a kanban card or mark a payment paid. The mutation and its invalidated
+   queries should batch into one `/api/trpc` request.
+4. Disable cache and repeat. The route should still stream sections rather than
+   wait for the slowest query.
+5. Confirm the KPI row appears before the slowest chart. If it does not, check
+   whether the section lost its own Suspense boundary.
+6. Profile a kanban drag with React Profiler. Unaffected cards should bail out;
+   if they do not, that is the next memoisation target.
+
+## Trade-offs
+
+| Decision                  | Benefit                        | Cost                                    |
+| ------------------------- | ------------------------------ | --------------------------------------- |
+| Server prefetch           | No client-side data waterfall  | More server work per request            |
+| `force-dynamic`           | Live data after mutations      | No static cache                         |
+| 25-row pages              | Small payloads                 | More requests when paging               |
+| 60-point charts           | Fast render and readable shape | Less granular detail                    |
+| Neon HTTP                 | No pool to manage              | Cold starts                             |
+| Invalidation over polling | Correct data after mutations   | Refetch bursts if invalidation is broad |
+
+## Code links
+
+- <SourceLink path="src/trpc/server.tsx" label="src/trpc/server.tsx" /> —
+  `prefetch`, `batchPrefetch`, `HydrateClient`.
+- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" /> — stale
+  time and pending-query dehydration.
+- <SourceLink path="src/trpc/client.tsx" label="trpc/client.tsx" /> —
+  `httpBatchLink`, SuperJSON, browser query client.
+- <SourceLink path="src/db/queries/overview.ts" label="overview.ts" /> —
+  parallel KPI aggregates.
+- <SourceLink path="src/db/queries/service-ops.ts" label="service-ops.ts" /> —
+  predictive scoring, area demand, 25-row cap.
+- <SourceLink path="src/db/queries/customers.ts" label="customers.ts" /> —
+  server-paged risk table and complaint trend.
+- <SourceLink path="src/db/queries/devices.ts" label="devices.ts" /> — fleet
+  paging and 60-point downsampling.
+- <SourceLink path="src/db/queries/payments.ts" label="payments.ts" /> — billing
+  trend and overdue paging.
+- <SourceLink path="src/db/schema.ts" label="schema.ts" /> — all indexes and
+  enums.
+- <SourceLink
+    path="src/components/dashboard/skeletons.tsx"
+    label="skeletons.tsx"
+  />
+  — shaped fallbacks.
+- <SourceLink
+    path="src/features/service-ops/server/index.ts"
+    label="service-ops/server"
+  />
+  — the batch prefetch list.
+- <SourceLink
+    path="src/app/(root)/(dashboard)/service-ops/page.tsx"
+    label="service-ops/page.tsx"
+  />
+  — server route, Suspense boundaries, `force-dynamic`.

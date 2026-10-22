@@ -4,6 +4,9 @@ import { createMDX } from "fumadocs-mdx/next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  experimental: {
+    agentUpgrade: "security",
+  },
   cacheComponents: false,
   partialPrefetching: false,
   reactCompiler: true,

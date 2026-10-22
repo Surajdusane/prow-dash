@@ -23,10 +23,16 @@ export function MethodNoteCard(): React.ReactElement {
           Litres served = active subscription-days × the plan&apos;s daily estimate ({rates}).
         </p>
         <p className="text-muted-foreground">
+          Active days run from subscription start to cancellation, or to today for an open subscription.
+        </p>
+        <p className="text-muted-foreground">
           Jars avoided = litres ÷ {JAR_SIZE_LITRES} L — the equivalent single-use 20 L jars displaced.
         </p>
         <p className="text-muted-foreground">
           Totals cover every subscription since the first one, including cancelled households.
+        </p>
+        <p className="text-muted-foreground">
+          The estimate excludes dispenser flushing, reject water from RO purification, and delivery losses.
         </p>
       </CardPanel>
     </Card>

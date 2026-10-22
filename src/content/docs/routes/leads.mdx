@@ -1,4 +1,248 @@
 ---
-title: Leads
-description: Funnel, source conversion, and the working lead table.
+title: "/leads — Sales funnel"
+description:
+  Enquiry volume, site visits and conversions by channel — a working
+  top-of-funnel with create and update flows.
 ---
+
+<RouteMeta
+  live="/leads"
+  time="5 min"
+  repoPath="src/app/(root)/(dashboard)/leads/page.tsx"
+/>
+
+## Why this route exists
+
+Retention protects existing revenue; growth has to add societies and households.
+The sales team needs to know how many enquiries arrive, which channels produce
+site visits, which channels convert, and who needs a follow-up. The page answers
+**is the funnel working, and where is it leaking?**
+
+It is also a working funnel: a header button creates a lead, and every row can
+move through a visit and a conversion, so the charts can be checked against a
+write.
+
+## What I chose — and what I left out
+
+| Option                  | Why I rejected it                                | What I chose instead                          |
+| ----------------------- | ------------------------------------------------ | --------------------------------------------- |
+| A single lead count     | No funnel or channel insight                     | Funnel, source conversion, and a table        |
+| A pipeline board        | Overkill for the question; leads are not tickets | Funnel and a server-paged table               |
+| A pie chart of sources  | Part-to-whole hides conversion                   | Grouped bars for leads, visits, and converted |
+| A read-only table       | The demo should prove the write path             | Create and update dialogs                     |
+| Forecast or attribution | Not enough data; would be fake precision         | Observed counts and rates only                |
+
+## What's on screen
+
+Live route: `/leads`. The page is `force-dynamic`; `batchPrefetchLeads()` warms
+the KPIs, funnel, source conversion, and first table page in one batch. Each
+section has its own `Suspense` boundary. The dialogs are mounted once at page
+level, so the header button and table rows only flip Zustand state.
+
+### KPI row
+
+Four tiles from `getLeadsKpis`: total leads, visit rate, conversion rate, and
+flats converted quarter-to-date.
+
+**Visit rate** is leads with a `visitDate` ÷ all leads. **Conversion rate** is
+converted leads ÷ all leads, not converted ÷ visits. The funnel compares each
+stage with the total; the KPI row measures overall efficiency. In the seed,
+roughly 40% of leads visit and 22% of visitors convert, so the overall
+conversion rate is near 9%.
+
+**Flats converted QTD** sums `flatsConverted` for leads **created** since the
+quarter started. A lead created last quarter that closes now moves the pipeline
+but not this tile.
+
+**Data:** `getLeadsKpis` → `leads`. **Code:**
+
+- <SourceLink
+    path="src/features/leads/components/kpi-row.tsx"
+    label="kpi-row.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/leads.ts"
+    symbol="getLeadsKpis"
+    label="leads.ts"
+  />
+
+### Pipeline funnel
+
+**Visual:** one horizontal bar per stage — leads, visits, converted — labelled
+with its count and share of all leads. **Why:** a funnel is a stage comparison,
+and horizontal bars keep the stage names readable.
+
+The bars use a custom ECharts series. The stock series cannot give every bar its
+own stage colour and value label. ECharts also cannot resolve CSS variables
+inside canvas overrides, so the component picks the hexes per theme.
+
+Every percentage is relative to total leads: 100%, ~40%, and ~9% — not the
+stage-to-stage drop. The ~22% visitor conversion rate lives in the source
+tooltip and the seed, not in these labels.
+
+**Data:** `getLeadFunnel` → `leads`, one aggregate. **Code:**
+
+- <SourceLink
+    path="src/features/leads/components/funnel-card.tsx"
+    label="funnel-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/leads.ts"
+    symbol="getLeadFunnel"
+    label="leads.ts"
+  />
+
+### Conversion by source
+
+**Visual:** a grouped bar chart, one group per source, with leads, visits, and
+converted side by side. **Why:** the channel comparison is the decision.
+Grouping keeps the stages separate; stacking would imply they are parts of a
+whole. Groups are sorted by lead volume, and the tooltip adds the channel's
+conversion rate.
+
+**Data:** `getLeadsBySource` → `leads`, grouped by `source`. The seeded channels
+are Instagram, referral, Google, walk-in, and broker. **Code:**
+
+- <SourceLink
+    path="src/features/leads/components/source-conversion-card.tsx"
+    label="source-conversion-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/leads.ts"
+    symbol="getLeadsBySource"
+    label="leads.ts"
+  />
+
+### Leads table
+
+**Visual:** a server-paged table, 25 rows per page. Columns: lead (name,
+society, and added date), role, source, visit date, status, and edit. Status is
+either "In pipeline" or a success badge with the flats count.
+
+Source and conversion filters round-trip through `getList`; no client-side
+slicing or search. A change resets to page 1; rows are newest first. While the
+next page loads, rows stay mounted and dim because a deferred copy drives them.
+
+**Data:** `getLeadList` → `leads`; rows and count run in `Promise.all`.
+**Code:**
+
+- <SourceLink
+    path="src/features/leads/components/leads-table/leads-table.tsx"
+    label="leads-table.tsx"
+  />
+- <SourceLink
+    path="src/features/leads/components/leads-table/toolbar.tsx"
+    label="toolbar.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/leads.ts"
+    symbol="getLeadList"
+    label="leads.ts"
+  />
+
+### Create and update
+
+The header's create button opens a dialog that requires a name and source;
+society and role are optional. A new lead starts unconverted with zero flats.
+The edit dialog sets or clears a visit date, toggles conversion, and records
+flats (clamped to 0–100, default 1). Clearing the visit date sends `null`;
+turning conversion off sends zero flats. The zod schemas in
+`src/trpc/schema/leads.ts` are the server contract.
+
+Dialogs close **only on success**. On failure the toast explains the error, the
+dialog stays open, and the form state is preserved.
+
+**Code:**
+
+- <SourceLink
+    path="src/features/leads/components/create-lead-button.tsx"
+    label="create-lead-button.tsx"
+  />
+- <SourceLink
+    path="src/features/leads/components/create-lead-dialog.tsx"
+    label="create-lead-dialog.tsx"
+  />
+- <SourceLink
+    path="src/features/leads/components/edit-lead-dialog.tsx"
+    label="edit-lead-dialog.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/leads-mutations.ts"
+    symbol="createLead"
+    label="leads-mutations.ts"
+  />
+
+## The data behind it
+
+- **450 leads over 24 months**, skewed toward recent months with `u^0.65`, so
+  the pipeline visibly grows.
+- **Source mix:** Instagram 32, referral 22, Google 20, walk-in 13, broker 13.
+- **Roles:** resident 45, RWA secretary 20, builder 20, other 15.
+- **Funnel:** about 40% book a visit, 0–12 days after creation and never in the
+  future. Only visitors convert, at 22%; a converted lead brings 1–5 flats.
+- **Society association:** 80% of leads carry a society name from the seed. It
+  is free text, not a foreign key, so the team can record a society that is not
+  onboarded yet.
+- **Sources are a fixed enum**, not a database table; a source written elsewhere
+  renders through the label fallback.
+
+The seed is deterministic, but the window is anchored to today, so counts shift
+as the demo ages.
+
+## Chart → data → code
+
+| Section           | Visual         | Why this visual                  | Data source         | Component                    |
+| ----------------- | -------------- | -------------------------------- | ------------------- | ---------------------------- |
+| KPI row           | KPI tiles      | Fast scan of funnel efficiency   | `getLeadsKpis`      | `kpi-row.tsx`                |
+| Funnel            | Horizontal bar | Stage comparison with labels     | `getLeadFunnel`     | `funnel-card.tsx`            |
+| Source conversion | Grouped bar    | Volume and conversion by channel | `getLeadsBySource`  | `source-conversion-card.tsx` |
+| Lead pipeline     | Table          | Follow-up list                   | `getLeadList`       | `leads-table/*`              |
+| Create / update   | Dialogs        | Prove the write path             | `create` / `update` | `dialogs.tsx`                |
+
+## Interactions
+
+- **Create.** The mutation posts the validated fields, then a toast names the
+  lead, society, and source. `onSettled` invalidates all four queries — KPIs,
+  funnel, source conversion, list — so the route moves together even on failure.
+- **Update.** A visit date moves the visit stage; conversion moves the converted
+  stage and the flats count. A toast names the stage change.
+- **Failures.** There is no optimistic write; the dialog keeps its values and
+  the toast explains the error. Invalidation still runs.
+- **Filter and page.** Both are tRPC inputs and part of the query key. The
+  current page dims instead of flashing a skeleton.
+- **Shared state.** The demo has no auth: a lead created by one visitor is
+  visible to the next.
+
+## Code map
+
+| Layer           | File                                        | What it does                               |
+| --------------- | ------------------------------------------- | ------------------------------------------ |
+| Page            | `src/app/(root)/(dashboard)/leads/page.tsx` | Prefetch + Suspense layout                 |
+| Server prefetch | `src/features/leads/server/index.ts`        | `batchPrefetchLeads`                       |
+| Hooks           | `src/features/leads/hooks/*`                | KPIs, funnel, source, list, create, update |
+| Components      | `src/features/leads/components/*`           | KPI row, two charts, table, dialogs        |
+| Store           | `src/features/leads/store/index.ts`         | Create/edit dialog state                   |
+| Router          | `src/trpc/routers/leads.ts`                 | Four queries and two mutations             |
+| Query           | `src/db/queries/leads.ts`                   | KPIs, funnel, source conversion, list      |
+| Query           | `src/db/queries/leads-mutations.ts`         | Create and partial update                  |
+| Schema          | `src/trpc/schema/leads.ts`                  | List, create, and update inputs            |
+| Seed            | `src/db/seed/generators/leads.ts`           | Volume, skew, source mix, funnel outcomes  |
+
+## What to notice as a reviewer
+
+1. Create a lead from the header, then watch the KPI row, both charts, and the
+   table refresh from one mutation. Edit it, set a visit date, then convert it.
+2. Read `getLeadsKpis` and `getLeadFunnel` together: similar aggregates for
+   different readers. Both use total leads as the denominator.
+3. Hover the source chart: the tooltip adds channel conversion, and the order is
+   lead volume, not conversion quality.
+
+## Trade-offs & next
+
+- 450 leads can show a funnel but cannot establish significance by channel.
+- No lead scoring, ownership, or assignment.
+- No activity history, follow-up reminder, or next-action date. The table is a
+  follow-up list, not a task queue.
+- Conversion is binary; there is no "qualified" or "proposal" stage.
+- Sources are a fixed enum in code, and society is free text with no rollup.
+- No search, date range, or export.

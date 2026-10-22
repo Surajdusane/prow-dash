@@ -1,6 +1,267 @@
 ---
-title: Churn Risk
+title: Complaint-based churn risk
 description:
-  A 0–100 household risk score built from complaints, payments, SLA misses, and
-  tenure.
+  How I score households with complaints, payment behaviour and SLA misses so
+  support can act before they cancel.
 ---
+
+## 60-second summary
+
+- Churn is usually visible before it happens: complaints cluster, payments go
+  late, service misses stack up.
+- I built a transparent 0–100 risk score from four signal groups: complaints,
+  payments, SLA misses, and tenure.
+- The score is computed by one shared function used by the seed and by the
+  "Recompute risk" mutation.
+- The `/customers` page turns the score into a sortable, filterable action list
+  with a household drawer.
+- The seed injects a known risk cohort, so the score can be checked against
+  outcomes instead of being decorative.
+
+## Why this exists
+
+A cancellation is the end of a longer story: an open complaint, a failed
+payment, a missed SLA. The signals are there; nobody has a ranked list of who to
+call next.
+
+- Reactive retention is expensive: a cancellation is already lost revenue.
+- Support needs a ranked list, not another dashboard of charts.
+- The reason behind the risk must be explainable to a support agent on the
+  phone.
+- The score should be cheap to recompute and consistent everywhere.
+
+This is a triage tool: who should support call this week, and why?
+
+## Options I considered
+
+| Option                                       | Why it looks attractive                                 | Why I did not choose it                                        |
+| -------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------- |
+| Supervised classifier                        | Learns non-linear patterns; improves with labelled data | No labelled production data; hard to explain; needs monitoring |
+| Simple filters (for example, complaints > 2) | Trivial to implement                                    | Ignores payment and SLA signals; no ranking                    |
+| Rules-based 0–100 score                      | Explainable, cheap, easy to validate                    | Weights are hand-tuned; not calibrated probabilities           |
+
+**I chose the rules-based score.** It uses all four signal groups, produces a
+ranking instead of a yes/no flag, and shows a support agent which inputs moved a
+household up the list. The weights are opinions until they are calibrated
+against real outcomes.
+
+## What I chose
+
+An additive 0–100 score with three bands, used as a ranking tool, not a
+probability. The bands create an operating rhythm:
+
+- **low** (`< 34`) — monitor.
+- **medium** (`34–66`) — review.
+- **high** (`≥ 67`) — call.
+
+`computeHouseholdRisk` runs in the seed, the recompute mutation, and any future
+cron job, so there is no second implementation to drift.
+
+## How the score works
+
+```text
+complaintScore = min(45, complaints90d × 9
+                        + highSeverity90d × 5
+                        + unresolved90d × 5)
+paymentScore   = min(45, latePayments6mo × 7
+                        + failedPayments6mo × 11)
+slaScore       = min(16, slaMissedTickets12mo × 4)
+tenureScore    = 8 if tenure < 90d
+                 5 if tenure < 180d
+                 2 if tenure < 365d
+                 else 0
+
+risk = clamp(0, 100, round(complaintScore + paymentScore
+                           + slaScore + tenureScore))
+```
+
+Why each group is weighted:
+
+- **Complaints are the strongest explicit signal.** Nine points per complaint in
+  90 days, plus five for high severity and five for unresolved. An open,
+  high-severity complaint is a support failure, not just a data point.
+- **Payment behaviour is the strongest implicit signal.** A late payment is
+  seven points; a failed payment is eleven; combined cap 45.
+- **SLA misses capture frustration that may never become a complaint.** Four
+  points per missed ticket in 12 months, capped at 16. A household can be
+  unhappy without calling.
+- **Newer households have less history.** Tenure adds 8, 5, 2, or 0 points as
+  the relationship matures. It is a small uncertainty adjustment, not a churn
+  signal on its own.
+
+The additive maximum is 114 before clamping, so multiple strong signals can
+saturate the score at 100. That also means scores at 100 cannot be ordered by
+severity.
+
+Full function: <SourceLink path="src/db/queries/risk.ts" label="risk.ts" />.
+`recomputeAllRiskScores` is the only writer of `households.risk_score`: it
+aggregates the three signals in SQL, computes scores in TS, and updates in
+chunks of 400 with one `UPDATE ... FROM (VALUES ...)`, skipping unchanged rows.
+
+Adding or resolving a complaint refreshes the drawer; neither auto-rescores.
+That is deliberate: a support lead can make several edits, then recompute once.
+The score changes on that click.
+
+## Validation
+
+The seed injects a **~13% risk cohort** with a deliberately bad recent window:
+
+- 2–4 complaints inside the window, skewed toward its end so the signal stays
+  inside the 90-day scoring window.
+- Late and failed payments that start slightly before the complaint cluster.
+  Inside the window the payment mix is roughly 50% late and 30% failed, versus
+  8% late and 4% failed outside it.
+- About 60% of the cohort cancels 30–90 days after the window, when the timeline
+  allows.
+
+The score is recomputed at the end of the seed, so the demo has a score and an
+outcome for the same household. But this page publishes no precision or recall
+number. The cohort flag is generated in memory and not stored on `households`,
+so a live query cannot join scores to cohort membership. The seed is also one
+deterministic fixture, not a validation set; a number from it would describe the
+generator, not the business.
+
+### How I would validate this
+
+| Metric                     | Definition                                      | What it tells you                         |
+| -------------------------- | ----------------------------------------------- | ----------------------------------------- |
+| Precision at the high band | Cohort members in high ÷ all households in high | How many high-risk calls are real         |
+| Recall at the high band    | Cohort members in high ÷ all cohort members     | How many at-risk households are captured  |
+| Lift at the top decile     | Churn rate in the top 10% ÷ base churn rate     | Whether the ranking beats random outreach |
+| Band calibration           | Observed churn rate for low, medium, high       | Whether 34 and 67 mean anything           |
+
+Use a time-based split: score each household at time `T` using only data before
+`T`, then observe cancellations in `(T, T+90]`. Persist the cohort label, or
+reconstruct it from the window, so precision and recall can be joined. Tune the
+band cutoffs against support capacity: a team that can call 50 households a week
+should pick the cutoff that fills 50 slots with the best precision, not the
+cutoff that maximises overall accuracy.
+
+The demo shows the mechanism, not a validated lift.
+
+## The data behind it
+
+| Signal                   | Table                  | Window    | Weight          |
+| ------------------------ | ---------------------- | --------- | --------------- |
+| Complaints               | `complaints`           | 90 days   | 45 max          |
+| High-severity complaints | `complaints`           | 90 days   | included above  |
+| Unresolved complaints    | `complaints`           | 90 days   | included above  |
+| Late payments            | `payments`             | 6 months  | 45 max combined |
+| Failed payments          | `payments`             | 6 months  | included above  |
+| SLA misses               | `service_tickets`      | 12 months | 16 max          |
+| Tenure                   | `households.join_date` | current   | 8 max           |
+
+The payment window is the current month plus the previous five. The SLA window
+is the last 365 days. The score uses complaint `severity` and `resolved`,
+payment `status`, ticket `slaMet`, and `join_date`; it ignores category and
+amount.
+
+Seed links:
+
+- <SourceLink
+    path="src/db/seed/generators/households.ts"
+    symbol="generateHouseholds"
+    label="households.ts"
+  />
+  — cohort share, cohort window, and cancel logic.
+- <SourceLink
+    path="src/db/seed/generators/complaints.ts"
+    symbol="generateComplaints"
+    label="complaints.ts"
+  />
+  — the 2–4 complaint cluster and severity mix.
+- <SourceLink
+    path="src/db/seed/generators/payments.ts"
+    symbol="generatePayments"
+    label="payments.ts"
+  />
+  — late and failed payments starting before the window.
+- <SourceLink
+    path="src/db/seed/generators/tickets.ts"
+    symbol="buildDispenserTickets"
+    label="tickets.ts"
+  />
+  — SLA misses.
+
+## The UI
+
+Live route: [/customers](/customers).
+
+| Surface           | What it does                                                                                                                                                                                                                                | Fed by                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| Risk table        | Server-paged action list, default sorted by risk. Filters: risk band, area, status. Columns: household, society/area, plan, tenure, risk score, complaints 90d, late + failed 6mo, last complaint, status. Clicking a row opens the drawer. | `getRiskTable`        |
+| Risk distribution | Donut of the active book split by low, medium, and high, with counts and shares.                                                                                                                                                            | `getRiskDistribution` |
+| Complaint trend   | Multi-line chart of monthly complaints by category over 12 months.                                                                                                                                                                          | `getComplaintTrend`   |
+| Household drawer  | Risk ring; subscription; dispenser; 30-day TDS and purity sparkline; latest 5 tickets; latest 6 complaints; latest 6 payments; add complaint.                                                                                               | `getById`             |
+| Recompute risk    | One-click, confirmed mutation that rescores the whole book. Invalidates the table, distribution, KPIs, and drawer.                                                                                                                          | `recomputeRisk`       |
+
+The drawer is the "why": the ring gives the number, the sections give the
+evidence. The donut and trend show whether risk is concentrated and which
+category is driving it.
+
+Why these visuals:
+
+- A table for triage, because support acts row by row.
+- A donut for part-to-whole with three bands, because the question is "how much
+  of the book is high risk?"
+- A multi-line chart for category trends, because a single total hides whether
+  the problem is water quality, service delay, billing, or device malfunction.
+- A sparkline for compact telemetry inside a drawer, and a ring for one score
+  with band context.
+
+## Code map
+
+| Layer           | File                                                                                                                                                 | What it does                                     |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Page            | <SourceLink path="src/app/(root)/(dashboard)/customers/page.tsx" label="page.tsx" />                                                                 | Prefetch + Suspense layout                       |
+| Server prefetch | <SourceLink path="src/features/customers/server/index.ts" symbol="batchPrefetchCustomers" label="server/index.ts" />                                 | `batchPrefetchCustomers`                         |
+| Hook            | <SourceLink path="src/features/customers/hooks/use-get-risk-table.ts" symbol="useGetRiskTable" label="use-get-risk-table.ts" />                      | Paged, sorted, filtered table                    |
+| Hook            | <SourceLink path="src/features/customers/hooks/use-recompute-risk.ts" symbol="useRecomputeRisk" label="use-recompute-risk.ts" />                     | Recompute mutation                               |
+| Hook            | <SourceLink path="src/features/customers/hooks/use-get-household-profile.ts" symbol="useGetHouseholdProfile" label="use-get-household-profile.ts" /> | Drawer query                                     |
+| Component       | <SourceLink path="src/features/customers/components/risk-table/risk-table.tsx" symbol="RiskTable" label="risk-table.tsx" />                          | Risk table                                       |
+| Component       | <SourceLink path="src/features/customers/components/household-drawer/household-drawer.tsx" symbol="HouseholdDrawer" label="household-drawer.tsx" />  | Household drawer                                 |
+| Component       | <SourceLink path="src/features/customers/components/risk-distribution-card.tsx" symbol="RiskDistributionCard" label="risk-distribution-card.tsx" />  | Donut                                            |
+| Component       | <SourceLink path="src/features/customers/components/complaint-trend-card.tsx" symbol="ComplaintTrendCard" label="complaint-trend-card.tsx" />        | Multi-line                                       |
+| Router          | <SourceLink path="src/trpc/routers/customers.ts" label="customers.ts" />                                                                             | Procedures                                       |
+| Query           | <SourceLink path="src/db/queries/risk.ts" symbol="computeHouseholdRisk" label="risk.ts" />                                                           | `computeHouseholdRisk`, `recomputeAllRiskScores` |
+| Query           | <SourceLink path="src/db/queries/customers.ts" symbol="getRiskTable" label="customers.ts" />                                                         | Table and profile queries                        |
+| Seed            | <SourceLink path="src/db/seed/generators/households.ts" symbol="generateHouseholds" label="households.ts" />                                         | Risk cohort                                      |
+| Seed            | <SourceLink path="src/db/seed/generators/complaints.ts" symbol="generateComplaints" label="complaints.ts" />                                         | Complaint clusters                               |
+
+## What to watch as a reviewer
+
+1. Open [/customers](/customers), set the risk-band filter to **High**, and open
+   the first household. The drawer should show the evidence behind the score:
+   recent complaints, late or failed payments, SLA-missed tickets, and the
+   30-day TDS/purity curve.
+2. Open `src/db/queries/risk.ts`. `computeHouseholdRisk` is the entire scoring
+   model; `recomputeAllRiskScores` is the only writer of
+   `households.risk_score`. Check the 90-day, 6-month, and 12-month windows
+   against the table above.
+3. Add a complaint to a household, resolve it, then click **Recompute risk**.
+   The complaint history updates immediately; the score changes on recompute,
+   and the table re-sorts. That separation is intentional.
+
+## Trade-offs and limitations
+
+- Hand-tuned weights, not calibrated probabilities.
+- A ranking, not a probability of churn.
+- The seed cohort is synthetic; real validation needs real outcomes.
+- Fixed windows (90 days, 6 months, 12 months) may not fit every business.
+- No causal claim: complaints correlate with churn, but the demo does not prove
+  causation.
+- No per-plan or per-area calibration.
+- Scores saturate at 100 because the additive maximum is 114, so the highest
+  band loses ordering.
+- Support-logged complaints are a biased sample; unhappy households that never
+  call are invisible.
+
+## What I would do next
+
+- Calibrate the weights against real cancellation data with a time-based
+  backtest.
+- Add precision/recall monitoring and a review queue for borderline scores.
+- Separate "risk of churn" from "risk of dissatisfaction."
+- Add suggested actions (call, discount, free filter change) based on the
+  dominant signal.
+- Add a risk-score time series per household.
