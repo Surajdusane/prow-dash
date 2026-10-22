@@ -19,14 +19,6 @@ endpoints for data.
 > mark a payment paid, add or resolve a complaint, recompute risk) are live and shared by all
 > visitors. Re-seeding the database is the reset button — see [Local setup](#local-setup).
 
-## Screenshots
-
-![Overview — KPIs, billing trend, household growth, plan mix](docs/screenshots/overview.png)
-
-![Service Ops — dnd-kit kanban with optimistic mutations, predictive next-service table](docs/screenshots/service-ops.png)
-
-![Customers — filterable risk table scored from complaints, payments and SLA misses](docs/screenshots/risk-table.png)
-
 ## Architecture
 
 ```
@@ -182,8 +174,8 @@ configureTRPCHeyApiClient(client, {
 
 ## Deploy notes
 
-The app is deployment-ready but the live deployment is not part of this repo snapshot.
-If you deploy it (Vercel + Neon is the intended stack):
+The live demo is deployed at [prow-dash.vercel.app](https://prow-dash.vercel.app) (Vercel + Neon).
+To deploy your own copy:
 
 1. All dashboard pages are `force-dynamic`, so `bun run build` passes without a database;
    data is rendered live at request time.

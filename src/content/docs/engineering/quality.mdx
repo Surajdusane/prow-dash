@@ -1,4 +1,385 @@
 ---
-title: Quality
-description: Typing, validation, error handling, and the trade-offs that remain.
+title: Code quality
+description:
+  End-to-end types, feature boundaries, validation, error states, accessibility
+  and tooling — what keeps the codebase maintainable.
 ---
+
+## The quality goal
+
+A solo project still needs guardrails, because there is no reviewer to catch a
+broken contract at 1 a.m. The goal is not 100% coverage, but five narrower
+promises:
+
+- a type error surfaces before a runtime error;
+- every mutation validates its input on the server;
+- every async surface has a loading, empty, and error state;
+- a feature can be changed without reading the whole app;
+- a clean checkout builds and lints the same way every time.
+
+This page explains how each promise is kept, and where it is not.
+
+## End-to-end type safety
+
+Trace `households.risk_score` from Postgres to the screen:
+
+```text
+households.risk_score        integer, not null, default 0
+  → Drizzle column            households.riskScore: number
+  → query row                 RiskTableRow["riskScore"]: number
+  → tRPC output               inferred from getRiskTable
+  → TanStack Query data       { rows: RiskTableRow[]; total: number }
+  → component prop            <RiskScoreCell score={number} />
+```
+
+The column is declared in the Drizzle schema. `getRiskTable` selects it into an
+explicit `RiskTableRow` and returns `RiskTableResult`. The router returns that
+result without casting. The hook passes the inferred data to the table, and
+`RiskScoreCell` accepts only `score: number`.
+
+**Code:**
+
+- <SourceLink path="src/db/schema.ts" symbol="households" label="schema.ts" />
+- <SourceLink
+    path="src/db/queries/customers.ts"
+    symbol="getRiskTable"
+    label="customers.ts"
+  />
+- <SourceLink
+    path="src/trpc/routers/customers.ts"
+    symbol="getRiskTable"
+    label="customers router"
+  />
+- <SourceLink
+    path="src/features/customers/hooks/use-get-risk-table.ts"
+    label="use-get-risk-table.ts"
+  />
+- <SourceLink
+    path="src/features/customers/components/risk-table/risk-score-cell.tsx"
+    label="risk-score-cell.tsx"
+  />
+
+Inputs are Zod schemas in `src/trpc/schema`; each exports an inferred type, and
+routers use `.input(schema)`. `AppRouter` is the single source of client types,
+and the browser client is created with `createTRPCContext<AppRouter>()`.
+
+**Code:** <SourceLink path="src/trpc/client.tsx" label="trpc/client.tsx" />
+
+`any` does not appear in the data path. It is confined to two places: the
+generic prefetch helper, where TanStack Query's overloads need a cast for
+infinite queries, and the vendored icon set. Neither is involved in a query
+result or a mutation input.
+
+## Feature boundaries
+
+Features live under `src/features/<feature>` with components, hooks, server
+prefetch, store, utils, and an `index.ts` that is the public surface. The
+customers feature is representative:
+
+- `features/customers/components/`
+- `features/customers/hooks/`
+- `features/customers/server/index.ts`
+- `features/customers/store/index.ts`
+- `features/customers/utils/index.ts`
+- `features/customers/index.ts`
+
+Validation schemas are centralised in `src/trpc/schema` rather than duplicated
+per feature. That is the one deviation from the folder template, and it keeps
+one input contract shared by the router and the client.
+
+Route files stay thin. The customers page sets metadata, calls
+`batchPrefetchCustomers()`, wraps sections in Suspense and an error boundary,
+and composes feature components. It contains no SQL, no fetch logic, and no
+chart configuration.
+
+**Code:**
+
+<SourceLink
+  path="src/app/(root)/(dashboard)/customers/page.tsx"
+  label="customers/page.tsx"
+/>
+
+The payoff is deletion: removing leads means deleting one folder, one router,
+and one route, not hunting a shared `hooks/` bucket. If risk scoring breaks, the
+code is in one of two places, not a 600-line page.
+
+## Validation
+
+Every mutation takes a Zod object: create and resolve a complaint, recompute
+risk, create, update, assign, or remove a ticket, create, update, or delete a
+lead, and mark a payment paid. Query inputs are validated too — pagination, sort
+direction, risk band, area id, status, and search length.
+
+Shared contracts live in `src/trpc/schema/common.ts`: `page` is at least 1,
+`limit` is 1–100 with a default of 25, and `dir` is `asc` or `desc`. The
+customers schemas show the pattern.
+
+**Code:**
+
+- <SourceLink path="src/trpc/schema/common.ts" label="schema/common.ts" />
+- <SourceLink path="src/trpc/schema/customers.ts" label="schema/customers.ts" />
+
+The server is the authority. Client controls constrain what a user can pick, but
+the router still parses the payload. `z.coerce.number().int().positive()` on ids
+means a string from a URL or a `NaN` from a malformed form never reaches SQL.
+Search strings are trimmed and capped at 120 characters. Enums are shared
+between Zod and Postgres, so an invalid status is rejected twice: once at the
+edge, once by the column type.
+
+## Error, loading, empty states
+
+Each dashboard feature exports an error boundary. On failure the route shows a
+titled card (“Couldn't load Customers”), one sentence explaining the likely
+cause (“usually a cold database”), and a Retry button wired to
+`resetErrorBoundary`. The boundary is a client component so its fallback can
+retry.
+
+**Code:**
+
+<SourceLink
+  path="src/features/customers/components/error-boundary.tsx"
+  label="error-boundary.tsx"
+/>
+
+Suspense fallbacks are shaped like content. Shared skeletons provide chart cards
+and table cards. Feature skeletons go further and render the real column heads
+over shimmer rows, so the layout does not jump when rows arrive.
+
+**Code:**
+
+<SourceLink
+  path="src/components/dashboard/skeletons.tsx"
+  label="skeletons.tsx"
+/>
+
+Empty is a state, not a blank. Tables render `TableEmpty` with a title and an
+explanation; charts use `ChartEmpty` inside the same fixed-height panel, so an
+empty query leaves a titled card rather than a collapsed canvas. A query
+resolves, suspends into a shaped fallback, or throws into a boundary with retry.
+
+**Code:**
+
+- <SourceLink
+    path="src/components/dashboard/table-empty.tsx"
+    label="table-empty.tsx"
+  />
+- <SourceLink
+    path="src/components/dashboard/chart-empty.tsx"
+    label="chart-empty.tsx"
+  />
+
+## Mutations and feedback
+
+Every mutation hook reports through `toastManager.add`. Success toasts include
+the specific object (“Complaint logged · Water quality · medium severity”), not
+a generic “Saved”. Error toasts include `error.message`, so a validation failure
+is visible.
+
+**Code:** <SourceLink path="src/components/ui/toast.tsx" label="toast.tsx" />
+
+Destructive actions go through `confirm()`. It returns a promise, so the call
+site reads top-to-bottom: confirm, then mutate. The dialog is mounted once in
+the dashboard layout.
+
+**Code:**
+
+<SourceLink path="src/hooks/use-confirm.tsx" label="use-confirm.tsx" />
+
+Optimistic updates are used only where the interaction demands it: the kanban
+board. Dragging a card must feel immediate. `useUpdateTicketStatus` cancels the
+board query, snapshots every cached board page, writes the new status, and
+returns the snapshot as context. On error it restores the snapshot and shows the
+message. On settle it invalidates the board, SLA stats, and technician workload
+— the three queries whose numbers the move changes. It does not invalidate the
+world.
+
+**Code:**
+
+<SourceLink
+  path="src/features/service-ops/hooks/use-update-ticket-status.ts"
+  label="use-update-ticket-status.ts"
+/>
+
+Deleting a ticket uses the same snapshot-and-rollback pattern. Everything else
+waits for the server and then invalidates the smallest query set the mutation
+could have changed.
+
+## Accessibility
+
+The primitives do most of the work. Dialogs and drawers come from Base UI, which
+traps focus, restores it on close, closes on Escape, and wires `aria-labelledby`
+and `aria-describedby` through `DialogTitle` and `DialogDescription`. Icon-only
+buttons carry `aria-label` (“Close”, “Clear visit date”, “Converted”). Filter
+selects are labelled (“Filter by risk band”, “Filter by area”), and the society
+search input has both a placeholder and an `aria-label`.
+
+Risk is not encoded by colour alone. `RiskScoreCell` shows the numeric score in
+a badge and a bar; the bar is `aria-hidden`, so the number is the accessible
+value. Status and plan cells use text badges. Chart legends pair a swatch with a
+label.
+
+Tables use semantic `<table>`, `<thead>`, `<th>`, and `<td>` elements; sortable
+headers are real buttons, and pagination exposes `aria-current="page"` plus
+previous/next labels. The kanban configures dnd-kit's `KeyboardSensor` with
+sortable coordinates, so a card can be picked up and moved without a pointer.
+
+**Code:**
+
+<SourceLink
+  path="src/features/service-ops/components/board/index.tsx"
+  label="board/index.tsx"
+/>
+
+Two gaps. First, table rows that open a drawer are clickable `<tr>` elements
+with no keyboard handler or `tabIndex`; the drawer itself is accessible once
+open, but a keyboard user cannot open it from the row. Second, charts have
+visible titles and descriptions, but the ECharts canvas has no data-table
+equivalent or `aria-label` describing the series. A screen-reader user gets the
+card heading and any adjacent text summary, not the plot. Both are on the list.
+
+## Formatting and linting
+
+ESLint 9 runs `eslint-config-next` core-web-vitals and TypeScript rules. There
+is one scoped exception: the vendored EvilCharts folder disables
+`react-hooks/refs` because those components intentionally keep a mutable ECharts
+instance in a ref. The exception is documented in the config.
+
+**Code:** <SourceLink path="eslint.config.mjs" label="eslint.config.mjs" />
+
+Prettier enforces a 120-column width, double quotes, and two-space indentation.
+Two plugins matter: `@ianvs/prettier-plugin-sort-imports` keeps import groups
+stable, and `prettier-plugin-tailwindcss` sorts utility classes. The pre-commit
+hook runs `lint-staged` and `bun run check-types`, so a commit cannot land with
+unformatted staged files or a type error.
+
+**Code:**
+
+- <SourceLink path=".prettierrc.json" label=".prettierrc.json" />
+- <SourceLink path=".husky/pre-commit" label=".husky/pre-commit" />
+
+The commands are the contract: `bun run lint`, `bun run format:check`,
+`bun run check-types`, and `bun run build`. Build is not just `next build`; it
+first regenerates the OpenAPI document from the tRPC router, so the API
+reference cannot drift from the procedures.
+
+**Code:** <SourceLink path="package.json" label="package.json" />
+
+## Database quality
+
+Constrained values are Postgres enums, not free strings: plan name, household
+status, subscription status, dispenser type, ticket type and status, complaint
+category and severity, payment status, and lead role. Money is integer rupees
+(`monthly_price`, `deposit`, `amount`), never a float. Date-only facts
+(`join_date`, `billing_month`, `raised_date`, `date`) use `date`; true instants
+(`created_at`, `recorded_at`) use `timestamp`. That distinction is what makes
+“complaints in the last 90 days” a date comparison rather than a timezone bug.
+
+Foreign keys are declared on every relation, so a ticket cannot point at a
+missing household and a reading cannot point at a missing dispenser. Indexes
+follow the access patterns: readings by `(dispenser_id, recorded_at)`,
+complaints by `(household_id, date)`, tickets by status, raised date, and
+technician, households by status and society, payments by household and billing
+month.
+
+Migrations live in `drizzle/` and are generated from the schema, not hand-
+edited. The seed is deterministic (`faker.seed(42)`), refuses to append to a
+non-empty database unless `--fresh` is passed, and `db:reset` truncates all 12
+tables with `RESTART IDENTITY CASCADE`. Risk scoring has one implementation,
+`computeHouseholdRisk`, used by the seed and by the recompute mutation; the low,
+medium, and high thresholds are exported constants, so the bands cannot disagree
+between the two paths.
+
+**Code:**
+
+- <SourceLink path="src/db/seed/index.ts" label="seed/index.ts" />
+- <SourceLink
+    path="src/db/queries/risk.ts"
+    symbol="computeHouseholdRisk"
+    label="risk.ts"
+  />
+
+## Security and honesty
+
+There is no authentication. `authorizedProcedure` is an alias for
+`baseProcedure`; the name is aspirational, and the comment in the file says so.
+Every mutation is open to every visitor, and the demo database is shared; do not
+treat this as a multi-tenant app.
+
+**Code:**
+
+<SourceLink
+  path="src/trpc/procedures/authorizedProcedure.ts"
+  label="authorizedProcedure.ts"
+/>
+
+What is true: `DATABASE_URL` is read only on the server, the database and tRPC
+server modules import `server-only`, and no secret is exposed through
+`NEXT_PUBLIC_*`. Drizzle parameterises values, and the one raw SQL block (the
+chunked risk update) interpolates integers through `sql` placeholders rather
+than string concatenation. There is no tenant isolation, no RBAC, and no audit
+log. Those are deliberate omissions for a portfolio demo, not features to claim.
+
+**Code:**
+
+- <SourceLink path="src/db/index.ts" label="db/index.ts" />
+- <SourceLink path="src/trpc/server.tsx" label="trpc/server.tsx" />
+
+## Testing — the honest gap
+
+There is no test suite: no unit, integration, or end-to-end tests, no test
+runner in `package.json`, and no test files. The checks that do exist are static
+and manual: `check-types`, `lint`, `format:check`, a production build, manual QA
+of nine routes, and a deterministic seed that makes a bug reproducible.
+
+What I would add first, in order:
+
+1. Unit tests for `computeHouseholdRisk` — each cap, the 0 and 100 clamps, and
+   the 34/67 band boundaries.
+2. Unit tests for the predictive slope and filter-age triggers, including flat
+   and missing readings.
+3. Integration tests for mutations against a disposable Postgres database,
+   especially the rollback paths.
+4. Playwright smoke tests for the nine routes: page renders, no console error,
+   table pages, drawer opens.
+5. A seed assertion that the high-risk band is enriched for the cohort, so the
+   demo story stays true.
+
+Until then, the honest statement is: this code is type-checked and manually
+exercised, not test-covered.
+
+## Code links
+
+- <SourceLink path="src/db/schema.ts" label="schema.ts" /> — tables, enums,
+  foreign keys, and indexes.
+- <SourceLink path="src/db/queries/customers.ts" label="customers.ts" /> —
+  server-paged risk query and explicit row types.
+- <SourceLink path="src/trpc/routers/customers.ts" label="customers router" /> —
+  schema-first procedures.
+- <SourceLink
+    path="src/features/customers/hooks/use-get-risk-table.ts"
+    label="use-get-risk-table.ts"
+  />
+  — inferred query data.
+- <SourceLink
+    path="src/features/customers/components/risk-table/risk-score-cell.tsx"
+    label="risk-score-cell.tsx"
+  />
+  — typed component prop.
+- <SourceLink path="src/trpc/schema/common.ts" label="schema/common.ts" /> and
+  <SourceLink path="src/trpc/schema/customers.ts" label="schema/customers.ts" />
+  — shared validation contracts.
+- <SourceLink path="src/hooks/use-confirm.tsx" label="use-confirm.tsx" /> —
+  promise-based confirmation.
+- <SourceLink
+    path="src/features/service-ops/hooks/use-update-ticket-status.ts"
+    label="use-update-ticket-status.ts"
+  />
+  — optimistic update and rollback.
+- <SourceLink path="src/db/queries/risk.ts" label="risk.ts" /> — shared scoring
+  used by seed and mutation.
+- <SourceLink path="src/db/seed/index.ts" label="seed/index.ts" /> —
+  deterministic seed and non-empty guard.
+- <SourceLink path="eslint.config.mjs" label="eslint.config.mjs" />,
+  <SourceLink path=".prettierrc.json" label=".prettierrc.json" />, and
+  <SourceLink path=".husky/pre-commit" label=".husky/pre-commit" /> — tooling.
+- <SourceLink path="package.json" label="package.json" /> — the check commands.

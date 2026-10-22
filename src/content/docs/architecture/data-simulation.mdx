@@ -1,5 +1,291 @@
 ---
-title: Data Simulation
+title: Simulating 24 months of causal data
 description:
-  The deterministic seed that injects the patterns the dashboard detects.
+  A deterministic ten-stage seed that injects filter degradation, seasonal
+  complaints, payment drift and a known risk cohort — so the dashboard's
+  insights are real to the dataset.
 ---
+
+A dashboard built on random rows proves layout, not logic. ProWater's data is a
+**simulation**: ten deterministic stages build a 24-month timeline, and the
+dashboard's patterns are seeded first. It is not real customer data or IoT
+telemetry.
+
+## Why simulate
+
+The dashboard must say which dispensers will fail, which households will cancel,
+and where demand outpaces capacity. Independent rows would leave the predictive
+queue and risk score with nothing to rank.
+
+The seed optimises for **internal consistency**: degradation produces rising
+TDS, which produces a repair ticket; the risk cohort produces complaints and
+late payments; cancellations reduce MRR. That chain makes the demo evidence for
+the logic. The goal is consistency, not realism for its own sake; the data is
+simulated, not measured.
+
+## Determinism and the window
+
+`faker.seed(42)` fixes names, noise, and branch decisions.
+`historyWindowStart(today)` returns the first day of the month 23 months ago
+(`MONTHS_OF_HISTORY = 24`). The window is anchored to the run day, so a rerun
+moves every date but preserves the patterns; the same date and seed reproduce
+the dataset.
+
+```bash
+bun run db:seed    # empty database only
+bun run db:reset   # truncate all 12 tables + reseed
+```
+
+<SourceLink path="package.json" label="package.json" /> defines both. `db:seed`
+exits with code 1 if any of the 12 tables contains rows. `db:reset` reruns with
+`--fresh`, issuing `TRUNCATE TABLE ... RESTART IDENTITY CASCADE` first. The seed
+is deliberately not idempotent.
+
+## The ten stages
+
+<SourceLink path="src/db/seed/index.ts" label="seed/index.ts" /> orchestrates
+the pipeline. Each stage consumes the previous stage's output.
+
+| Stage             | What it creates                                | Key file                                                                                                                                                 |
+| ----------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Reference data | 8 areas, 3 plans, 12 technicians               | <SourceLink path="src/db/seed/reference.ts" label="reference.ts" />                                                                                      |
+| 2. Societies      | 50 societies in onboarding waves               | <SourceLink path="src/db/seed/generators/societies.ts" label="societies.ts" />                                                                           |
+| 3. Households     | ~1,150 households, plan mix, risk cohort       | <SourceLink path="src/db/seed/generators/households.ts" label="households.ts" />                                                                         |
+| 4. Subscriptions  | One subscription per household                 | <SourceLink path="src/db/seed/generators/households.ts" label="households.ts" />                                                                         |
+| 5. Dispensers     | One per household, plus filter history         | <SourceLink path="src/db/seed/generators/dispensers.ts" label="dispensers.ts" />                                                                         |
+| 6. Readings       | ~250,000 readings and causal service tickets   | <SourceLink path="src/db/seed/generators/readings.ts" label="readings.ts" />, <SourceLink path="src/db/seed/generators/tickets.ts" label="tickets.ts" /> |
+| 7. Complaints     | Seasonal complaints and risk-cohort clusters   | <SourceLink path="src/db/seed/generators/complaints.ts" label="complaints.ts" />                                                                         |
+| 8. Payments       | One payment per active subscription-month      | <SourceLink path="src/db/seed/generators/payments.ts" label="payments.ts" />                                                                             |
+| 9. Leads          | 450 leads over 24 months                       | <SourceLink path="src/db/seed/generators/leads.ts" label="leads.ts" />                                                                                   |
+| 10. Risk scores   | Score every household with the shared function | <SourceLink path="src/db/queries/risk.ts" label="risk.ts" />                                                                                             |
+
+Stage 2 sets onboarding dates; stage 3 joins after them and picks plan/cohort.
+Stage 4 creates the subscription span. Stage 5 installs and simulates filter
+cycles; stage 6 emits readings and tickets from those cycles. Stages 7–8 use
+lifetime, cohort, and season; stage 9 is lead flow; stage 10 scores the book.
+
+Telemetry and tickets share a curve; complaints and payments share the cohort
+window, and complaints add season. Complaints do not come from a specific
+reading — a shared timeline, not a full causal graph.
+
+## Injected patterns
+
+| Pattern              | How it is injected                                                                                        | Where it shows up                                         |
+| -------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Area imbalance       | `infrastructureAgeYears` (3–14) drives `infraDriftFactor`. High-infra areas also get more societies.      | `/service-ops` area demand, `/societies` penetration      |
+| Filter degradation   | Baseline, ceiling, and speed set a convex TDS curve. A replacement resets it.                             | `/devices` telemetry, `/service-ops` queue                |
+| Causal tickets       | Crossing 500 ppm early emits a repair. Otherwise the cycle ends with a scheduled filter change.           | `/service-ops` board and demand                           |
+| Seasonality          | Monsoon/summer multipliers speed drift. Monsoon adds hardness and complaint weight.                       | `/customers` complaint trend, `/devices` TDS/purity drift |
+| Risk cohort          | ~13% get a recent 60–120 day bad window with complaints and payment failures. Many cancel.                | `/customers` risk table                                   |
+| Growth curve         | 50 societies in weighted waves over months 1–14. Each contributes 12–34 households.                       | `/societies` growth, `/` household growth                 |
+| Plan mix shift       | Starter 0.45→0.12, premium 0.08→0.35. Standard is the remainder.                                          | `/revenue` plan mix, `/` donut                            |
+| Technician imbalance | 12 technicians carry load weights 1–5. Same-area assignment is weighted by them.                          | `/service-ops` workload                                   |
+| Sales funnel         | 450 leads; 40% visit, 22% of visitors convert. Conversions bring 1–5 flats.                               | `/leads` funnel and source conversion                     |
+| Payment drift        | The bad window starts one month before the complaint cluster. Inside it, 20% pay, 50% are late, 30% fail. | `/revenue` payments, `/customers` risk                    |
+
+## The exact formulas
+
+The shared formulas and the dispenser timeline live in:
+
+- <SourceLink path="src/db/seed/patterns.ts" label="patterns.ts" /> — formulas.
+- <SourceLink path="src/db/seed/generators/readings.ts" label="readings.ts" /> —
+  timeline and telemetry.
+
+### Filter cycle
+
+```text
+scheduledDays = randInt(60, 75)
+baseline      = randInt(105, 140) ppm
+ceiling       = highInfra (age >= 9.5) ? randInt(480, 560)
+                                        : randInt(385, 470)
+midDate       = cycleStart + round(scheduledDays / 2)
+
+speed = infraDriftFactor(age)
+      × seasonalityMultiplier(midDate)
+      × planIntensity
+      × randFloat(0.94, 1.06)
+
+infraDriftFactor(age) = 1 + max(0, age - 4) × 0.035
+```
+
+- `seasonalityMultiplier`: monsoon (Jun–Oct) `1.25`, summer (Mar–May) `1.12`,
+  otherwise `1`.
+- `planIntensity`: starter `0.95`, standard `1.00`, premium `1.08`.
+
+### TDS, purity, hardness
+
+```text
+projectTds(progress, baseline, ceiling) =
+  baseline + (ceiling - baseline)
+           × clamp(progress, 0, 1.08) ^ 1.12
+
+purity = clamp(97.5 - (tds - 110) × 0.0305, 82, 98.5)
+
+hardness = (baselineHardness
+          + (ceilingHardness - baselineHardness) × progress ^ 1.1)
+         × monsoonBoost
+```
+
+The exponent makes the curve convex, so the last weeks accelerate. `progress`
+can exceed 1 when a filter change runs past its scheduled end.
+`baselineHardness` is 170–215 mg/L and `ceilingHardness` is
+`round(baseline × randFloat(1.65, 1.95))`; monsoon boost `1.12`; noise TDS ±5,
+purity ±0.4, hardness ±7.
+
+### Telemetry cadence
+
+- Every 2–3 days from day 0–2, at 06:00–22:59.
+- Readings stop at `readingEnd` (cancel or offline date). `ONLINE_SHARE = 0.96`;
+  the other 4% stop 9–75 days before today.
+
+### Repairs and filter changes
+
+```text
+crossRatio = ((500 - baseline) / (ceiling - baseline)) ^ (1 / 1.12)
+crossDay   = round(crossRatio × scheduledDays / speed)
+```
+
+If `ceiling` is above 505 ppm and `crossDay` is at least 5 days after the start
+and 4 days before the scheduled end, the crossing becomes a `repair`; otherwise
+the cycle ends with a scheduled `filter_change`.
+
+- 4% hardware-fault repair when no threshold repair occurs.
+- `installation` for ~70% of households; `inspection` on ~6% of cycles.
+- Resolution: repair 3–68h (SLA 48h), filter change 6–96h (SLA 72h), inspection
+  6–136h (SLA 96h), installation 8–148h (SLA 120h).
+- `PURITY_REPAIR_THRESHOLD = 85` is defined but unused; tickets use the TDS
+  crossing, and purity is derived from TDS.
+
+### Complaints
+
+- A normal household draws `Poisson(1.75)`; a cohort household gets 2–4 inside
+  its window, skewed late.
+- Seasonal weights: monsoon `1.45`, post-monsoon `1.35`, summer `1.1`, otherwise
+  `1`. The `1.35` post-monsoon branch is unreachable because monsoon matches
+  September–October first.
+- Category weights: monsoon water quality 42, device malfunction 28, service
+  delay 16, billing 13, other 6; outside monsoon water quality 30 and device
+  malfunction 20; service delay rises to 30 in September–October.
+- Severity: cohort 25/45/30%, normal 50/35/15%; complaints older than 10 days
+  are resolved, recent ones 45%.
+
+### Payments and cohort
+
+One row per active subscription-month, including join and cancellation months,
+with no proration.
+
+| Month type        | Paid | Late | Failed | Pending |
+| ----------------- | ---: | ---: | -----: | ------: |
+| Normal            |  88% |   8% |     4% |       — |
+| Current month     |  58% |   5% |     4% |     33% |
+| Risk-cohort month |  20% |  50% |    30% |       — |
+
+`RISK_COHORT_SHARE = 0.13`, `COHORT_CANCEL_SHARE = 0.6`,
+`BASE_CHURN_SHARE = 0.08`, `RECENT_JOINER_SHARE = 0.07`. Cohort windows are
+60–120 days and skewed recent; about 60% cancel 30–90 days after the window.
+
+### Growth, plan mix, leads
+
+- 50 societies over months 1–14 with weights
+  `[6, 6, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 1]`; area allocation
+  `[6, 8, 6, 5, 6, 7, 7, 5]`; 80–400 flats per society.
+- 78% join 3–45 days after onboarding; the rest arrive 3–9 months later.
+- Starter share `0.45 → 0.12`, premium `0.08 → 0.35` over 23 months.
+- 450 leads, skewed with `u^0.65`. Sources: Instagram 32, referral 22, Google
+  20, walk-in 13, broker 13. 40% book a visit; 22% of visitors convert; 1–5
+  flats. Roles: resident 45, RWA secretary 20, builder 20, other 15.
+
+## Volumes and insert strategy
+
+| Table             | Approx rows | Why                                        |
+| ----------------- | ----------: | ------------------------------------------ |
+| `areas`           |           8 | Reference                                  |
+| `plans`           |           3 | Reference                                  |
+| `technicians`     |          12 | Reference                                  |
+| `societies`       |          50 | Growth and penetration                     |
+| `households`      |      ~1,150 | The book                                   |
+| `subscriptions`   |      ~1,150 | One per household                          |
+| `dispensers`      |      ~1,150 | One per household, including cancellations |
+| `readings`        |    ~250,000 | 24 months at ~2.5 readings/week            |
+| `service_tickets` |      ~7,000 | Causal repairs and filter changes          |
+| `complaints`      |      ~2,500 | Seasonal plus cohort clusters              |
+| `payments`        |     ~25,000 | Monthly billing                            |
+| `leads`           |         450 | Sales                                      |
+
+Tickets, complaints, payments, and leads are inserted in chunks of 1,000, and
+readings are buffered and flushed at the same threshold to stay under Neon's
+HTTP parameter limit. Risk scores update in chunks of 400. The seed is not part
+of the build: dashboard pages are `force-dynamic`. The batching helper is
+
+<SourceLink
+  path="src/db/seed/index.ts"
+  symbol="insertInChunks"
+  label="insertInChunks"
+/>
+.
+
+## Validation
+
+No precision or recall numbers are published: the cohort flag is not stored, and
+the window shifts with the run date.
+
+The validation method is:
+
+1. **Cohort check** — compare the high-risk band with the seed-time cohort list.
+2. **Outcome check** — compare high-risk households with later cancellations;
+   the cohort's ~60% cancellation is above the base rate.
+3. **Lift** — top-decile risk versus a random household.
+4. **Precision and recall at band thresholds** — the score is a ranking tool,
+   not a classifier.
+5. **Visual sanity** — high-infra areas should carry more tickets per 100
+   households, and monsoon months should bring more water-quality complaints.
+
+```sql
+-- The cohort flag is not stored, so this compares risk bands to outcomes.
+select
+  case
+    when risk_score >= 67 then 'high'
+    when risk_score >= 34 then 'medium'
+    else 'low'
+  end as band,
+  count(*) as households,
+  count(*) filter (where status = 'cancelled') as cancelled
+from households
+group by 1
+order by 1;
+```
+
+## Limitations
+
+- Synthetic data, not real customers or IoT telemetry.
+- The injected cohort makes validation partly circular: it proves the score can
+  recover a known signal, not that it predicts real churn.
+- The TDS curve simplifies membrane chemistry and ignores pressure, flow,
+  temperature, and source water.
+- No real weather, plumbing, ingestion, late data, price changes, upgrades, or
+  replacements; seasonality is a calendar multiplier.
+- The 24-month window shifts with the run date, and complaints respond to season
+  and cohort rather than a specific repair.
+
+## What I would change for production
+
+- Ingest real telemetry over MQTT or HTTP, storing raw and cleaned readings.
+- Add data-quality checks for late readings, outliers, and clock drift.
+- Calibrate filter cycles per device model and water source.
+- Replace the injected cohort with real outcomes and a time-based split.
+- Add a monthly MRR snapshot table at scale, plus lineage and a seed version for
+  reproducibility across environments.
+
+## Code links
+
+- <SourceLink path="src/db/seed/index.ts" label="seed/index.ts" /> — pipeline
+  orchestration.
+- <SourceLink path="src/db/seed/patterns.ts" label="patterns.ts" /> — formulas.
+- <SourceLink path="src/db/seed/generators/readings.ts" label="readings.ts" /> —
+  filter timeline.
+- <SourceLink
+    path="src/db/seed/generators/households.ts"
+    label="households.ts"
+  />
+  — cohort and churn.
+- <SourceLink path="src/db/queries/risk.ts" label="risk.ts" /> — scoring.

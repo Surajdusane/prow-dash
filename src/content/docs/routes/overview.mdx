@@ -1,6 +1,234 @@
 ---
-title: Overview
-description:
-  The executive landing page with KPIs, billing trend, household growth, plan
-  mix, and area health.
+title: "/ — Executive overview"
+description: The 60-second health check for the whole ProWater network.
 ---
+
+<RouteMeta
+  live="/"
+  time="5 min"
+  repoPath="src/app/(root)/(dashboard)/page.tsx"
+/>
+
+## Why this route exists
+
+The first question an ops lead asks on a Monday morning is: _is the business
+healthy this month?_ The overview has to answer that in under a minute:
+households, revenue, churn, open service load, and fleet water quality. It is
+also the entry point to every deeper route.
+
+The page is not a data catalogue. It is a hierarchy: six numbers first, four
+supporting visuals second, one cross-area table last. Everything else belongs on
+a dedicated route.
+
+## What I chose — and what I left out
+
+| Option                   | Why I rejected it                                 | What I chose instead                       |
+| ------------------------ | ------------------------------------------------- | ------------------------------------------ |
+| A wall of every metric   | No hierarchy; nothing stands out                  | Six KPIs plus four supporting visuals      |
+| Only charts, no numbers  | Slow to scan; the answer is usually in the number | KPI row first, then trends                 |
+| A single revenue chart   | Misses service and fleet health                   | Revenue, growth, plan mix, and area health |
+| A map of Bangalore       | Interesting, but not the first decision           | Area health table with TDS and SLA         |
+| A configurable dashboard | Role configuration is a product, not a demo       | Fixed composition, optimized for one job   |
+
+## What's on screen
+
+The page is a server component (`force-dynamic`) that calls
+`batchPrefetchOverview()`, wraps the tree in `HydrateClient`, and splits each
+section into its own `Suspense` boundary. The page component does not fetch
+directly; each card reads the same query key through a suspense hook.
+
+### KPI row
+
+**Visual:** six KPI tiles · **Why:** a fast scan before any chart loads.
+**Data:** `getOverviewKpis` → `households`, `subscriptions`, `plans`,
+`service_tickets`, `readings`. **Code:**
+
+- <SourceLink
+    path="src/features/overview/components/kpi-row.tsx"
+    label="kpi-row.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/overview.ts"
+    symbol="getOverviewKpis"
+    label="overview.ts"
+  />
+
+The six numbers are: active households, MRR, 90-day churn %, open tickets, new
+households this month, and the 7-day fleet average purity.
+
+<Callout type="info" title="The churn denominator matters">
+  Churn is not `cancelled ÷ active today`. The denominator is households that
+  had joined by the 90-day cutoff and had not cancelled by it — the active base
+  at the start of the window. The numerator is any household whose cancellation
+  falls after the cutoff. That keeps the percentage comparable across a growing
+  book, though a household that joins and cancels inside the window can land in
+  the numerator but not the denominator.
+</Callout>
+
+### Billing trend
+
+**Visual:** overlapping area chart, billed vs collected, 18 months. **Why:** two
+series over the same timeline; the gap between them is the story. A single
+revenue number would hide failed and pending payments. **Data:**
+`getRevenueTrend` → `getBillingTrend` → `payments`. "Collected" counts any
+payment with a `paidDate`, including late payers who eventually settled.
+**Code:**
+
+- <SourceLink
+    path="src/features/overview/components/revenue-trend-card.tsx"
+    label="revenue-trend-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/payments.ts"
+    symbol="getBillingTrend"
+    label="payments.ts"
+  />
+
+### Household growth
+
+**Visual:** stacked area chart, cumulative active and cancelled households, 24
+months. **Why:** growth and leakage on one timeline. Stacking also makes the
+total book visible at any month-end. **Data:** `getHouseholdGrowth` →
+`households`. The query reads every household's join and cancel date once, then
+shapes 24 month-end points in TypeScript. **Code:**
+
+- <SourceLink
+    path="src/features/overview/components/household-growth-card.tsx"
+    label="household-growth-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/overview.ts"
+    symbol="getHouseholdGrowth"
+    label="overview.ts"
+  />
+
+### Plan mix
+
+**Visual:** donut, active subscriptions by plan. **Why:** three categories,
+part-to-whole, readable at a glance. The centre shows the active subscription
+count. **Data:** `getPlanMix` → `subscriptions` joined to `plans`, filtered to
+active subscriptions, grouped by plan name and sorted by count. **Code:**
+
+- <SourceLink
+    path="src/features/overview/components/plan-mix-card.tsx"
+    label="plan-mix-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/overview.ts"
+    symbol="getPlanMix"
+    label="overview.ts"
+  />
+
+### Area health
+
+**Visual:** table with area, active households, open tickets, 30-day average
+TDS, and 90-day SLA met %. **Why:** five metrics per area; five charts would be
+harder to compare than one sorted table. SLA is drawn as a small progress bar
+with green/amber/rose bands. **Data:** `getAreaHealth` → `areas`, `societies`,
+`households`, `service_tickets`, `readings`. Five grouped queries run in one
+`Promise.all` and are merged in TypeScript; it is not one query per area.
+**Code:**
+
+- <SourceLink
+    path="src/features/overview/components/area-health-card.tsx"
+    label="area-health-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/overview.ts"
+    symbol="getAreaHealth"
+    label="overview.ts"
+  />
+
+## The data behind it
+
+- **Growth waves.** Societies onboard across months 1–14 of the 24-month window;
+  78% of households join within 45 days of their society onboarding, and a 7%
+  slice joins in the last 90 days. That produces the cumulative growth curve and
+  the "new this month" KPI. Seed sources:
+
+  - <SourceLink
+      path="src/db/seed/generators/societies.ts"
+      label="societies.ts"
+    />
+  - <SourceLink
+      path="src/db/seed/generators/households.ts"
+      label="households.ts"
+    />
+
+- **Plan-mix shift.** Starter share falls from 45% to 12% over the window while
+  premium rises from 8% to 35%, so the donut reflects a business moving upmarket
+  rather than a static random split.
+- **Churn.** A ~13% risk cohort carries the bad windows; ~60% of that cohort
+  cancels 1–3 months later, on top of an 8% base churn rate.
+- **Billing.** Payments are generated per active subscription-month. The current
+  month is weighted 58% paid / 5% late / 4% failed / 33% pending; older months
+  are 88% paid / 8% late / 4% failed. Risk-cohort months are 20% paid / 50% late
+  / 30% failed. That is why billed and collected diverge without a random walk.
+- **Area health.** `areas.infrastructure_age_years` is the lever: Whitefield (14
+  years), Electronic City (12), and Sarjapur Road (10) degrade filters faster,
+  which shows up in TDS and ticket volume.
+
+Windows are explicit: 18 months for billing, 24 months for growth, 30 days for
+TDS, 90 days for SLA. The page is `force-dynamic`, so those windows end today,
+not at build time.
+
+## Chart → data → code
+
+| Section          | Visual       | Why                          | Data source          | Component                   |
+| ---------------- | ------------ | ---------------------------- | -------------------- | --------------------------- |
+| KPI row          | KPI tiles    | Fast scan                    | `getOverviewKpis`    | `kpi-row.tsx`               |
+| Billing trend    | Area         | Two series over time         | `getRevenueTrend`    | `revenue-trend-card.tsx`    |
+| Household growth | Stacked area | Cumulative trend + book size | `getHouseholdGrowth` | `household-growth-card.tsx` |
+| Plan mix         | Donut        | Part-to-whole, 3 categories  | `getPlanMix`         | `plan-mix-card.tsx`         |
+| Area health      | Table        | Multi-metric comparison      | `getAreaHealth`      | `area-health-card.tsx`      |
+
+## Interactions
+
+There are no mutations on the overview. It is a read-only summary, and the cards
+are not links themselves; the dashboard sidebar is the navigation surface to the
+deeper routes. Each section still maps to the route that owns its decision:
+revenue to `/revenue`, service load to `/service-ops`, churn to `/customers`,
+and fleet purity to `/devices`.
+
+Each section has its own `Suspense` fallback (`KpiRowSkeleton`,
+`ChartCardSkeleton`, `TableCardSkeleton`) and the route shares one error
+boundary with a retry button. A cold database shows the retry state, not a blank
+page.
+
+## Code map
+
+| Layer           | File                                                                  | What it does                        |
+| --------------- | --------------------------------------------------------------------- | ----------------------------------- |
+| Page            | `src/app/(root)/(dashboard)/page.tsx`                                 | Prefetch + Suspense layout          |
+| Server prefetch | `src/features/overview/server/index.ts`                               | `batchPrefetchOverview`             |
+| Hooks           | `src/features/overview/hooks/*`                                       | Five suspense queries               |
+| Components      | `src/features/overview/components/*`                                  | KPI row + four cards                |
+| Router          | `src/trpc/routers/overview.ts`                                        | Five procedures                     |
+| Queries         | `src/db/queries/overview.ts`                                          | KPI, growth, plan, and area queries |
+| Query           | `src/db/queries/payments.ts`                                          | `getBillingTrend`                   |
+| Seed            | `src/db/seed/generators/households.ts`, `payments.ts`, `societies.ts` | Growth, payment, and area patterns  |
+
+## What to notice as a reviewer
+
+1. The churn KPI uses the active base at the start of the 90-day window, not
+   today's active count. Read `getOverviewKpis` and check the four `filter`
+   clauses in the household aggregate.
+2. Area health is five grouped queries in one `Promise.all`, then a TypeScript
+   merge by `areaId` — not five sequential queries and not an N+1 loop.
+3. The page has no client-side data fetching of its own: `batchPrefetchOverview`
+   warms the cache and every card reads the same query key through
+   `useSuspenseQuery`.
+
+## Trade-offs & next
+
+- The KPI row is fixed. A configurable dashboard would suit different roles
+  better, but it would also make the demo's hierarchy disappear.
+- Billing stops at 18 months to keep the chart readable. A longer window would
+  compress the recent gap that matters.
+- There is no previous-period comparison. Delta indicators would make the KPIs
+  more decision-ready than absolute numbers.
+- Area health is a table. A map would be a nice addition, but the table answers
+  the comparison question faster.
+- `getHouseholdGrowth` shapes 24 windows in TypeScript. At ~1,200 households
+  that is cheap and readable; at a larger book it should move into a SQL
+  aggregate.

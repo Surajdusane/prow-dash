@@ -1,4 +1,244 @@
 ---
-title: Societies
-description: Growth, penetration, and the society book.
+title: "/societies — Expansion and penetration"
+description:
+  Where the society book is growing, which areas are under-penetrated, and which
+  societies need attention.
 ---
+
+<RouteMeta
+  live="/societies"
+  time="5 min"
+  repoPath="src/app/(root)/(dashboard)/societies/page.tsx"
+/>
+
+## Why this route exists
+
+Growth depends on **where** the next society is, not just how many households
+exist. The team needs to compare areas on active households, penetration against
+flats covered, open tickets, and average TDS. The page answers **where should we
+expand, and which society is underperforming?**
+
+## What I chose — and what I left out
+
+| Option                         | Why I rejected it                      | What I chose instead                          |
+| ------------------------------ | -------------------------------------- | --------------------------------------------- |
+| A map of Bangalore             | Nice visual, weak comparison           | Stacked growth, penetration bars, and a table |
+| One growth line                | Hides the area mix                     | Stacked area by area                          |
+| A penetration donut            | Part-to-whole does not fit eight areas | Horizontal bar, sorted                        |
+| Cards per society              | 50 cards is not scannable              | Server-paged table plus a drawer              |
+| A separate society detail page | Slower context switching               | Drawer with plan mix and top risk             |
+
+## What's on screen
+
+Live route: `/societies`. The page is `force-dynamic`;
+`batchPrefetchSocieties()` warms the KPIs, growth trend, area penetration, and
+the first table page in one batch. The drawer query is excluded on purpose and
+fetches when a row opens.
+
+### KPI row
+
+Four tiles from `getSocietiesKpis`: societies, average penetration, flats
+covered, and areas. Average penetration is one portfolio-wide ratio — active
+households ÷ flats across every onboarded society — not the mean of the eight
+area percentages.
+
+**Data:** `getSocietiesKpis` → `societies`, `households`. **Code:**
+
+- <SourceLink
+    path="src/features/societies/components/kpi-row.tsx"
+    label="kpi-row.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/societies.ts"
+    symbol="getSocietiesKpis"
+    label="societies.ts"
+  />
+
+### Onboarding growth
+
+A stacked area chart of cumulative active households per area over 24 months.
+The series keys are derived from the data by `growthSeriesKeys` — the query
+returns the top eight areas by all-time households plus an "Other" bucket. A
+fixed area list would silently drop a new area; here a new high-volume area
+displaces the eighth, and a low-volume one folds into "Other". Colours are
+assigned by rank, so an area keeps its hue across renders.
+
+**Data:** `getGrowthTrend` → `households`, `societies`, `areas`. **Code:**
+
+- <SourceLink
+    path="src/features/societies/components/growth-trend-card.tsx"
+    label="growth-trend-card.tsx"
+  />
+- <SourceLink
+    path="src/features/societies/utils/index.ts"
+    symbol="growthSeriesKeys"
+    label="utils/index.ts"
+  />
+- <SourceLink
+    path="src/db/queries/societies.ts"
+    symbol="getGrowthTrend"
+    label="societies.ts"
+  />
+
+### Penetration by area
+
+A horizontal bar of active households ÷ flats covered per area, highest first.
+Horizontal bars keep long area names readable, and sorting turns the chart into
+a ranking. The custom tooltip adds the two numbers that explain the ranking:
+infrastructure age and tickets per 100 households over the last 90 days.
+
+**Data:** `getAreaPenetration` → `areas`, `societies`, `households`,
+`service_tickets`. **Code:**
+
+- <SourceLink
+    path="src/features/societies/components/area-penetration-card.tsx"
+    label="area-penetration-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/societies.ts"
+    symbol="getAreaPenetration"
+    label="societies.ts"
+  />
+
+### Society table
+
+Every society, 25 per page, highest penetration first by default. Columns are
+society (with area and onboarded date), flats, subscribed, penetration, open
+tickets, and 30-day average TDS. The penetration cell combines a mini bar with
+the percentage.
+
+Search and the area select are server-side; search is debounced by 300 ms and
+every change resets to page 1. All six visible columns sort server-side,
+toggling direction on a second click. Name sorts ascending by default; numeric
+columns sort descending.
+
+**Data:** `getSocietyList` → `societies`, `areas`, `households` (active count),
+`service_tickets` (unresolved count), `readings` and `dispensers` (30-day TDS).
+**Code:**
+
+- <SourceLink
+    path="src/features/societies/components/society-table/society-table.tsx"
+    label="society-table.tsx"
+  />
+- <SourceLink
+    path="src/features/societies/components/society-table/toolbar.tsx"
+    label="toolbar.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/societies.ts"
+    symbol="getSocietyList"
+    label="societies.ts"
+  />
+
+### Society drawer
+
+A row opens a right-side drawer with the society facts: area, name, onboarded
+date, flats covered, penetration, open tickets, 30-day average TDS, and active
+households. Below that, the plan mix (starter, standard, premium as a share of
+active subscriptions) and the five highest-risk active households, each with
+tenure and risk band. "Open in Customers" hands off to the risk flow.
+
+The drawer owns a separate, non-suspense query, so opening a row never refetches
+or re-sorts the table, and the table state survives. It keeps the last selected
+id through the close animation and offers a Retry on a failed fetch.
+
+**Data:** `getSocietyDetail` → `societies`, `areas`, `households`,
+`subscriptions`, `plans`, `service_tickets`, `readings`, `dispensers`. **Code:**
+
+- <SourceLink
+    path="src/features/societies/components/society-drawer/society-drawer.tsx"
+    label="society-drawer.tsx"
+  />
+- <SourceLink
+    path="src/features/societies/hooks/use-get-society-detail.ts"
+    label="use-get-society-detail.ts"
+  />
+- <SourceLink
+    path="src/db/queries/societies.ts"
+    symbol="getSocietyDetail"
+    label="societies.ts"
+  />
+
+## The data behind it
+
+- **50 societies across 8 areas.** The area allocation is weighted toward
+  high-infrastructure neighbourhoods; Whitefield (14 years), Electronic City
+  (12), and Sarjapur Road (10) carry the largest footprints.
+- **Onboarding waves over the first 14 months.** The wave weights are
+  front-loaded: six societies in each of the first two months, a 4–5/month
+  plateau through month seven, then a taper to one by month 14.
+- **80–400 flats per society.** Each society gets 12–34 households. About 78%
+  join within 3–45 days of onboarding; the rest trickle in three to nine months
+  later. A 7% recent-joiner slice keeps the growth curve alive inside existing
+  societies.
+- **Penetration** is active households ÷ flats covered by onboarded societies,
+  not every flat in Bangalore. Flats covered only counts societies ProWater has
+  already onboarded.
+- **Risk** in the drawer is the stored score written by the same
+  `recomputeAllRiskScores()` path used on `/customers`, so the top five match
+  the risk table rather than a separate society-only heuristic.
+
+## Chart → data → code
+
+| Section        | Visual         | Why this visual                    | Data source          | Component                   |
+| -------------- | -------------- | ---------------------------------- | -------------------- | --------------------------- |
+| KPI row        | KPI tiles      | Fast scan of the book              | `getSocietiesKpis`   | `kpi-row.tsx`               |
+| Growth         | Stacked area   | Total plus area mix over time      | `getGrowthTrend`     | `growth-trend-card.tsx`     |
+| Penetration    | Horizontal bar | Ranked comparison, long labels     | `getAreaPenetration` | `area-penetration-card.tsx` |
+| Society book   | Table          | Lookup and multi-metric comparison | `getSocietyList`     | `society-table/*`           |
+| Society detail | Drawer         | Context on demand                  | `getSocietyDetail`   | `society-drawer/*`          |
+
+## Interactions
+
+- **Search, filter, sort, page.** Every change is a tRPC input, not client-side
+  slicing. Search is debounced into one request; filters reset to page 1; the
+  current rows dim while the next result loads because a deferred copy of the
+  state drives the table.
+- **Open a society.** Clicking a row only updates the Zustand UI store. The
+  drawer fetches its own profile, so the table does not refetch and its page,
+  sort, filter, and search state are preserved.
+- **Close the drawer.** The last id is snapshotted so the content does not blank
+  during the exit animation.
+- **Read-only.** There are no mutations on this route. The next action is the
+  link to `/customers` for the high-risk households.
+
+## Code map
+
+| Layer           | File                                            | What it does                            |
+| --------------- | ----------------------------------------------- | --------------------------------------- |
+| Page            | `src/app/(root)/(dashboard)/societies/page.tsx` | Prefetch + Suspense layout              |
+| Server prefetch | `src/features/societies/server/index.ts`        | `batchPrefetchSocieties`                |
+| Hooks           | `src/features/societies/hooks/*`                | KPIs, growth, penetration, list, detail |
+| Components      | `src/features/societies/components/*`           | KPI row, two cards, table, drawer       |
+| Store           | `src/features/societies/store/index.ts`         | Selected society for the drawer         |
+| Router          | `src/trpc/routers/societies.ts`                 | Five queries                            |
+| Query           | `src/db/queries/societies.ts`                   | KPIs, list, growth, penetration, detail |
+| Seed            | `src/db/seed/generators/societies.ts`           | Onboarding waves and flat counts        |
+| Seed            | `src/db/seed/generators/households.ts`          | Household join curve and churn          |
+| Seed            | `src/db/seed/reference.ts`                      | Area infrastructure ages                |
+
+## What to notice as a reviewer
+
+1. Open `growthSeriesKeys` and the growth card together. The keys come from the
+   first data point, not a hardcoded array; the chart and legend both map over
+   that list, so a new area cannot be dropped silently. With the current eight
+   seeded areas, "Other" stays at zero.
+2. Sort the society table by penetration, then hover the top area bar. The
+   tooltip adds infrastructure age and tickets per 100 households — the "why"
+   behind the ranking.
+3. Open a society with high penetration and few open tickets. The drawer should
+   show a healthy plan mix and few high-risk households; contrast it with an
+   older-infrastructure area.
+
+## Trade-offs & next
+
+- Penetration uses flats covered by onboarded societies, not all flats in an
+  area, so a new area with no societies shows as zero rather than untapped.
+- No map view. The table and bars compare better, but a map would help field
+  planning and route density.
+- No lease or contract data per society, so the page cannot distinguish a
+  long-term partner from a month-to-month arrangement.
+- No expansion scoring model. The page gives the inputs — penetration, service
+  load, infrastructure age — but not a ranked recommendation.
+- The drawer is read-only. Creating a ticket or changing a plan still happens on
+  the relevant route.

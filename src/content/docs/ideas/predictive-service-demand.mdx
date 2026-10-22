@@ -1,6 +1,237 @@
 ---
-title: Predictive Service Demand
+title: Predictive service demand
 description:
-  A transparent heuristic that turns dispenser telemetry into a next-service
-  worklist.
+  How I turn dispenser telemetry into a ranked next-service queue before
+  customers complain.
 ---
+
+## 60-second summary
+
+- Field service is reactive: a customer complains, then a ticket is raised.
+- The dispenser already reports TDS, pH, hardness, and purity. Filter
+  degradation is visible before failure.
+- I built a ranked queue of dispensers whose TDS is rising fast or whose filter
+  is overdue, with a human-readable reason for each row.
+- It is a transparent heuristic, not ML: a linear slope over recent readings,
+  plus filter age and latest TDS.
+- The list is predictive in the demo because the same simulated timeline that
+  emits repair tickets also produces the readings the queue reads.
+
+## Why this exists
+
+A failed filter is not a single repair. It means a household is drinking water
+that no longer meets the promised quality, then calling support, then waiting
+for a visit. By the time the complaint lands, the ops team is already late.
+
+- A failed filter means bad water, a complaint, and an emergency repair visit.
+- A proactive filter change is cheaper than an emergency repair and protects
+  retention.
+- The ops team cannot watch ~1,000 dispensers manually.
+- The dashboard should answer: _which 25 households should we visit next, and
+  why?_
+
+The queue is a morning worklist, not an analytics chart. It is deliberately
+small: 25 rows, ranked, with a reason a dispatcher can read without opening
+another screen.
+
+## Options I considered
+
+| Option                          | Why it looks attractive                                  | Why I did not choose it                                           |
+| ------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------- |
+| Calendar-based maintenance      | Simple; every filter changes every N days                | Ignores actual water quality and area conditions                  |
+| Fixed TDS threshold             | Easy to explain; one number                              | Fires too late; misses fast-rising TDS below the threshold        |
+| ML model on telemetry           | Could learn complex patterns                             | No labelled production data; hard to explain; overkill for a demo |
+| Slope + filter age + latest TDS | Catches both slow drift and overdue filters; explainable | Needs tuning; linear slope is a simplification                    |
+
+**I chose the composite heuristic.** It is the only option that catches both a
+fast-rising TDS curve and an overdue filter, and every row can explain itself.
+It costs tuning, and the slope is a simplification, but it is cheap enough to
+run on every page load.
+
+The thresholds below are configurable product decisions, not universal truths.
+They are named constants in the query so a market or plan can tune them without
+rewriting the model.
+
+## What I chose
+
+The model is a filter, not a classifier. It answers "which dispensers are likely
+to need a filter change soon" rather than "what is the probability this
+dispenser fails in the next N days." The reason column is part of the interface:
+a dispatcher should be able to defend the visit without interpreting a score.
+
+## How it works
+
+1. **Read a 30-day window.** The query starts at the beginning of the day 30
+   days ago, which keeps the scan index-friendly.
+2. **Keep the latest six readings per dispenser.** A `row_number()` window
+   orders each dispenser's readings newest first; rows with rank 1–6 survive.
+3. **Fit a line.** `linearSlope` computes an ordinary least-squares slope with
+   `x` in days since the first surviving reading and `y` in TDS ppm. The result
+   is ppm/day.
+4. **Convert it for display.**
+   `tdsSlope7d = round(((slopePpmPerDay × 7) / latestTds) × 100)`. It is signed,
+   so a reset after a filter change can show a negative trend.
+5. **Compute filter age.** `filterAgeDays` is the number of days between
+   `dispensers.last_filter_change_date` and the start of today, clamped at zero.
+6. **Apply the candidate filter.** A dispenser enters the queue when either:
+   - `slopePpmPerDay >= 3.5` **and** `latestTds >= 250`, or
+   - `filterAgeDays >= 70`.
+7. **Rank the candidates.** The score is
+   `latestTds + (slopePpmPerDay × 10) + (filterAgeDays × 2)`.
+8. **Return the top 25.** The score has no unit; only the ordering matters.
+
+```sql
+row_number() over (
+  partition by dispenser_id
+  order by recorded_at desc
+) <= 6
+```
+
+```ts
+const tdsRising = slopePpmPerDay >= 3.5 && latest.tdsPpm >= 250;
+const filterOld = filterAgeDays >= 70;
+if (!tdsRising && !filterOld) continue;
+
+const score = latest.tdsPpm + slopePpmPerDay * 10 + filterAgeDays * 2;
+```
+
+The weights (`×10` for slope, `×2` for filter age) are a product choice: one
+ppm/day of slope is worth ten ppm of current TDS, and one day of filter age is
+worth two ppm. Changing them changes the order, not the candidate set. The
+reason string is built from the same two booleans, so a row cannot appear
+without a matching explanation.
+
+Full query: <SourceLink path="src/db/queries/service-ops.ts" label="query" />.
+The constants sit at the top of the same file: `READINGS_WINDOW_DAYS = 30`,
+`MAX_READINGS_PER_DISPENSER = 6`, `SLOPE_TRIGGER_PPM_PER_DAY = 3.5`,
+`SLOPE_MIN_TDS = 250`, `FILTER_AGE_TRIGGER_DAYS = 70`, and
+`PREDICTIVE_LIMIT = 25`.
+
+## The data behind it
+
+| Data                       | Table                                | Window       | Why                                                                                                                                |
+| -------------------------- | ------------------------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| TDS, purity, hardness, pH  | `readings`                           | last 30 days | The signal. The queue scores TDS; the drawer and fleet pages surface TDS and purity. pH and hardness are stored but not used here. |
+| Filter age                 | `dispensers.last_filter_change_date` | current      | Overdue maintenance.                                                                                                               |
+| Household / society / area | `households`, `societies`, `areas`   | current      | Human-readable queue.                                                                                                              |
+| Ticket history             | `service_tickets`                    | 90 days      | Area demand context, not a ranking input.                                                                                          |
+
+Only TDS is in the score. pH, hardness, and purity are available, but TDS is the
+clearest filter-degradation signal and the one the simulated repair threshold
+uses. The area demand chart reads 90 days of tickets to show where demand
+concentrates; it does not feed the queue.
+
+The seed makes the queue causal rather than decorative. `simulateDispenserLife`
+builds filter cycles of 60–75 days. TDS starts at 105–140 ppm and climbs toward
+a cycle ceiling of 385–560 ppm (higher in old-infrastructure areas), with
+seasonality and plan intensity baked into the speed. When the projected curve
+crosses `TDS_REPAIR_THRESHOLD = 500` early in a cycle, the generator emits a
+repair ticket at that crossing; otherwise it emits a scheduled `filter_change`
+ticket. Readings land every 2–3 days with noise and reset after each
+replacement.
+
+That is the link: the queue reads the same curve that created the ticket
+history. A rising segment before a threshold crossing is exactly the pattern the
+slope condition is meant to catch. In the live demo the queue reads the current
+edge of that timeline; it does not replay historical predictions.
+
+Seed links:
+
+- <SourceLink
+    path="src/db/seed/generators/readings.ts"
+    symbol="simulateDispenserLife"
+    label="readings.ts"
+  />
+  — filter cycles and telemetry.
+- <SourceLink
+    path="src/db/seed/generators/tickets.ts"
+    symbol="buildDispenserTickets"
+    label="tickets.ts"
+  />
+  — repair and scheduled tickets.
+- <SourceLink
+    path="src/db/seed/patterns.ts"
+    symbol="TDS_REPAIR_THRESHOLD"
+    label="patterns.ts"
+  />
+  — the 500 ppm threshold.
+
+## The UI
+
+Live route: [/service-ops](/service-ops).
+
+| Surface             | What it does                                                                                                                                                                                                 | Fed by                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| Predictive table    | The action queue. Columns: household, area, filter age, latest TDS, trend, signal, action. The row action opens the create-ticket dialog with the household preselected. Server-ranked; no client-side sort. | `getPredictive`         |
+| Area demand         | Grouped bar of tickets raised and tickets per 100 households, by area. The tooltip adds infrastructure age.                                                                                                  | `getAreaDemand`         |
+| SLA gauge           | Semi-radial gauge of SLA-met percentage over 90 days, with average resolution and open-now counts.                                                                                                           | `getSlaStats`           |
+| Technician workload | Horizontal bars of open load versus 30-day throughput, ranked by open load.                                                                                                                                  | `getTechnicianWorkload` |
+
+The **Signal** column is the reason string: `TDS rising 5%/wk`,
+`filter 74d old`, or both joined with `·`. That is the answer to "why this row?"
+without a second click.
+
+Why these visuals:
+
+- A table for an action queue, because the output is a decision per row, not a
+  trend.
+- Grouped bars for area comparison, because raw ticket counts would just rank
+  the biggest areas. The per-100-households series shows density.
+- A semi gauge for one percentage against a 100% frame, which is faster to read
+  than another bar.
+- Horizontal bars for technician load, because `name · area` labels are long.
+
+## Code map
+
+| Layer           | File                                                                                                                                 | What it does                                |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| Page            | <SourceLink path="src/app/(root)/(dashboard)/service-ops/page.tsx" label="page.tsx" />                                               | Prefetch + Suspense layout                  |
+| Server prefetch | <SourceLink path="src/features/service-ops/server/index.ts" symbol="batchPrefetchServiceOps" label="server/index.ts" />              | `batchPrefetchServiceOps`                   |
+| Hook            | <SourceLink path="src/features/service-ops/hooks/use-get-predictive.ts" symbol="useGetPredictive" label="use-get-predictive.ts" />   | `useSuspenseQuery`                          |
+| Component       | <SourceLink path="src/features/service-ops/components/predictive-table.tsx" symbol="PredictiveTable" label="predictive-table.tsx" /> | Ranked queue                                |
+| Router          | <SourceLink path="src/trpc/routers/service-ops.ts" symbol="getPredictive" label="service-ops.ts" />                                  | `getPredictive` procedure                   |
+| Query           | <SourceLink path="src/db/queries/service-ops.ts" symbol="getPredictive" label="service-ops.ts" />                                    | `getPredictive`                             |
+| Schema          | <SourceLink path="src/db/schema.ts" label="schema.ts" />                                                                             | `readings`, `dispensers`, `service_tickets` |
+| Seed            | <SourceLink path="src/db/seed/generators/readings.ts" symbol="simulateDispenserLife" label="readings.ts" />                          | Filter cycle + telemetry                    |
+| Seed            | <SourceLink path="src/db/seed/generators/tickets.ts" symbol="buildDispenserTickets" label="tickets.ts" />                            | Causal tickets                              |
+
+## What to watch as a reviewer
+
+1. Open [/service-ops](/service-ops) and scroll to **Predicted next service**,
+   the last section on the page. Scan the **Signal** column, then compare the
+   areas in the top rows with the area demand chart. The queue and the chart
+   should tell the same geographic story, but they answer different questions:
+   urgency per dispenser versus volume per area.
+2. Open `src/db/queries/service-ops.ts` and read `getPredictive`. The window
+   function, the slope, the two triggers, and the score are the whole model.
+3. Open `src/db/seed/generators/readings.ts` and follow `simulateDispenserLife`.
+   Find the crossing of `TDS_REPAIR_THRESHOLD` (500 ppm), then check
+   `buildDispenserTickets`: that crossing becomes a repair ticket. The queue
+   reads the same curve.
+
+## Trade-offs and limitations
+
+- Linear slope is a simplification. A damped trend or a small model could handle
+  noisy readings better, but would be harder to explain to a dispatcher.
+- Six readings every 2–3 days is a short baseline; one noisy reading can
+  dominate the slope. The filter-age trigger is the backstop for slow drift.
+- The 30-day window can miss degradation on low-usage dispensers that report
+  less often.
+- Thresholds are global. A per-area or per-plan baseline would be better;
+  Whitefield's water is not Indiranagar's.
+- No real-time stream. The list is a batch query, refreshed when the page loads.
+- No cost model or route optimisation. It ranks urgency, not the cheapest order
+  of visits.
+- The data is simulated. There are no labelled outcomes here, so this page does
+  not claim a measured precision or hit rate.
+
+## What I would do next
+
+- Add confidence and estimated days-to-threshold, so the queue can say "about
+  nine days" instead of only "rising."
+- Use area and plan baselines instead of global thresholds, and model the local
+  water baseline explicitly.
+- Add route optimisation and technician capacity constraints so the queue
+  becomes a schedule, not just a ranking.
+- Track whether predicted failures actually happened and report precision over
+  time.

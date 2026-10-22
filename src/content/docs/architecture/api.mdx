@@ -1,4 +1,326 @@
 ---
-title: API
-description: The tRPC router, Zod inputs, and the generated OpenAPI document.
+title: API design
+description:
+  Thin tRPC routers, Zod-validated inputs, one cached request context, and an
+  OpenAPI document generated from the router types.
 ---
+
+## The API surface
+
+The dashboard is read-heavy, and the API exists to make those reads typed,
+prefetchable on the server, and reusable from the browser. Forty-one queries and
+ten mutations is a lot of surface for a demo, so each procedure stays small and
+the work lives in shared query functions.
+
+The app router has eight namespaces, one per dashboard feature:
+
+```ts
+export const appRouter = createTRPCRouter({
+  overview: overviewRouter,
+  serviceOps: serviceOpsRouter,
+  customers: customersRouter,
+  devices: devicesRouter,
+  revenue: revenueRouter,
+  societies: societiesRouter,
+  leads: leadsRouter,
+  impact: impactRouter,
+});
+```
+
+That is the whole composition.
+
+<SourceLink
+  path="src/trpc/routers/_app.ts"
+  symbol="appRouter"
+  label="_app.ts"
+/>
+is the source, and its exported `AppRouter` type is what the client imports.
+
+| Namespace    | Queries                                                                                                    | Mutations                                              |
+| ------------ | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `overview`   | `getKpis`, `getRevenueTrend`, `getHouseholdGrowth`, `getPlanMix`, `getAreaHealth`                          | —                                                      |
+| `serviceOps` | `getBoard`, `getAreaDemand`, `getPredictive`, `getSlaStats`, `getTechnicianWorkload`, `getHouseholdsLite`  | `createTicket`, `updateStatus`, `assign`, `remove`     |
+| `customers`  | `getKpis`, `getAreas`, `getRiskTable`, `getRiskDistribution`, `getComplaintTrend`, `getById`               | `recomputeRisk`, `createComplaint`, `resolveComplaint` |
+| `devices`    | `getAreas`, `getFleet`, `getReadings`, `getReadingsTrend`, `getAnomalies`, `getFleetStats`                 | —                                                      |
+| `revenue`    | `getKpis`, `getMrrTrend`, `getPlanMixTrend`, `getPaymentStatusByMonth`, `getCohortRetention`, `getOverdue` | `markPaid`                                             |
+| `societies`  | `getKpis`, `getList`, `getGrowthTrend`, `getAreaPenetration`, `getById`                                    | —                                                      |
+| `leads`      | `getKpis`, `getFunnel`, `getBySource`, `getList`                                                           | `create`, `update`                                     |
+| `impact`     | `getTotals`, `getMonthlyTrend`, `getByPlan`                                                                | —                                                      |
+
+The names map to the eight dashboard concerns:
+
+- **`overview`** answers “how is the business doing in 60 seconds?”: headline
+  KPIs, billed versus collected, household growth, plan mix, and area health.
+- **`serviceOps`** powers the kanban and the field-work view: the filtered
+  board, 90-day area demand, the predictive queue, SLA stats, technician
+  workload, and a lightweight household list for the create-ticket dialog.
+- **`customers`** powers churn and complaints: risk KPIs, area options, the
+  paginated risk table, the band distribution, the 12-month complaint trend, and
+  the household drawer profile.
+- **`devices`** powers telemetry: area options, the paginated fleet, readings
+  for one dispenser, a downsampled trend, the anomaly feed, and fleet stats.
+- **`revenue`** powers MRR and collections: KPIs, MRR trend, plan-mix trend,
+  payment status by month, cohort retention, and the overdue list.
+- **`societies`** powers expansion: KPIs, the society book, growth trend, area
+  penetration, and the society drawer.
+- **`leads`** powers the sales funnel: KPIs, funnel stages, source conversion,
+  the lead table, and create/update mutations.
+- **`impact`** powers sustainability: litres served, jars avoided, monthly
+  trend, and the split by plan.
+
+Queries are read-only and named `getX`. Mutations are verbs. That convention is
+consistent enough that a reader can guess the procedure before opening the file.
+
+## Router discipline
+
+Routers are thin: validate input, call a query or mutation, return the result.
+Business logic lives in `src/db/queries/*`, not in the router. The risk scorer
+is reused by the seed and the recompute mutation; the server prefetch and the
+client hooks call the same procedures.
+
+No `any` appears at the boundary. Zod schemas live in `src/trpc/schema/*` and
+are exported as types, and the router input type is inferred from the schema
+rather than declared twice.
+
+A real mutation is short enough to read in one screen:
+
+```ts
+markPaid: authorizedProcedure.input(markPaidSchema).mutation(async ({ ctx: { db }, input }) => {
+  const payment = await markPaymentPaid(db, input.paymentId);
+  if (!payment) throw new TRPCError({ code: "NOT_FOUND", message: "Payment not found." });
+  return payment;
+}),
+```
+
+`input(markPaidSchema)` validates `{ paymentId }` and coerces it to a number.
+`markPaymentPaid` performs the update. The router adds one useful failure mode —
+the payment disappeared or the id was wrong — and returns the database row
+unchanged. It does not format a success message, choose a currency symbol, or
+decide what the toast should say; that belongs to the hook.
+
+<SourceLink path="src/trpc/routers/leads.ts" symbol="create" label="leads.ts" />
+uses the same shape, with `create` delegating to `createLead`:
+
+```ts
+create: authorizedProcedure.input(createLeadSchema).mutation(({ ctx: { db }, input }) => createLead(db, input)),
+```
+
+There is no service layer between the router and the query. With queries this
+small, a service layer would be a pass-through file. The query function is the
+unit of reuse, and the router is the transport adapter.
+
+## Validation
+
+Zod sits at every mutation boundary. It also sits at every query boundary that
+accepts input, which is most of the paginated or filtered procedures.
+
+Shared contracts live in
+
+<SourceLink path="src/trpc/schema/common.ts" label="schema/common.ts" />:
+
+- `paginationSchema` parses `page` and `limit`, defaults them to `1` and `25`,
+  and caps `limit` at `100`.
+- `sortDirSchema` defaults to `desc`.
+
+Query inputs with defaults are parsed, not trusted. The risk table extends the
+pagination schema with a `sort` enum defaulting to `risk` and a direction
+defaulting to `desc`; the client can send an empty object and still get a
+deterministic first page. The overdue list reuses `paginationSchema` directly.
+
+`z.coerce.number()` is used where the value may arrive as a string: route
+params, URL search state, and ids embedded in client mutations. That is not
+cosmetic. Without coercion, a tRPC call from a URL-shaped input would reject
+`"42"` even though the database expects an integer.
+
+The client form and the server schema should agree, but the router is the
+authority. A form can disable a button, but it cannot make an invalid payload
+valid. The schemas are exported as types so the hooks and forms can reuse the
+inferred shape without a parallel interface.
+
+## Context and auth
+
+`createTRPCContext` is cached per request and returns `{ db: getDb() }`. The
+database client itself is a lazy module singleton; the context is what the
+router receives.
+
+<SourceLink
+  path="src/trpc/init.ts"
+  symbol="createTRPCContext"
+  label="init.ts"
+/>
+defines it, and the HTTP adapter passes it to `fetchRequestHandler`.
+
+`authorizedProcedure` is currently an **alias for `baseProcedure`**:
+
+```ts
+export const authorizedProcedure = baseProcedure;
+```
+
+That is the honest description. There is no session lookup, no role check, and
+no row-level filter. The demo is public by design, and every query and mutation
+is open. The name is a placeholder for the shape real auth would take, not a
+claim that authorization exists.
+
+Real auth would add four things:
+
+1. A session or token lookup in `createTRPCContext`.
+2. An `orgId` or `userId` column on every tenant-owned table.
+3. A row filter in every query, enforced in the query layer rather than the
+   component.
+4. Middleware or procedure builders for role checks, so a mutation cannot be
+   called by a role that should not see it.
+
+That is a schema-and-query change, not a router decorator. It is deliberately
+out of scope here. The
+
+<SourceLink
+  path="src/trpc/procedures/authorizedProcedure.ts"
+  label="authorizedProcedure.ts"
+/>
+file says so in one comment.
+
+## Transport
+
+tRPC v11 runs over HTTP at `/api/trpc`. The route handler is a thin
+`fetchRequestHandler` wrapper, exported for both `GET` and `POST`:
+
+<SourceLink path="src/app/api/trpc/[trpc]/route.ts" label="route.ts" />
+
+The browser client uses `httpBatchLink`, so several procedure calls in the same
+tick become one HTTP request. SuperJSON is the transformer on both ends, which
+preserves `Date` values and other non-JSON shapes. The client is in
+
+<SourceLink path="src/trpc/client.tsx" label="client.tsx" />.
+
+The same transformer must be used by any generated client. A plain JSON client
+would see serialized date wrappers instead of dates, and a request body would
+miss the `{ json: ... }` envelope. That is why the Scalar reference installs
+request and response hooks rather than pointing a generic REST client at the
+endpoint.
+
+On the server,
+
+<SourceLink
+  path="src/trpc/server.tsx"
+  symbol="getQueryClient"
+  label="server.tsx"
+/>
+defines the per-request cache with `getQueryClient = cache(makeQueryClient)`.
+`HydrateClient` serializes that cache into the route. The client provider
+creates one browser query client and reuses it across suspends.
+
+## OpenAPI and Scalar
+
+<SourceLink path="scripts/generate-openapi.ts" label="generate-openapi.ts" />
+generates an OpenAPI 3.1 document from the `AppRouter` type. It writes
+`public/openapi.json`, which Next.js serves at `/openapi.json`.
+
+The document is regenerated before every build. `bun run build` is
+`bun run openapi:generate && next build`, so the spec cannot drift from the
+router without the build refreshing it.
+
+Paths are relative to `/api/trpc`. The default server URL is `/api/trpc`, and
+`OPENAPI_SERVER_URL` can override it when the API is served from another origin.
+The generated paths look like `/overview.getKpis`, not
+`/api/trpc/overview.getKpis`, because the server entry supplies the base.
+
+The interactive reference is `/api-docs`, rendered by Scalar from
+
+<SourceLink path="src/app/api-docs/route.ts" label="api-docs/route.ts" />. It
+reads `/openapi.json` and installs two hooks:
+
+- requests wrap the input as `{ json: <input> }`;
+- responses unwrap `{ result: { data: { json, meta } } }` into plain JSON.
+
+Without those hooks, Scalar would display the SuperJSON envelope instead of the
+payload. The OpenAPI document is a bridge for inspection and client generation,
+not a contract-first design.
+
+## Error handling
+
+tRPC errors surface as `TRPCError` on the server and typed errors on the client.
+Routers throw for genuine not-found and invalid-state cases, for example a
+ticket with no dispenser or a payment id that no longer exists.
+
+Feature mutation hooks handle both outcomes:
+
+- `onSuccess` shows a success toast and invalidates the affected keys.
+- `onError` shows the error message in a toast.
+- `onSettled` refreshes the queries, so a failed optimistic update still
+  reconciles with the server.
+
+Query failures do not get swallowed. Suspense handles the loading state, and the
+feature error boundary renders a retry card when a query rejects. Tables and
+charts also have explicit empty states, so “no rows” is not presented as an
+error and a failed request is not presented as an empty dataset.
+
+Mutations do not silently swallow failures. The kanban restores its snapshot and
+shows the error; the payment button exits its pending state and leaves the row
+in place; the complaint dialog stays open so the operator can retry.
+
+## Naming
+
+- Queries: `getX` — `getKpis`, `getRiskTable`, `getPredictive`, `getMrrTrend`.
+- Mutations: a verb — `createTicket`, `markPaid`, `recomputeRisk`,
+  `resolveComplaint`.
+- Router namespaces match the route/feature names: `serviceOps` for
+  `/service-ops`, `customers` for `/customers`.
+- No `handle` or `process` names. A procedure either gets data or changes it;
+  the name should say which.
+
+The naming is not decoration. `getRiskTable` returns a page and a total;
+`getRiskDistribution` returns three bands. A name that promised “risk data”
+would hide which shape the caller is about to render.
+
+## Trade-offs
+
+- **tRPC is not a public REST API.** The OpenAPI document is a bridge, not a
+  contract-first design. External consumers would need a stable versioned
+  contract, which this app does not have.
+- **No versioning.** The app and API deploy together, so a breaking change is
+  allowed as long as both sides move in the same commit. A mobile client would
+  force versioned endpoints.
+- **No rate limiting.** The demo is public and cheap to read; a real deployment
+  would need per-IP or per-session limits before exposing mutations.
+- **No auth.** `authorizedProcedure` is a naming placeholder. Every caller is
+  trusted because there is no caller identity.
+- **No request-level tracing beyond server logs.** There is no correlation id,
+  span, or per-procedure timing. A production version would add structured logs
+  and query timing at the router boundary.
+- **Batching hides per-call latency.** `httpBatchLink` reduces round trips, but
+  a slow procedure in a batch delays the whole response. The prefetch path
+  avoids this by running queries in parallel on the server, not by relying on
+  the browser batch.
+
+## Code links
+
+- <SourceLink path="src/trpc/init.ts" label="init.ts" /> — context, transformer,
+  base procedure.
+- <SourceLink
+    path="src/trpc/procedures/authorizedProcedure.ts"
+    label="authorizedProcedure.ts"
+  />
+  — the no-auth alias.
+- <SourceLink path="src/trpc/routers/_app.ts" label="_app.ts" /> — the eight
+  namespaces.
+- <SourceLink path="src/trpc/server.tsx" label="server.tsx" /> — prefetch,
+  hydration, per-request cache.
+- <SourceLink path="src/trpc/client.tsx" label="client.tsx" /> — batch link and
+  SuperJSON.
+- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" /> — stale
+  time and dehydration rules.
+- <SourceLink path="src/trpc/schema/common.ts" label="schema/common.ts" /> —
+  pagination and sort contracts.
+- <SourceLink path="src/trpc/schema/customers.ts" label="schema/customers.ts" />
+  — risk table and complaint inputs.
+- <SourceLink
+    path="src/trpc/schema/service-ops.ts"
+    label="schema/service-ops.ts"
+  />
+  — board filters and ticket mutations.
+- <SourceLink path="src/app/api/trpc/[trpc]/route.ts" label="trpc route.ts" /> —
+  the HTTP adapter.
+- <SourceLink path="scripts/generate-openapi.ts" label="generate-openapi.ts" />—
+  the OpenAPI generator.
+- <SourceLink path="src/app/api-docs/route.ts" label="api-docs/route.ts" /> —
+  Scalar and the SuperJSON hooks.
