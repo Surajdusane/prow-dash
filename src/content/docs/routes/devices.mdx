@@ -1,4 +1,260 @@
 ---
-title: Devices
-description: Fleet KPIs, telemetry trends, and the anomaly feed.
+title: "/devices — IoT fleet monitoring"
+description:
+  Connectivity, telemetry trends, and the anomalies that need a field visit.
 ---
+
+<RouteMeta
+  live="/devices"
+  time="7 min"
+  repoPath="src/app/(root)/(dashboard)/devices/page.tsx"
+/>
+
+## Why this route exists
+
+The dispenser fleet is the physical edge of the business. When a device goes
+offline, its membrane degrades, or purity slips, the customer notices before the
+dashboard does. Ops needs one answer each morning: **which devices are offline,
+degrading, or producing bad water?**
+
+With roughly a thousand dispensers, a raw inventory is not an answer. The route
+turns the fleet into a short attention list and keeps evidence one click away.
+
+## What I chose — and what I left out
+
+| Option                  | Why I rejected it                                    | What I chose instead                       |
+| ----------------------- | ---------------------------------------------------- | ------------------------------------------ |
+| A table of every device | Too much for a monitoring overview                   | Aggregate charts plus an anomaly feed      |
+| One chart per metric    | No prioritisation; every device looks equally urgent | Anomaly mix, fleet trend, and online gauge |
+| A map of devices        | Interesting, but not the first operational decision  | Severity-sorted anomaly feed               |
+| Real-time streaming     | Overkill for a simulated demo                        | Daily aggregates plus latest readings      |
+
+## What's on screen
+
+Live route: `/devices`. The device drawer is the detail state. The page is
+`force-dynamic`, and `batchPrefetchDevicesOverview()` warms the fleet stats, the
+30-day telemetry trend, and the anomaly feed. Device readings are excluded on
+purpose: the drawer owns its windowed query and fetches on open.
+
+### KPI row
+
+Four tiles from `getFleetStats`:
+
+- **Online** — share of active-household dispensers with `is_online = true`.
+- **Avg purity (7d)** — mean purity across every reading in the last seven days.
+- **Needs service** — dispensers whose filter is older than 75 days, latest TDS
+  is above 450 ppm, or latest purity is below 85%.
+- **Offline > 7d** — dispensers flagged offline **or** with no reading in the
+  last seven days.
+
+The percentage reads the stored `is_online` flag; the offline count also catches
+devices that are nominally online but have gone quiet.
+
+**Data:** `getFleetStats` → `dispensers`, `households`, `readings`. **Code:**
+
+- <SourceLink
+    path="src/features/devices/components/kpi-row.tsx"
+    label="kpi-row.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/devices.ts"
+    symbol="getFleetStats"
+    label="devices.ts"
+  />
+
+### Anomaly mix
+
+A donut of the anomaly feed, bucketed by each device's **most urgent signal**:
+offline or silent, high TDS, then low purity. Each device counts once, in
+priority order, so the percentages describe devices rather than raw alarm
+counts. The centre reports the number of flagged devices in the feed.
+
+Because the feed is capped at the worst 100 devices, the donut describes that
+capped list, not every flagged device.
+
+**Data:** `getAnomalies` → `dispensers`, `readings`. **Code:**
+
+<SourceLink
+  path="src/features/devices/components/anomaly-mix-card.tsx"
+  label="anomaly-mix-card.tsx"
+/>
+
+### Telemetry trend
+
+A composed chart with two lines on separate axes: fleet-wide average TDS (ppm)
+and purity (%). Two units share one timeline because their relationship is the
+insight — as TDS climbs, purity falls. The 30- or 90-day window is bucketed by
+day; 90-day payloads fold into at most 60 points.
+
+**Data:** `getReadingsTrend` → `readings`. **Code:**
+
+- <SourceLink
+    path="src/features/devices/components/readings-trend-card.tsx"
+    label="readings-trend-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/devices.ts"
+    symbol="getReadingsTrend"
+    label="devices.ts"
+  />
+
+### Fleet online
+
+A full radial gauge against a 100% track; colour changes at 95% (green) and 90%
+(amber). Below it, the two actionable counts: needs service and offline over
+seven days.
+
+**Data:** `getFleetStats` → `dispensers`, `households`, `readings`. **Code:**
+
+<SourceLink
+  path="src/features/devices/components/fleet-online-gauge.tsx"
+  label="fleet-online-gauge.tsx"
+/>
+
+### Anomaly feed
+
+The six most severe flagged devices, with severity, household, society, area,
+exact reasons, and last report. Each row offers **View device** (opens the
+drawer) and **Create ticket** (writes to `/service-ops`). Sorting is severity
+first, then latest TDS — triage, not lookup.
+
+**Data:** `getAnomalies` → `dispensers`, `households`, `societies`, `areas`,
+`readings`. **Code:**
+
+- <SourceLink
+    path="src/features/devices/components/anomaly-panel.tsx"
+    label="anomaly-panel.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/devices.ts"
+    symbol="getAnomalies"
+    label="devices.ts"
+  />
+
+### Device drawer
+
+The drawer shows id, type, connectivity, install date, last filter change,
+filter age, and a 30/90-day TDS and purity chart. Hovering the first reading on
+or after the last filter change adds a **Filter reset** row to the tooltip.
+Switching devices resets to 30 days and never shows one device's curve under
+another's header.
+
+**Data:** `getReadings` → `dispensers`, `households`, `societies`, `areas`,
+`readings`. **Code:**
+
+- <SourceLink
+    path="src/features/devices/components/device-drawer/device-drawer.tsx"
+    label="device-drawer.tsx"
+  />
+- <SourceLink
+    path="src/features/devices/components/device-drawer/readings-chart.tsx"
+    label="readings-chart.tsx"
+  />
+- <SourceLink
+    path="src/features/devices/hooks/use-get-readings.ts"
+    label="use-get-readings.ts"
+  />
+
+## The data behind it
+
+Each household gets one dispenser, installed about two to seven days after
+joining. Starter plans use the household's own device; standard and premium get
+the matching model. About 96% are online; an offline device stops reporting nine
+to 75 days ago.
+
+Telemetry follows the filter cycle:
+
+- Cycles last **60–75 days**. TDS starts at 105–140 ppm and climbs to 385–470
+  ppm, or 480–560 in high-infrastructure areas, on a convex `progress^1.12`
+  curve.
+- Purity tracks TDS: about 97.5% fresh, about 84% at the ceiling. Hardness
+  follows the same progress with a monsoon multiplier.
+- Readings land every two to three days, 06:00–22:00, with noise; pH stays
+  6.8–7.4.
+- TDS crossing 500 ppm before the scheduled end emits a repair (plus a 4%
+  hardware-fault path); the scheduled end emits a filter change.
+
+Anomaly detection is deterministic. It takes each dispenser's latest reading
+from the last 30 days and flags offline, no reading for over seven days, TDS
+above 450 ppm, or purity below 85%. Severity is high when TDS is above 500,
+purity below 84%, or the latest reading is over 14 days old; otherwise medium.
+Results sort by severity and TDS, then cap at 100.
+
+**Code:**
+
+- <SourceLink
+    path="src/db/seed/generators/dispensers.ts"
+    label="dispensers.ts"
+  />
+- <SourceLink path="src/db/seed/generators/readings.ts" label="readings.ts" />
+- <SourceLink
+    path="src/db/seed/patterns.ts"
+    symbol="projectTds"
+    label="patterns.ts"
+  />
+
+## Chart → data → code
+
+| Section         | Visual             | Why this visual             | Data source        | Component                 |
+| --------------- | ------------------ | --------------------------- | ------------------ | ------------------------- |
+| KPI row         | KPI tiles          | Fast scan of fleet health   | `getFleetStats`    | `kpi-row.tsx`             |
+| Anomaly mix     | Donut              | Problem composition         | `getAnomalies`     | `anomaly-mix-card.tsx`    |
+| Telemetry trend | Dual-line composed | Two units over one timeline | `getReadingsTrend` | `readings-trend-card.tsx` |
+| Fleet online    | Radial gauge       | Single percentage vs target | `getFleetStats`    | `fleet-online-gauge.tsx`  |
+| Anomaly feed    | List               | Action list, not a chart    | `getAnomalies`     | `anomaly-panel.tsx`       |
+| Device detail   | Drawer + chart     | Detail on demand            | `getReadings`      | `device-drawer/*`         |
+
+## Interactions
+
+- **Switch the trend window.** Tabs update local state; a deferred copy drives
+  the chart, so the current curve dims instead of flashing a skeleton.
+- **Open a device.** "View device" writes to a small Zustand store; the drawer
+  fetches `getReadings` for the chosen window.
+- **Create a ticket.** The action calls `serviceOps.createTicket`, choosing a
+  filter change when TDS is above 450 or purity is below 85, otherwise a repair.
+  A toast reports the ticket, and the hook invalidates anomalies, fleet, board,
+  SLA, and area demand.
+- **No telemetry writes.** The drawer is read-only; there is no "mark fixed"
+  action. The service ticket is the write.
+
+## Code map
+
+| Layer           | File                                          | What it does                               |
+| --------------- | --------------------------------------------- | ------------------------------------------ |
+| Page            | `src/app/(root)/(dashboard)/devices/page.tsx` | Prefetch + Suspense layout                 |
+| Server prefetch | `src/features/devices/server/index.ts`        | `batchPrefetchDevicesOverview`             |
+| Hooks           | `src/features/devices/hooks/*`                | Stats, trend, anomalies, readings          |
+| Components      | `src/features/devices/components/*`           | Charts, feed, drawer                       |
+| Router          | `src/trpc/routers/devices.ts`                 | Procedures                                 |
+| Query           | `src/db/queries/devices.ts`                   | Stats, trend, anomalies, readings          |
+| Seed            | `src/db/seed/generators/dispensers.ts`        | Device lifecycle and connectivity          |
+| Seed            | `src/db/seed/generators/readings.ts`          | Telemetry along the filter cycle           |
+| Seed            | `src/db/seed/patterns.ts`                     | TDS, purity, hardness, and seasonal curves |
+
+## What to notice as a reviewer
+
+1. The anomaly feed is urgency-sorted, not id-sorted. The top row is the
+   highest-TDS device in the top severity group; open it and compare the chart
+   with the stated reason.
+2. Open a drawer and switch from 30 to 90 days. The sawtooth is the filter
+   cycle: TDS climbs, then resets after a change. Hover the first reading after
+   the reset date for the **Filter reset** tooltip row.
+3. Read
+   <SourceLink
+     path="src/db/queries/devices.ts"
+     symbol="getAnomalies"
+     label="getAnomalies"
+   />
+   — thresholds, severity, and reason strings live in one function.
+
+## Trade-offs & next
+
+- Anomaly rules are heuristic and global: own-device and premium installations
+  share the same TDS and purity cut-offs.
+- There is no real-time ingestion, alerting, or paging; the page is a snapshot
+  on request.
+- The anomaly mix describes only the capped feed, not the whole fleet.
+- The trend is fleet-wide and unsegmented — no area, plan, or device-model
+  filter — and the drawer loads on demand.
+- Connectivity is seeded. The status dot reports the stored flag; the table's
+  flag also treats a silent device as offline, so the two can disagree.

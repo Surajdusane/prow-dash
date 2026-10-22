@@ -1,4 +1,259 @@
 ---
-title: Service Ops
-description: Kanban, predictive maintenance, SLA tracking, and technician load.
+title: "/service-ops — Field operations"
+description:
+  Triage the service board, see where demand is concentrated, and act before the
+  next complaint.
 ---
+
+<RouteMeta
+  live="/service-ops"
+  time="7 min"
+  repoPath="src/app/(root)/(dashboard)/service-ops/page.tsx"
+/>
+
+## Why this route exists
+
+Service ops has two jobs: **triage today's work** and **prevent tomorrow's
+failures**. The page pairs a kanban with a predictive queue, then exposes
+capacity: area demand, SLA performance, and technician load. The decision is
+"who needs a visit next, and who is going to do it?"
+
+## What I chose — and what I left out
+
+| Option                     | Why I rejected it                       | What I chose instead             |
+| -------------------------- | --------------------------------------- | -------------------------------- |
+| Status dropdown in a table | Slower to triage; no sense of flow      | Four-column drag-and-drop kanban |
+| Calendar view              | Good for scheduling, not for triage     | Kanban plus predictive table     |
+| Only the predictive list   | No way to manage current work           | Kanban plus predictive table     |
+| A map of tickets           | Interesting, but not the first decision | Area demand bars plus a table    |
+
+## What's on screen
+
+The page is `force-dynamic` and warms six queries through
+`batchPrefetchServiceOps()`. Each board, chart, and table section has its own
+`Suspense` boundary.
+
+### KPI row
+
+**Visual:** four KPI tiles · **Why:** scan the current load before touching the
+board. **Data:** `getSlaStats` → `service_tickets` — open now, overdue backlog
+(open for more than seven days), average resolution days, and 90-day SLA met %.
+**Code:**
+
+<SourceLink
+  path="src/features/service-ops/components/kpi-row.tsx"
+  label="kpi-row.tsx"
+/>
+
+### Kanban board
+
+**Visual:** four columns — New, Assigned, In progress, Resolved — with drag and
+drop. **Why:** mirrors the ops workflow; dragging is the action, not opening a
+form. The columns are derived from status plus technician presence: `open` + no
+technician → New, `open` + technician → Assigned, `in_progress` → In progress,
+`resolved` → Resolved. **Data:** `getBoard` → `service_tickets`, `households`,
+`societies`, `areas`, `technicians`. The payload contains every open and
+in-progress ticket plus the 60 most recently resolved tickets from the last 30
+days. **Code:**
+
+- <SourceLink
+    path="src/features/service-ops/components/board/index.tsx"
+    label="board/index.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/tickets.ts"
+    symbol="getBoard"
+    label="tickets.ts"
+  />
+- <SourceLink
+    path="src/features/service-ops/utils/board.ts"
+    symbol="getTicketColumn"
+    label="getTicketColumn"
+  />
+
+The toolbar filters by type and area, with debounced search over resident, flat,
+and society. The board query is intentionally non-suspense with
+`keepPreviousData`, so a filter change keeps the toolbar and columns mounted.
+
+### Predictive table
+
+**Visual:** ranked table with household, area, filter age, latest TDS, TDS
+trend, signal, and a "Create ticket" action. **Why:** this is an action queue,
+not a chart. A dispatcher needs a row they can defend, not a score they have to
+interpret. **Data:** `getPredictive` → `readings`, `dispensers`, `households`,
+`societies`, `areas`. It returns the top 25 candidates with a human-readable
+reason. **Code:**
+
+- <SourceLink
+    path="src/features/service-ops/components/predictive-table.tsx"
+    label="predictive-table.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/service-ops.ts"
+    symbol="getPredictive"
+    label="service-ops.ts"
+  />
+
+Filter age turns amber at 70 days; TDS turns amber at 300 ppm and rose at 500.
+
+### Area demand
+
+**Visual:** grouped bar — tickets raised in the last 90 days and tickets per 100
+households, one pair per area. **Why:** volume alone favors big areas; density
+is the fairer comparison. The tooltip adds infrastructure age. **Data:**
+`getAreaDemand` → `service_tickets`, `households`, `societies`, `areas`; sorted
+by density descending. **Code:**
+
+- <SourceLink
+    path="src/features/service-ops/components/area-demand-card.tsx"
+    label="area-demand-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/service-ops.ts"
+    symbol="getAreaDemand"
+    label="service-ops.ts"
+  />
+
+### SLA performance
+
+**Visual:** semi-radial gauge, 0–100%. **Why:** one percentage against a target.
+The colour changes at 88% (green) and 84% (amber). **Data:** `getSlaStats` →
+`service_tickets`, last 90 days for the percentage and all unresolved tickets
+for the open count. **Code:**
+
+- <SourceLink
+    path="src/features/service-ops/components/sla-gauge-card.tsx"
+    label="sla-gauge-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/tickets.ts"
+    symbol="getSlaStats"
+    label="tickets.ts"
+  />
+
+### Technician workload
+
+**Visual:** sorted horizontal bar — open now vs resolved in the last 30 days.
+**Why:** names are long, and the ranking is the point: who is carrying the
+queue? **Data:** `getTechnicianWorkload` → `technicians`, `areas`,
+`service_tickets`. **Code:**
+
+- <SourceLink
+    path="src/features/service-ops/components/technician-workload-card.tsx"
+    label="technician-workload-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/tickets.ts"
+    symbol="getTechnicianWorkload"
+    label="tickets.ts"
+  />
+
+### Ticket flows
+
+The header opens a create dialog; dropping on Assigned without a technician
+opens an assign dialog; the drawer assigns, changes status, reopens, or deletes
+behind the shared `confirm()` dialog.
+
+## The data behind it
+
+- **Tickets are causal.** `simulateDispenserLife` builds 60–75 day filter
+  cycles. TDS climbs from 105–140 ppm toward 385–470 ppm, or 480–560 in
+  high-infra areas. Crossing 500 ppm before the scheduled change emits a
+  `repair`; the scheduled end emits a `filter_change`.
+- **Telemetry sets the curve.** Readings land every 2–3 days with noise and a
+  monsoon hardness bump; the predictive query keeps the latest six per
+  dispenser.
+- **Extra visits.** About 70% of households get an installation, and each
+  completed cycle has a 6% chance of an inspection.
+- **Backlog is seeded.** Six percent of tickets older than 14 days stay open,
+  feeding the overdue KPI.
+- **SLA targets.** Repair 48h, filter change 72h, inspection 96h, installation
+  120h. Seed resolution times are wider, so some tickets miss.
+- **Capacity is weighted.** Whitefield has a technician at weight 5; Electronic
+  City and Sarjapur Road have one at 4, with a long tail at 1. That is the
+  workload chart's shape.
+- **Area stress is structural.** Infrastructure ages are 14 years in Whitefield,
+  12 in Electronic City, and 10 in Sarjapur Road, against 3–6 elsewhere.
+
+The predictive heuristic is explicit: a 30-day window, the latest six readings,
+an ordinary-least-squares slope, and two triggers — `slope ≥ 3.5 ppm/day` with
+`latest TDS ≥ 250`, or `filter age ≥ 70 days`. Candidates are scored with
+`latestTds + slopePpmPerDay × 10 + filterAgeDays × 2` and capped at 25.
+
+<Callout type="info" title="A heuristic, not a model">
+  This is a batch query with named constants, not ML. Every row explains itself,
+  so a dispatcher can defend the visit. See the [method
+  note](/docs/ideas/predictive-service-demand).
+</Callout>
+
+## Chart → data → code
+
+| Section          | Visual         | Why                      | Data source             | Component                      |
+| ---------------- | -------------- | ------------------------ | ----------------------- | ------------------------------ |
+| Kanban           | dnd-kit board  | Workflow triage          | `getBoard`              | `board/*`                      |
+| Predictive queue | Table          | Action list              | `getPredictive`         | `predictive-table.tsx`         |
+| Area demand      | Grouped bar    | Compare volume + density | `getAreaDemand`         | `area-demand-card.tsx`         |
+| SLA              | Semi-radial    | Single % vs target       | `getSlaStats`           | `sla-gauge-card.tsx`           |
+| Workload         | Horizontal bar | Ranked capacity          | `getTechnicianWorkload` | `technician-workload-card.tsx` |
+
+## Interactions
+
+- **Drag a card.** `useUpdateTicketStatus` snapshots the board cache, patches
+  the status (and `resolvedDate` when resolving), and rolls back on error. It
+  invalidates board, SLA, and workload; toasts confirm or explain. The hook:
+
+  <SourceLink
+    path="src/features/service-ops/hooks/use-update-ticket-status.ts"
+    label="use-update-ticket-status.ts"
+  />
+
+- **Resolve.** The query stamps today's `resolvedDate` and computes `slaMet`
+  against the type's target; reopening clears both.
+- **Create.** The dialog invalidates board, SLA, and area demand. There is no
+  optimistic insert because the ticket needs a server id.
+- **Assign.** `useAssignTicket` patches the board with the technician id and
+  name, then invalidates board and workload. Dropping on Assigned without a
+  technician opens the dialog instead of mutating.
+- **Delete.** `useRemoveTicket` removes the card optimistically after
+  confirmation, then invalidates board, SLA, and workload.
+
+The board is shared by every demo visitor: there is no auth in this project, so
+one visitor's drag changes what the next visitor sees. That is a demo decision,
+not a production one.
+
+## Code map
+
+| Layer           | File                                              | What it does                           |
+| --------------- | ------------------------------------------------- | -------------------------------------- |
+| Page            | `src/app/(root)/(dashboard)/service-ops/page.tsx` | Prefetch + Suspense layout             |
+| Server prefetch | `src/features/service-ops/server/index.ts`        | `batchPrefetchServiceOps`              |
+| Hooks           | `src/features/service-ops/hooks/*`                | Board, predictive, area, SLA, workload |
+| Components      | `src/features/service-ops/components/*`           | Board, charts, tables, dialogs, store  |
+| Router          | `src/trpc/routers/service-ops.ts`                 | Procedures and mutations               |
+| Query           | `src/db/queries/service-ops.ts`                   | Predictive and area demand             |
+| Query           | `src/db/queries/tickets.ts`                       | Board, SLA, workload, mutations        |
+| Seed            | `src/db/seed/generators/readings.ts`              | TDS/filter timeline                    |
+| Seed            | `src/db/seed/generators/tickets.ts`               | Causal tickets and SLA outcomes        |
+| Seed            | `src/db/seed/reference.ts`                        | Area infrastructure and load weights   |
+
+## What to notice as a reviewer
+
+1. Drag a card, watch the optimistic move, then refresh. The persisted status
+   should match. The rollback path is in `useUpdateTicketStatus`.
+2. Compare the predictive table's top rows with the area demand chart. The
+   high-stress areas — Whitefield, Electronic City, Sarjapur Road — should line
+   up, because both read the same simulated infrastructure stress.
+3. Read `getPredictive`: the `row_number()` window keeps the latest six readings
+   per dispenser, `linearSlope` fits the line in TypeScript, and the score is a
+   plain weighted sum. There is no hidden model.
+
+## Trade-offs & next
+
+- The kanban is a triage surface, not a dispatch optimiser: no travel time,
+  skills, or spare-parts routing.
+- There is no calendar capacity planning or technician shift model.
+- The predictive queue is batch, not streaming; it recomputes on page load.
+- The resolved column stops at 60 tickets from the last 30 days; there is no
+  full ticket archive.
+- Mutations are global. Production needs auth, assignment rules, and an audit
+  trail.

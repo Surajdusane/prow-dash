@@ -1,5 +1,261 @@
 ---
-title: System Architecture
+title: System architecture
 description:
-  Browser, Next.js server components, tRPC, Drizzle, and Neon end to end.
+  One Next.js deployment, a typed tRPC boundary, Drizzle queries, and Neon
+  Postgres — and why that was the right size for this project.
 ---
+
+## The shape of the problem
+
+ProWater is a small internal ops product: nine read-heavy dashboard routes, a
+handful of mutations for the kanban, complaints, payments, leads, and risk
+recompute, one database, and one deployable. The read paths dominate. A shift
+lead opens a route, scans several aggregates, filters one table, and
+occasionally moves a ticket or marks a payment paid.
+
+The important constraint is not scale. It is **iteration speed with end-to-end
+type safety**. Every feature starts in the schema, becomes a query, crosses a
+typed API boundary, and lands in a chart or table. If a column rename or a
+return shape change requires edits in four disconnected places, the dashboard
+becomes slow to change.
+
+A separate API service would add deployment, versioning, and contract overhead
+without solving a real problem at this size. The only consumer is this Next.js
+app. The API surface is large in procedure count, not in traffic.
+
+## The architecture
+
+```text
+Browser
+  → React 19 client components
+  → TanStack Query hooks
+  → tRPC v11 over HTTP with SuperJSON
+Next.js 16 App Router
+  → server components prefetch queries
+  → HydrateClient
+  → Suspense + error boundaries
+  → tRPC routers (thin)
+  → feature modules
+Drizzle ORM v1
+  → typed SQL-like queries in src/db/queries
+Neon Postgres
+  → 12 tables
+Seed / OpenAPI sidecars
+  → deterministic 24-month simulation
+  → generated OpenAPI 3.1 + Scalar docs
+```
+
+The browser renders client components from feature folders. Those components
+read TanStack Query hooks; mutations travel back through the same tRPC client.
+On the server, each route page calls a feature `batchPrefetchX()` function,
+which uses the tRPC options proxy to execute the same procedures in-process.
+Routers only validate and delegate. The SQL lives in `src/db/queries`, and the
+Drizzle client talks to Neon over HTTP.
+
+The important property is that neither side owns a private data path. The server
+prefetch and the browser hook use the same tRPC procedure and the same query
+key. That is what makes hydration work without a second request.
+
+The entry points are
+
+<SourceLink
+  path="src/trpc/routers/_app.ts"
+  symbol="appRouter"
+  label="_app.ts"
+/>
+for the API surface,
+<SourceLink
+  path="src/trpc/server.tsx"
+  symbol="batchPrefetch"
+  label="trpc/server.tsx"
+/>
+for prefetch and hydration, and
+<SourceLink path="src/trpc/client.tsx" label="trpc/client.tsx" /> for the
+browser provider.
+
+## Why Next.js full-stack
+
+One deployable, one language, one type system. A route server component can
+prefetch through the tRPC options proxy without an internal HTTP hop: the router
+runs in the same process, with the same request context. There is no second
+service to boot, no internal URL to configure, and no duplicated DTO layer.
+
+Route-level `force-dynamic` keeps the demo live. Every recruiter-facing
+dashboard page exports it, so the build does not try to snapshot query results
+and does not need a database at build time. The lazy database getter in
+
+<SourceLink path="src/db/index.ts" symbol="getDb" label="src/db/index.ts" />
+reinforces that: `DATABASE_URL` is read on the first query, not at module scope.
+
+The cost is discipline at the server/client boundary. A careless import can pull
+server code into the client bundle, and React Server Components make that
+mistake easy to miss until the build fails or a secret-shaped module appears in
+the client graph.
+
+The mitigation is structural:
+
+- `src/trpc/server.tsx` and `src/db/index.ts` import `server-only`.
+- Database work lives in feature `server/` folders and `src/db/queries`.
+- `"use client"` is applied at the component or hook that needs interactivity,
+  not at the route.
+- Routers import query functions, never the other way around.
+
+See
+
+<SourceLink
+  path="src/app/(root)/(dashboard)/customers/page.tsx"
+  label="customers/page.tsx"
+/>
+for the server/client split in practice: the page is a server component, and
+only the sections below it are client components.
+
+## Why tRPC
+
+The API is consumed only by this app. There is no third-party client to support
+and no public contract to version. tRPC gives end-to-end inference from the
+Drizzle query return type through the router, the hook, and the component. Zod
+validates inputs at the boundary without a separate OpenAPI-first codegen step.
+
+The trade-off is tighter coupling to TypeScript. A non-TypeScript consumer
+cannot import `AppRouter`, and a breaking return-shape change is a breaking
+change for the only client — which is fine here, because both deploy together.
+
+The mitigation is the generated OpenAPI document:
+
+<SourceLink path="scripts/generate-openapi.ts" label="generate-openapi.ts" />
+produces a 3.1 spec from the router, served at `/openapi.json` and rendered by
+Scalar at `/api-docs`. It is an inspection and client-generation bridge, not a
+hand-maintained contract. The API page covers the details: [API
+design](/docs/architecture/api).
+
+## Why Drizzle + Neon
+
+Drizzle gives SQL-like control and typed results without a heavy abstraction.
+The queries that matter here are aggregate-heavy: monthly MRR from subscription
+spans, risk windows over complaints and payments, latest readings per dispenser.
+A query builder that hides SQL would make those harder to read, not easier.
+
+<SourceLink path="src/db/schema.ts" label="src/db/schema.ts" /> is the single
+schema source. Drizzle infers row types from it, and the routers return those
+types unchanged.
+
+Neon's HTTP driver means no local Postgres server and no connection pool to
+manage in a demo. `neon(databaseUrl)` plus `drizzle-orm/neon-http` is the entire
+connection setup in
+
+<SourceLink path="src/db/index.ts" label="src/db/index.ts" />. That is a real
+operational simplification for a public case study that may sit idle for hours.
+
+The costs are concrete:
+
+- Cold starts add roughly a second to the first query after idle.
+- Raw SQL windows are occasionally clearer than the query builder; those are
+  localized in `src/db/queries`, not spread through components.
+- The HTTP driver has different transaction characteristics from a pooled `pg`
+  client. This app does not rely on interactive transactions.
+
+## The request path
+
+1. A route server component calls `batchPrefetchX()` from its feature `server/`
+   module.
+2. `batchPrefetch` warms the per-request TanStack Query cache by firing each
+   query's `prefetchQuery` (or `prefetchInfiniteQuery`) without awaiting.
+3. `HydrateClient` dehydrates that cache, including pending queries, into the
+   client.
+4. Client components render feature hooks that call `useSuspenseQuery` with the
+   same query options.
+5. Charts and tables read the hydrated cache; mutations go back through tRPC.
+6. `invalidateQueries` refetches only the affected keys after a mutation.
+
+The mechanism is in
+
+<SourceLink
+  path="src/trpc/server.tsx"
+  symbol="HydrateClient"
+  label="trpc/server.tsx"
+/>
+and
+<SourceLink path="src/trpc/query-client.ts" label="query-client.ts" />. The
+detailed trace, including the complaint-trend path and the kanban mutation path,
+is in [Code flow](/docs/architecture/code-flow).
+
+## Deployment shape
+
+Vercel plus Neon is the intended stack;
+
+<SourceLink path="README.md" label="README.md" /> documents the deployment.
+Every recruiter-facing dashboard page is `force-dynamic`, so the build does not
+need a database; the first request after a deploy is the first query.
+
+Configuration is intentionally small:
+
+- `DATABASE_URL` is required — the Neon pooled connection string;
+  <SourceLink path=".env.example" label=".env.example" /> shows the expected
+  shape.
+- `NEXT_PUBLIC_APP_URL` is optional;
+  <SourceLink path="src/app/(root)/layout.tsx" label="layout.tsx" /> uses it for
+  absolute metadata, and the docs constants use it for live links.
+- `OPENAPI_SERVER_URL` is optional;
+  <SourceLink path="scripts/generate-openapi.ts" label="generate-openapi.ts" />
+  reads it before generating the spec.
+
+Migrations and seed run from a machine, not on every request:
+
+```bash
+bun run db:migrate
+bun run db:seed    # only on an empty database
+bun run db:reset   # truncate all 12 tables + reseed
+```
+
+The build regenerates the OpenAPI document first: `bun run build` runs
+`openapi:generate` and then `next build`, as defined in `package.json`.
+
+The demo is public and unauthenticated by design. There is no login, no tenant
+column, and no row-level filtering. That is a deliberate scope decision, not an
+oversight; the API page explains what real auth would add.
+
+## What this architecture deliberately does not have
+
+| Omission                      | Why it is reasonable here                                                                  | What would trigger adding it                                                |
+| ----------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| Separate backend service      | One consumer, one deploy, one type system; an internal HTTP hop would add no value         | A mobile app or a third-party API needing the same backend                  |
+| GraphQL                       | tRPC already gives typed queries and mutations without a schema/resolver layer             | Multiple clients needing different field selections over one graph          |
+| Microservices                 | The domain is small and one team owns it; network boundaries would add failure modes       | Independent scaling or ownership boundaries between service, billing, sales |
+| Event bus or streaming ingest | Telemetry is simulated in batch and read on page load; there is no live device feed today  | Real IoT ingestion, real-time alerting, or per-reading processing           |
+| Auth or tenant isolation      | The demo is public and shares one dataset; auth would block the reviewer before the work   | Any real customer data, roles, or per-company isolation                     |
+| Background job runner         | Risk recompute is user-triggered; the seed is manual; no scheduled work is required        | Nightly scoring, scheduled alerts, retries, or long-running exports         |
+| Caching layer beyond TanStack | The only read cache is TanStack Query's 30-second stale time; data changes through the app | Read traffic grows, or an aggregate becomes too expensive to recompute      |
+
+The omissions are connected. No real ingestion means no queue, no worker, and no
+streaming UI. No auth means no tenant column and no per-row policy. Adding one
+of those later would change the schema and every query, which is why the
+boundary is stated rather than implied.
+
+## Trade-offs
+
+| Decision           | Benefit                               | Cost                                   | When I would change it                                     |
+| ------------------ | ------------------------------------- | -------------------------------------- | ---------------------------------------------------------- |
+| Next.js full-stack | One deploy, one type system           | Server/client boundary discipline      | If a mobile app or third-party API needed the same backend |
+| tRPC               | End-to-end types                      | TypeScript-only coupling               | If external consumers needed a stable REST contract        |
+| Drizzle            | SQL control + typed results           | Smaller ecosystem than Prisma          | If the team needed more ORM conveniences                   |
+| Neon HTTP          | No local DB server, no pool to manage | Cold starts and HTTP round-trips       | If p95 latency became a hard requirement                   |
+| `force-dynamic`    | Live demo, simple build               | No static caching for dashboard routes | If read traffic grew and data freshness allowed caching    |
+
+## Code links
+
+- <SourceLink path="src/trpc/routers/_app.ts" label="_app.ts" /> — the eight
+  router namespaces.
+- <SourceLink path="src/trpc/server.tsx" label="trpc/server.tsx" /> —
+  `prefetch`, `batchPrefetch`, `HydrateClient`.
+- <SourceLink path="src/trpc/client.tsx" label="trpc/client.tsx" /> —
+  `httpBatchLink`, SuperJSON, browser query client.
+- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" /> — stale
+  time and dehydration rules.
+- <SourceLink path="src/db/index.ts" label="src/db/index.ts" /> — lazy Neon
+  connection.
+- <SourceLink path="src/db/schema.ts" label="schema.ts" /> — 12 tables and
+  relations.
+- <SourceLink path="src/app/api/trpc/[trpc]/route.ts" label="trpc route.ts" /> —
+  the HTTP adapter.
+- <SourceLink path="scripts/generate-openapi.ts" label="generate-openapi.ts" />—
+  OpenAPI 3.1 generation.

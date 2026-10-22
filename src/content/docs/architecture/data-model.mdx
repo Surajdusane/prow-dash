@@ -1,4 +1,306 @@
 ---
-title: Data Model
-description: The 12 tables behind the dashboard and how they relate.
+title: Data model
+description:
+  Twelve tables that model the path from area to society to household to
+  dispenser to telemetry, service, complaints and billing.
 ---
+
+## The modeling question
+
+The schema is shaped around the decisions the dashboard has to support:
+
+- **Area-level demand** — where field capacity is under strain, and which areas
+  need more technicians.
+- **Household-level churn** — which households are at risk, and what evidence
+  supports that score.
+- **Device-level telemetry** — which dispensers are degrading, offline, or due
+  for a filter change.
+- **Subscription-level revenue** — what MRR is, how plan mix is shifting, and
+  which payments are late.
+- **Society-level expansion** — which apartment complexes are penetrated, and
+  where the next growth wave should go.
+
+Every table earns its place by supporting one of those decisions. The domain
+chain is the spine: a society sits in an area, households sit in societies,
+subscriptions attach households to plans, dispensers attach to households, and
+readings attach to dispensers. Service, complaints, payments, and leads hang off
+that spine.
+
+The full schema is one file:
+
+<SourceLink path="src/db/schema.ts" label="schema.ts" />. Relations are declared
+centrally with Drizzle's `defineRelations`, so the query layer can traverse them
+without ad-hoc join maps.
+
+## The 12 tables
+
+| Table             | Purpose                    | Key columns                                                                                                  |
+| ----------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `areas`           | Geographic operating zones | `name`, `city`, `infrastructure_age_years`                                                                   |
+| `societies`       | Apartment complexes        | `area_id`, `name`, `total_flats`, `onboarded_date`, `latitude`, `longitude`                                  |
+| `plans`           | Product catalogue          | `name`, `monthly_price`, `deposit`, `includes_dispenser`                                                     |
+| `technicians`     | Field workforce            | `area_id`, `name`, `join_date`, `active`                                                                     |
+| `households`      | Customers                  | `society_id`, `flat_number`, `resident_name`, `join_date`, `status`, `cancel_date`, `risk_score`             |
+| `subscriptions`   | Commercial relationship    | `household_id`, `plan_id`, `start_date`, `end_date`, `status`, `billing_cycle`                               |
+| `dispensers`      | Installed device           | `household_id`, `type`, `install_date`, `last_filter_change_date`, `is_online`                               |
+| `readings`        | Telemetry                  | `dispenser_id`, `recorded_at`, `tds_ppm`, `ph`, `hardness_mgl`, `purity_pct`                                 |
+| `service_tickets` | Field work                 | `household_id`, `dispenser_id`, `technician_id`, `type`, `status`, `raised_date`, `resolved_date`, `sla_met` |
+| `complaints`      | Customer voice             | `household_id`, `category`, `severity`, `date`, `resolved`, `resolution_date`                                |
+| `payments`        | Billing                    | `household_id`, `subscription_id`, `billing_month`, `amount`, `status`, `paid_date`                          |
+| `leads`           | Sales pipeline             | `name`, `society_name`, `role`, `source`, `visit_date`, `converted`, `flats_converted`, `created_at`         |
+
+## The relationships
+
+```text
+areas 1─* societies 1─* households
+households 1─* subscriptions *─1 plans
+households 1─* dispensers 1─* readings
+households 1─* service_tickets *─1 technicians
+households 1─* complaints
+households 1─* payments *─1 subscriptions
+areas 1─* technicians
+leads (standalone)
+```
+
+The chain is mostly one-to-many, so there are no join tables. A society has many
+households; a household has many subscriptions, dispensers, tickets, complaints,
+and payments. Plans and technicians are lookup tables on the many side.
+`service_tickets` is the exception: it points at both the household and the
+specific dispenser, so a repair can be tied to the physical unit that failed.
+
+`payments` points at both the household and the subscription. The household
+makes the payment; the subscription explains which plan and price it belongs to,
+so a plan change or rejoin keeps its billing history without rewriting rows.
+
+### One active subscription per household
+
+A household buys one plan at a time. The table preserves history with
+`start_date` and `end_date`: a cancellation closes the span, and a rejoin opens
+a new one. The risk table reads the latest subscription per household with
+`DISTINCT ON (household_id)` ordered by `start_date` descending.
+
+There is no partial unique index enforcing “one active subscription per
+household.” The invariant lives in the seed and mutation code. At one row per
+household this is a safe simplification; a partial unique index on
+`(household_id) WHERE status = 'active'` would enforce it if rejoins became
+common.
+
+### One dispenser per household
+
+The service installs one unit per flat, so the seed creates exactly one
+dispenser per household. The foreign key is still one-to-many: a replacement
+device would add a second row rather than overwrite the old one, preserving the
+old device's readings and tickets. If a household could genuinely run two
+devices at once, the model would need a join table or an explicit `is_primary`
+flag; today the UI assumes the single active unit.
+
+### Readings belong to a dispenser, not a household
+
+Telemetry is a property of the physical device. If a dispenser is replaced, the
+reading history stays with the old device instead of silently attaching to the
+new one. That is why `readings.dispenser_id` is the only parent key and why the
+fleet queries join through `dispensers` to reach the household.
+
+### Tickets and complaints are separate
+
+A complaint is the customer's voice: category, severity, date, resolved flag. A
+ticket is the operational response: type, technician, SLA outcome, raised and
+resolved dates. One can exist without the other. A customer can complain without
+a ticket being raised, and a preventive filter change can be ticketed without a
+complaint. Linking them with a foreign key would lose that distinction and force
+a one-to-one story that the operation does not have.
+
+Tickets also carry `dispenser_id`; complaints do not. A complaint is about the
+service experience, not necessarily a specific device.
+
+### Leads are standalone
+
+A lead may not have a society yet, and a converted lead can create multiple
+households across a complex. `society_name` is free text, and there is no
+foreign key to `societies`. A foreign key would over-constrain the funnel before
+the society exists. The trade-off is that lead-to-society matching is a human
+step, not a database join.
+
+## Type decisions
+
+- **`date` for business dates** — `join_date`, `cancel_date`, `billing_month`,
+  `last_filter_change_date`, `raised_date`, `resolved_date`, `visit_date`. These
+  are calendar days, compared as strings in `YYYY-MM-DD` form.
+- **`timestamp` for telemetry and created-at** — `readings.recorded_at` and the
+  `created_at` defaults on areas, societies, households, and leads. These need
+  ordering within a day.
+- **Integer rupees, not floats** — `plans.monthly_price`, `plans.deposit`, and
+  `payments.amount` are integers. No rounding drift in money.
+- **Enums for closed sets** — plan name, household status, subscription status,
+  dispenser type, ticket type, ticket status, complaint category, complaint
+  severity, payment status, and lead role. The database rejects invalid states
+  before a query sees them.
+- **`decimal` for measurements** — `readings.ph` is `decimal(3,1)` and
+  `purity_pct` is `decimal(4,1)`. These are sensor values, not money, and the
+  decimal scale is part of the reading.
+- **Tri-state SLA outcome** — `service_tickets.sla_met` is nullable. `null`
+  means the ticket is not resolved (or was reopened), `true` means resolved
+  within target, `false` means missed. There is no `sla_hours` column:
+  <SourceLink
+    path="src/db/queries/tickets.ts"
+    symbol="SLA_HOURS"
+    label="SLA_HOURS"
+  />
+  defines the targets as code constants, and the resolved row stores the boolean
+  outcome.
+- **Denormalized `risk_score`** — the score lives on `households` as an integer
+  so the risk table can sort and filter without recomputing the score for every
+  row.
+  <SourceLink
+    path="src/db/queries/risk.ts"
+    symbol="recomputeAllRiskScores"
+    label="recomputeAllRiskScores"
+  />
+  writes the score; the seed calls it, and the `customers.recomputeRisk`
+  mutation exposes it.
+
+The denormalization is the main type trade-off. Reads are fast and the table can
+sort by a real column, but the stored score goes stale when complaints,
+payments, or tickets change. The app makes that explicit: resolving a complaint
+does not silently re-score the household. An operator clicks **Recompute risk**,
+and the same function that seeded the scores rewrites them. The alternative —
+scoring on every read — would turn a paginated table into a 1,150-row scoring
+job per request.
+
+## Indexes
+
+The indexes follow the access paths in `src/db/queries`. They were added in the
+second migration, after the query shapes were known:
+
+| Index                             | Columns                               | Why                                                     |
+| --------------------------------- | ------------------------------------- | ------------------------------------------------------- |
+| `societies_area_idx`              | `societies(area_id)`                  | Area joins, penetration, and society counts per area    |
+| `households_society_idx`          | `households(society_id)`              | Society → households and society detail                 |
+| `households_status_idx`           | `households(status)`                  | Active/cancelled filters across KPIs and the risk table |
+| `subscriptions_status_idx`        | `subscriptions(status)`               | Active subscription counts and MRR spans                |
+| `subscriptions_household_idx`     | `subscriptions(household_id)`         | Latest subscription per household and history           |
+| `subscriptions_plan_idx`          | `subscriptions(plan_id)`              | Plan mix joins                                          |
+| `dispensers_household_idx`        | `dispensers(household_id)`            | Household → dispenser lookup                            |
+| `dispensers_online_idx`           | `dispensers(is_online)`               | Fleet online/offline gauge                              |
+| `readings_dispenser_recorded_idx` | `readings(dispenser_id, recorded_at)` | Latest reading and trend windows per dispenser          |
+| `readings_recorded_idx`           | `readings(recorded_at)`               | Global recent-reading windows and anomaly scans         |
+| `service_tickets_status_idx`      | `service_tickets(status)`             | Kanban columns and open-ticket counts                   |
+| `service_tickets_raised_date_idx` | `service_tickets(raised_date)`        | 90-day SLA and area-demand windows                      |
+| `service_tickets_technician_idx`  | `service_tickets(technician_id)`      | Technician workload                                     |
+| `complaints_household_date_idx`   | `complaints(household_id, date)`      | Household complaint history and risk windows            |
+| `complaints_date_idx`             | `complaints(date)`                    | 12-month complaint trend                                |
+| `payments_billing_month_idx`      | `payments(billing_month)`             | Monthly payment status and overdue windows              |
+| `payments_subscription_idx`       | `payments(subscription_id)`           | Payment ↔ subscription reconciliation                   |
+| `payments_household_idx`          | `payments(household_id)`              | Household payment history                               |
+| `leads_visit_date_idx`            | `leads(visit_date)`                   | Pipeline by visit date                                  |
+| `leads_converted_idx`             | `leads(converted)`                    | Funnel conversion filters                               |
+
+Some indexes are deliberately missing. There is no index on
+`households.risk_score`; at roughly 1,150 households, sorting the risk table is
+not the bottleneck. The first index I would add at 10x is a partial index on
+active high-risk households, or a simple `risk_score` index if the filter mix
+stayed broad.
+
+There is also no `service_tickets(household_id)` index, even though the
+household drawer filters tickets by household. The current indexes cover status,
+raised date, and technician, not that path. With about 7,000 tickets the scan is
+cheap, but it is the most obvious missing index in the schema.
+
+The lead list orders by `created_at` descending, and there is no
+`leads(created_at)` index. At 450 leads it does not matter. Both gaps are
+recorded here rather than hidden behind a claim that every access path is
+indexed.
+
+The migration workflow is defined in
+
+<SourceLink path="drizzle.config.ts" label="drizzle.config.ts" />; the schema is
+in <SourceLink path="src/db/schema.ts" label="schema.ts" /> and the indexes are
+in the
+<SourceLink
+  path="drizzle/20261016121634_aromatic_frank_castle/migration.sql"
+  label="index migration"
+/>
+migration.
+
+## Why no snapshot tables
+
+MRR, plan mix, and retention are reconstructed from subscription spans rather
+than stored as monthly snapshots. `getMrrTrend` and `getPlanMixTrend` fetch the
+spans once and fold them over the month ends; `getCohortRetention` derives
+active membership from `join_date` and `cancel_date`. There is one source of
+truth and no nightly job in a demo that has no scheduler.
+
+The trade-off is CPU and transfer on every read: the aggregation happens in
+TypeScript over a small book. At a much larger scale, a monthly snapshot table
+would be cheaper and would preserve history after a subscription row is
+corrected. Today the live reconstruction keeps the seed honest: the same
+subscription rows produce MRR and plan mix.
+
+The relevant queries are in
+
+<SourceLink
+  path="src/db/queries/revenue.ts"
+  symbol="getMrrTrend"
+  label="revenue.ts"
+/>
+and
+<SourceLink path="src/db/queries/customers.ts" label="customers.ts" />.
+
+## Trade-offs
+
+- **One dispenser per household is a simplification.** The FK allows many; the
+  seed and UI assume one. Replacements are representable, simultaneous devices
+  are not.
+- **No soft deletes.** `serviceOps.remove` calls `removeTicket` and deletes the
+  row. That keeps the demo clean but loses the ability to audit a deleted
+  ticket.
+- **No audit trail.** Mutations overwrite state; there is no `updated_by`,
+  `updated_at`, or event table.
+- **No tenant column.** Every table belongs to the single demo dataset. Adding
+  multi-tenancy would touch every table and every query.
+- **No geospatial index.** `societies` stores latitude and longitude, but
+  nothing queries by distance; area is the operational unit.
+- **No partial unique indexes.** “One active subscription” and “one dispenser”
+  are conventions, not database constraints.
+- **Risk scores can lag.** The stored score changes only on recompute, so the
+  risk table can show yesterday's ranking until someone clicks the button.
+
+## Code links
+
+- <SourceLink path="src/db/schema.ts" label="schema.ts" /> — all 12 tables,
+  enums, indexes, and relations.
+- <SourceLink path="src/db/index.ts" label="db/index.ts" /> — lazy Neon client.
+- <SourceLink
+    path="src/db/queries/risk.ts"
+    symbol="computeHouseholdRisk"
+    label="risk.ts"
+  />
+  — the scoring function and its weights.
+- <SourceLink
+    path="src/db/queries/service-ops.ts"
+    symbol="getAreaDemand"
+    label="service-ops.ts"
+  />
+  — the area-demand aggregate.
+- <SourceLink
+    path="src/db/queries/tickets.ts"
+    symbol="SLA_HOURS"
+    label="tickets.ts"
+  />
+  — SLA targets and ticket mutations.
+- <SourceLink
+    path="src/db/queries/revenue.ts"
+    symbol="getMrrTrend"
+    label="revenue.ts"
+  />
+  — span-based MRR.
+- <SourceLink
+    path="drizzle/20261013104841_giant_rocket_raccoon/migration.sql"
+    label="initial migration"
+  />
+  — tables, keys, and enums.
+- <SourceLink
+    path="drizzle/20261016121634_aromatic_frank_castle/migration.sql"
+    label="index migration"
+  />
+  — the 20 indexes above.

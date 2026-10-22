@@ -1,5 +1,200 @@
 ---
-title: Device Fleet
+title: "/devices/fleet — Full dispenser fleet"
 description:
-  The full dispenser table with purity, filter age, connectivity, and flags.
+  Every active dispenser with its latest telemetry, filter age, and connectivity
+  state.
 ---
+
+<RouteMeta
+  live="/devices/fleet"
+  time="5 min"
+  repoPath="src/app/(root)/(dashboard)/devices/fleet/page.tsx"
+/>
+
+## Why this route exists
+
+The devices overview answers "what needs attention across the fleet?" The fleet
+page answers a different question: **what is the state of this specific
+dispenser?** It is the lookup and comparison surface for ops and support — the
+place to find a flat, check its latest reading, see how old the filter is, and
+decide whether the device is healthy.
+
+The overview is for triage; the fleet table is for investigation.
+
+## What I chose — and what I left out
+
+| Option                 | Why I rejected it                               | What I chose instead                       |
+| ---------------------- | ----------------------------------------------- | ------------------------------------------ |
+| Cards per device       | Hundreds of cards are hard to compare or scan   | A dense table with filters                 |
+| Infinite scroll        | Harder to scan, sort, and return to a known row | Server pagination, 25 rows per page        |
+| One row per reading    | Explodes the table and buries the current state | One row per dispenser, latest reading only |
+| A separate device page | Slower context switching; duplicates detail UI  | The shared device drawer                   |
+
+## What's on screen
+
+Live route: `/devices/fleet`. The page is `force-dynamic`, and
+`batchPrefetchFleetTable()` warms the first page of the inventory and the area
+filter options.
+
+### Filter toolbar
+
+Three selects: area, dispenser type, and connectivity (any, online, offline).
+Any change resets paging to page 1 and round-trips through `getFleet`. The
+current rows stay on screen and dim while the filtered page resolves, rather
+than being replaced by a full-page skeleton.
+
+**Data:** `getFleet` input — `areaId`, `type`, `online`, `page`, `limit`.
+**Code:**
+
+<SourceLink
+  path="src/features/devices/components/fleet-table/toolbar.tsx"
+  label="toolbar.tsx"
+/>
+
+### Fleet table
+
+Eleven columns: device id, household (flat and resident), society and area,
+type, connectivity status, last reading, latest TDS, pH, purity, filter age, and
+the derived flag. Rows are clickable; the whole row opens the device drawer.
+
+The sort is fixed: **oldest filter first**, with device id as the tie-breaker.
+That is deliberate. The page is a maintenance queue as much as a lookup table;
+the devices most likely to need a filter change sit at the top without the
+reader having to configure anything. There is no column sorting UI and no
+search.
+
+Pagination is server-side at 25 rows. TDS turns rose above 450 ppm, purity turns
+rose below 85%, and filter age becomes an amber badge at 75 days.
+
+**Data:** `getFleet` → `dispensers`, `households`, `societies`, `areas`,
+`readings`. **Code:**
+
+- <SourceLink
+    path="src/features/devices/components/fleet-table/fleet-table.tsx"
+    label="fleet-table.tsx"
+  />
+- <SourceLink
+    path="src/features/devices/hooks/use-get-fleet.ts"
+    label="use-get-fleet.ts"
+  />
+- <SourceLink
+    path="src/db/queries/devices.ts"
+    symbol="getFleet"
+    label="devices.ts"
+  />
+
+### Device drawer
+
+The drawer is shared with `/devices`: same component, same read-only behaviour,
+same 30- and 90-day telemetry chart. It shows the device metadata, filter age,
+and the TDS/purity curve for the selected window. Opening a row only changes
+Zustand state; the table query is not refetched.
+
+**Data:** `getReadings` → `dispensers`, `households`, `societies`, `areas`,
+`readings`. **Code:**
+
+- <SourceLink
+    path="src/features/devices/components/device-drawer/device-drawer.tsx"
+    label="device-drawer.tsx"
+  />
+- <SourceLink
+    path="src/features/devices/hooks/use-get-readings.ts"
+    label="use-get-readings.ts"
+  />
+
+## The data behind it
+
+- **One dispenser per household.** The seed installs it about two to seven days
+  after the household joins. The fleet table only includes dispensers whose
+  household is currently active; cancelled households' devices are out of scope.
+- **Latest reading, not history.** `getFleet` builds a
+  `DISTINCT ON (dispenser_id)` subquery over readings from the last 30 days and
+  joins it to each dispenser. A device with no reading in that window shows `—`
+  and `Never`, not a stale number from months ago.
+- **Filter age** is `today − last_filter_change_date`, computed in SQL.
+- **Connectivity** comes from `dispensers.is_online`.
+- **The flag is stricter than the status dot.** `deriveFlag` checks, in order:
+  offline or no reading for more than seven days, TDS above 450 ppm, purity
+  below 85%, then filter age above 75 days. A device can show "Online" in the
+  status column and still carry an "Offline" flag if it has gone silent.
+
+**Code:**
+
+- <SourceLink
+    path="src/db/queries/devices.ts"
+    symbol="latestReadingsSubquery"
+    label="latestReadingsSubquery"
+  />
+- <SourceLink
+    path="src/db/queries/devices.ts"
+    symbol="deriveFlag"
+    label="deriveFlag"
+  />
+- <SourceLink
+    path="src/db/seed/generators/dispensers.ts"
+    label="dispensers.ts"
+  />
+- <SourceLink path="src/db/seed/generators/readings.ts" label="readings.ts" />
+
+## Chart → data → code
+
+| Section     | Visual  | Why this visual              | Data source      | Component         |
+| ----------- | ------- | ---------------------------- | ---------------- | ----------------- |
+| Fleet table | Table   | Lookup and comparison        | `getFleet`       | `fleet-table/*`   |
+| Filters     | Toolbar | Narrow the book              | `getFleet` input | `toolbar.tsx`     |
+| Detail      | Drawer  | Context without leaving page | `getReadings`    | `device-drawer/*` |
+
+## Interactions
+
+- **Filter.** Area, type, or connectivity change resets to page 1 and issues a
+  new server query.
+- **Page.** Previous and next move through the server-paginated inventory.
+- **Open a row.** The shared drawer opens; it fetches the selected window and
+  keeps the 30/90-day toggle local.
+- **No mutations on this route.** The fleet table is read-only. The only write
+  path in the devices feature is the anomaly feed's **Create ticket** on
+  `/devices`, which lives in a different route.
+
+## Code map
+
+| Layer           | File                                                | What it does                          |
+| --------------- | --------------------------------------------------- | ------------------------------------- |
+| Page            | `src/app/(root)/(dashboard)/devices/fleet/page.tsx` | Prefetch + Suspense layout            |
+| Server prefetch | `src/features/devices/server/index.ts`              | `batchPrefetchFleetTable`             |
+| Hook            | `src/features/devices/hooks/use-get-fleet.ts`       | Server-paged fleet query              |
+| Component       | `src/features/devices/components/fleet-table/*`     | Table and toolbar                     |
+| Component       | `src/features/devices/components/device-drawer/*`   | Shared detail drawer                  |
+| Router          | `src/trpc/routers/devices.ts`                       | `getFleet`, `getReadings`, `getAreas` |
+| Query           | `src/db/queries/devices.ts`                         | Latest reading per dispenser, flags   |
+| Seed            | `src/db/seed/generators/dispensers.ts`              | Device type, install, connectivity    |
+| Seed            | `src/db/seed/generators/readings.ts`                | Latest telemetry and filter cycles    |
+
+## What to notice as a reviewer
+
+1. The table does **not** ship the full reading history. `getFleet` joins a
+   latest-reading subquery, so the payload is one telemetry row per dispenser.
+   Open the query's `latestReadingsSubquery` to see the `DISTINCT ON`.
+2. Filters and pagination are server-side. Change the area filter and watch the
+   row count and page footer change together; nothing is filtered in the
+   browser.
+3. Open a device from this page, then open the same device from `/devices`. It
+   is the same drawer component and the same `getReadings` query — there is no
+   second detail implementation to keep in sync.
+
+## Trade-offs & next
+
+- **No sorting and no search.** The fixed oldest-filter-first order is useful
+  for maintenance, but a support agent looking up a flat must page or filter by
+  area. A search box and sortable columns are the obvious next additions.
+- **No bulk actions.** Rows are acted on one at a time; there is no
+  multi-select. Ticket creation lives on the anomaly feed, not here.
+- **No CSV export.** Ops cannot take the filtered inventory into a spreadsheet.
+- **No device-level alert history.** The flag is derived from the latest
+  reading; the table cannot show that a device has failed the same rule three
+  weeks in a row.
+- **No column customisation.** Eleven columns are a lot on a laptop; the table
+  relies on horizontal layout rather than hiding low-priority fields.
+- **Active households only.** Cancelled households' devices are excluded by
+  design, so the table is not an asset register.
+- **The flag and the status dot can disagree.** Status is the seeded `is_online`
+  flag; the flag also treats a silent device as offline.

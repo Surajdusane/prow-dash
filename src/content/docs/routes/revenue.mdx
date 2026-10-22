@@ -1,5 +1,259 @@
 ---
-title: Revenue
+title: "/revenue — Revenue and retention"
 description:
-  MRR, plan mix, payment status, cohort retention, and overdue collections.
+  MRR, plan mix, payment outcomes and cohort retention — where revenue is
+  leaking and which cohorts stick.
 ---
+
+<RouteMeta
+  live="/revenue"
+  time="6 min"
+  repoPath="src/app/(root)/(dashboard)/revenue/page.tsx"
+/>
+
+## Why this route exists
+
+Revenue is not one number. An ops lead needs five answers at once: is MRR
+rising, are customers moving up-plan or down-plan, how much is late or failed,
+do newer cohorts stick, and which overdue payments can be recovered today. The
+page answers **where revenue is leaking, and which cohort is weak**.
+
+## What I chose — and what I left out
+
+| Option                  | Why I rejected it                                 | What I chose instead                                     |
+| ----------------------- | ------------------------------------------------- | -------------------------------------------------------- |
+| One revenue chart       | Does not show mix or leakage                      | Five surfaces: MRR, plan mix, outcomes, cohorts, overdue |
+| Revenue by area         | Interesting, but not the primary revenue decision | MRR and plan mix first                                   |
+| A single "churn" number | Hides cohort differences                          | Cohort retention matrix                                  |
+| A payments table only   | No trend or mix                                   | Stacked payment outcomes plus an overdue action table    |
+| ARR / forecast          | Not enough history to make a forecast honest      | MRR only, clearly labelled as a run-rate                 |
+
+## What's on screen
+
+Live route: `/revenue`. The page is `force-dynamic`; `batchPrefetchRevenue()`
+warms the KPI row, four charts, and the first overdue page in one batch. Each
+card has its own Suspense boundary and a matching skeleton.
+
+### KPI row
+
+Five tiles from `getRevenueKpis`:
+
+- **MRR** — the sum of active plan prices. It is a run-rate, not cash collected.
+- **ARPU** — MRR ÷ active subscriptions, rounded to whole rupees.
+- **Active subs** — subscriptions billing today.
+- **Failed this month** — failed payments ÷ every payment billed this month.
+- **Collections (90d)** — collected ÷ billed across the current and previous two
+  billing months. Collected means `paidDate` is set; late payers that eventually
+  settled still count. This is the "are we actually getting paid?" number.
+
+**Data:** `getRevenueKpis` → `subscriptions`, `plans`, `payments`. **Code:**
+
+- <SourceLink
+    path="src/features/revenue/components/kpi-row.tsx"
+    label="kpi-row.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/revenue.ts"
+    symbol="getRevenueKpis"
+    label="revenue.ts"
+  />
+
+### MRR trend
+
+An area chart of month-end MRR over 18 months, one series. The legend shows the
+latest value and the percentage change against the first month. The current
+month is capped at today rather than at a future month-end.
+
+MRR is reconstructed from subscription spans. For each month-end, a subscription
+counts when `startDate <= month-end` and `endDate` is null or later than that
+date. There is no monthly snapshot table and no second source of truth.
+
+**Data:** `getMrrTrend` → `subscriptions`, `plans`. **Code:**
+
+- <SourceLink
+    path="src/features/revenue/components/mrr-trend-card.tsx"
+    label="mrr-trend-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/revenue.ts"
+    symbol="getMrrTrend"
+    label="revenue.ts"
+  />
+
+### Plan mix over time
+
+A stacked bar of active subscriptions at each month-end, split into `starter`,
+`standard`, and `premium`, over the same 18 months. It counts subscriptions, not
+rupees. The legend carries the latest count per plan.
+
+**Data:** `getPlanMixTrend` → `subscriptions`, `plans`. **Code:**
+
+- <SourceLink
+    path="src/features/revenue/components/plan-mix-trend-card.tsx"
+    label="plan-mix-trend-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/revenue.ts"
+    symbol="getPlanMixTrend"
+    label="revenue.ts"
+  />
+
+### Payment outcomes
+
+A stacked bar of every billing month's payments by outcome: `paid`, `late`,
+`failed`, `pending`, over the last 12 billing months. It shows volume and
+composition together. "Late" keeps its late label even after the payment
+settles, which is why the same money also appears in the collections rate.
+
+**Data:** `getPaymentStatusByMonth` → `payments`. **Code:**
+
+- <SourceLink
+    path="src/features/revenue/components/payment-status-card.tsx"
+    label="payment-status-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/payments.ts"
+    symbol="getPaymentStatusByMonth"
+    label="payments.ts"
+  />
+
+### Cohort retention
+
+A matrix of 12 join-month cohorts against months since joining. Each cell is the
+share of that cohort still active at the month-end, heat-shaded. The first seven
+months render by default; a toggle expands to 12 so the table stays readable on
+a laptop. A cell the cohort has not reached yet renders a quiet dot, not a fake
+0%. M0 is the join month.
+
+**Data:** `getCohortRetention` → `households` (`joinDate`, `cancelDate`).
+**Code:**
+
+- <SourceLink
+    path="src/features/revenue/components/cohort-retention-card.tsx"
+    label="cohort-retention-card.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/revenue.ts"
+    symbol="getCohortRetention"
+    label="revenue.ts"
+  />
+- <SourceLink
+    path="src/features/revenue/utils/index.ts"
+    symbol="cohortAgeMonths"
+    label="utils/index.ts"
+  />
+
+### Overdue payments
+
+A server-paged table of every `late` or `failed` payment, 25 rows per page,
+newest billing month first and largest amount first within a month. Columns are
+household (flat and resident), society, billing month, amount, days late,
+status, and action. Days late is computed from the first of the billing month,
+matching the seed's due-date convention.
+
+This table has pagination but no filters: the query is already scoped to the
+only rows an operator can act on. Marking one paid is a single click.
+
+**Data:** `getOverdue` → `payments`, `households`, `societies`. **Mutation:**
+`markPaid` → `markPaymentPaid`. **Code:**
+
+- <SourceLink
+    path="src/features/revenue/components/overdue-table/overdue-table.tsx"
+    label="overdue-table.tsx"
+  />
+- <SourceLink
+    path="src/features/revenue/components/overdue-table/mark-paid-button.tsx"
+    label="mark-paid-button.tsx"
+  />
+- <SourceLink
+    path="src/db/queries/payments.ts"
+    symbol="getOverduePayments"
+    label="payments.ts"
+  />
+
+## The data behind it
+
+Payments are generated per active subscription-month, from `startDate` to
+`endDate` or today. The outcome mix is deliberate:
+
+- **Normal months:** 88% paid, 8% late, 4% failed.
+- **Current month:** 58% paid, 5% late, 4% failed, 33% pending.
+- **Risk-cohort months:** 20% paid, 50% late, 30% failed. The bad window starts
+  one month before the household's complaint cluster, so the revenue story and
+  the churn story line up.
+
+Plan prices are ₹499 for starter, ₹799 for standard, and ₹1,199 for premium. The
+seed creates roughly 1,150 households and about 25,000 payments over 24 months.
+About 13% of households enter the risk cohort and roughly 60% of those cancel
+within one to three months of the bad window.
+
+MRR, ARPU, and plan mix all come from subscription spans rather than stored
+monthly totals, so "who was active when" has one definition across the route.
+
+## Chart → data → code
+
+| Section          | Visual      | Why this visual                 | Data source               | Component                   |
+| ---------------- | ----------- | ------------------------------- | ------------------------- | --------------------------- |
+| KPI row          | KPI tiles   | Fast scan of growth and leakage | `getRevenueKpis`          | `kpi-row.tsx`               |
+| MRR trend        | Area        | One trend over time             | `getMrrTrend`             | `mrr-trend-card.tsx`        |
+| Plan mix         | Stacked bar | Composition over time           | `getPlanMixTrend`         | `plan-mix-trend-card.tsx`   |
+| Payment outcomes | Stacked bar | Four outcomes per billing month | `getPaymentStatusByMonth` | `payment-status-card.tsx`   |
+| Cohort retention | Matrix      | Cohort × time                   | `getCohortRetention`      | `cohort-retention-card.tsx` |
+| Overdue          | Table       | Recover specific payments       | `getOverdue`              | `overdue-table/*`           |
+
+## Interactions
+
+- **Mark paid.** The clicked row's button enters a pending state, pinned to that
+  payment id so other rows stay idle. On success a toast names the resident,
+  flat, billing month, and amount. `onSettled` invalidates `getKpis`,
+  `getPaymentStatusByMonth`, and `getOverdue`, so the KPI row, outcomes chart,
+  and table move together.
+- **Failure.** There is no optimistic write. If the mutation fails, the row is
+  unchanged in the database and the toast reports the error; the invalidation
+  still runs.
+- **Page.** Pagination is server-side: the page number is part of the tRPC input
+  and the query key. A deferred copy of the state drives the rows, so the
+  current page dims while the next one loads instead of flashing a skeleton.
+- **No optimistic payment.** Showing a recovered payment before the write lands
+  would overstate collections, so the table waits for the server.
+
+## Code map
+
+| Layer           | File                                          | What it does                              |
+| --------------- | --------------------------------------------- | ----------------------------------------- |
+| Page            | `src/app/(root)/(dashboard)/revenue/page.tsx` | Prefetch + Suspense layout                |
+| Server prefetch | `src/features/revenue/server/index.ts`        | `batchPrefetchRevenue`                    |
+| Hooks           | `src/features/revenue/hooks/*`                | KPIs, trends, cohorts, overdue, mark paid |
+| Components      | `src/features/revenue/components/*`           | KPI row, four cards, overdue table        |
+| Router          | `src/trpc/routers/revenue.ts`                 | Six queries and one mutation              |
+| Query           | `src/db/queries/revenue.ts`                   | KPIs, MRR, plan mix, cohort retention     |
+| Query           | `src/db/queries/payments.ts`                  | Payment outcomes, overdue, mark paid      |
+| Query           | `src/db/queries/plans.ts`                     | `PlanName` type and shared plan constants |
+| Seed            | `src/db/seed/generators/payments.ts`          | Outcomes and risk-cohort drift            |
+| Seed            | `src/db/seed/generators/households.ts`        | Plan mix shift and cancellations          |
+| Seed            | `src/db/seed/reference.ts`                    | Plan prices                               |
+
+## What to notice as a reviewer
+
+1. Read
+   <SourceLink
+     path="src/db/queries/revenue.ts"
+     symbol="getMrrTrend"
+     label="getMrrTrend"
+   />
+   — MRR is rebuilt from spans at each month-end. There is no snapshot table.
+2. Expand the cohort matrix. The dots are months a cohort has not reached, not
+   zero retention; `cohortAgeMonths` draws the boundary.
+3. Mark an overdue payment paid. Watch the KPI row, payment outcomes, and table
+   invalidate together, then refresh to confirm the write persisted.
+
+## Trade-offs & next
+
+- MRR is a point-in-time reconstruction. It ignores upgrades or downgrades
+  inside a month, and the seed gives each subscription one plan for its life.
+- Collections is a three-billing-month window, not a ledger reconciliation. A
+  late payment counts as collected in the month it was billed, not the month the
+  cash arrived.
+- There is no dunning workflow, retry scheduling, or promise-to-pay date.
+- No revenue forecast: the history is too short to make one honest.
+- No per-area revenue view, and the overdue table has no search or filters.
