@@ -14,7 +14,7 @@ const chartConfig = {
   premium: { label: "Premium", colors: chartColor(PLAN_COLOR_PAIRS.premium) },
 } satisfies ChartConfig;
 
-/** Active subscriptions per plan at each month-end — the mix growth story. */
+/** Active subscriptions per plan at each month-end - the mix growth story. */
 export function PlanMixTrendCard() {
   const { data } = useGetPlanMixTrend();
 

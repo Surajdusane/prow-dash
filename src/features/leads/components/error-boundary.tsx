@@ -22,7 +22,7 @@ export function LeadsErrorBoundary({ children }: { children: ReactNode }): React
               <EmptyHeader>
                 <EmptyTitle>Couldn&apos;t load Leads</EmptyTitle>
                 <EmptyDescription>
-                  The pipeline data request failed. This is usually a cold database — try again.
+                  The pipeline data request failed. This is usually a cold database - try again.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>

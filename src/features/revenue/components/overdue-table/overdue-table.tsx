@@ -92,7 +92,7 @@ function OverdueTableRows({
               colSpan={7}
               icon={<CheckCircle2 />}
               title="No overdue payments"
-              description="Late and failed payments land here — collections are on track."
+              description="Late and failed payments land here - collections are on track."
             />
           ) : (
             rows.map((row) => (
@@ -110,7 +110,7 @@ function OverdueTableRows({
                   {row.paidDate === null ? (
                     `${formatNumber(daysLate(row.billingMonth))}d`
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </TableCell>
                 <TableCell>

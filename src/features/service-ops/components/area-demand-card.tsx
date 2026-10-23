@@ -22,7 +22,7 @@ export function AreaDemandCard() {
   const chartData = useMemo(() => data.map((row) => ({ ...row, label: row.area })), [data]);
   const totalTickets = useMemo(() => data.reduce((sum, row) => sum + row.tickets90d, 0), [data]);
 
-  // The stock tooltip only knows series values — swap in a formatter that also
+  // The stock tooltip only knows series values - swap in a formatter that also
   // surfaces infrastructure age for the hovered area.
   const chartOptions = useMemo(
     () => ({

@@ -22,7 +22,7 @@ export function RevenueErrorBoundary({ children }: { children: ReactNode }): Rea
               <EmptyHeader>
                 <EmptyTitle>Couldn&apos;t load Revenue</EmptyTitle>
                 <EmptyDescription>
-                  The billing data request failed. This is usually a cold database — try again.
+                  The billing data request failed. This is usually a cold database - try again.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>

@@ -12,7 +12,7 @@ import { ApiReference } from "@scalar/nextjs-api-reference";
  * - requests: input/body are wrapped as `{ json: <input> }`
  * - responses: `{ result: { data: { json, meta } } }` is unwrapped
  *
- * Hooks must be self-contained arrow functions — they are serialized into the
+ * Hooks must be self-contained arrow functions - they are serialized into the
  * page and run in the browser.
  *
  * @see https://scalar.com/products/api-references/integrations/nextjs
@@ -68,7 +68,7 @@ export const GET = ApiReference({
         headers: { "Content-Type": "application/json" },
       });
     } catch {
-      // Not a tRPC payload — keep the original response.
+      // Not a tRPC payload - keep the original response.
       return;
     }
   },

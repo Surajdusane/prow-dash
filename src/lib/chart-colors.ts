@@ -1,7 +1,7 @@
 import type { PlanName } from "@/db/queries/plans";
 
 /**
- * Shared chart palette — the single source of truth for series hues that cross
+ * Shared chart palette - the single source of truth for series hues that cross
  * route boundaries (plan colours appear on Overview, Revenue and
  * Sustainability; payment statuses on Revenue and Customer drawers). Pick from
  * here instead of inlining hexes per feature so the same entity keeps the same
@@ -21,7 +21,7 @@ export function chartColor(pair: ColorPair): { light: string[]; dark: string[] }
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Plans — amber / sky / violet, reused across routes
+   Plans - amber / sky / violet, reused across routes
    ──────────────────────────────────────────────────────────────────────────── */
 
 export const PLAN_COLOR_PAIRS: Record<PlanName, ColorPair> = {
@@ -37,7 +37,7 @@ export const PLAN_SWATCHES: Record<PlanName, string> = {
 };
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Payment status — semantic (paid good, late warn, failed bad, pending muted)
+   Payment status - semantic (paid good, late warn, failed bad, pending muted)
    ──────────────────────────────────────────────────────────────────────────── */
 
 export type PaymentStatusKey = "paid" | "late" | "failed" | "pending";
@@ -57,7 +57,7 @@ export const PAYMENT_STATUS_SWATCHES: Record<PaymentStatusKey, string> = {
 };
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Dynamic category series — top areas (stacked growth) and similar
+   Dynamic category series - top areas (stacked growth) and similar
    ──────────────────────────────────────────────────────────────────────────── */
 
 /** Ordered hues for series keyed off data (areas, categories). Last slot is the muted "Other". */
@@ -70,7 +70,7 @@ export const CATEGORY_COLOR_PAIRS: ColorPair[] = [
   { light: "#0d9488", dark: "#2dd4bf" }, // teal
   { light: "#4f46e5", dark: "#818cf8" }, // indigo
   { light: "#ca8a04", dark: "#facc15" }, // yellow
-  { light: "#64748b", dark: "#94a3b8" }, // slate — "Other"
+  { light: "#64748b", dark: "#94a3b8" }, // slate - "Other"
 ];
 
 /** Tailwind swatch class pair for hand-rolled legends, matching CATEGORY_COLOR_PAIRS. */
@@ -96,6 +96,6 @@ export function categorySwatch(index: number): string {
   return CATEGORY_SWATCHES[index % CATEGORY_SWATCHES.length];
 }
 
-/** The muted slate used for the folded-in "Other" bucket — always the last slot. */
+/** The muted slate used for the folded-in "Other" bucket - always the last slot. */
 export const OTHER_COLOR_PAIR: ColorPair = CATEGORY_COLOR_PAIRS[CATEGORY_COLOR_PAIRS.length - 1];
 export const OTHER_SWATCH: string = CATEGORY_SWATCHES[CATEGORY_SWATCHES.length - 1];

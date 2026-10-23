@@ -9,15 +9,15 @@ description:
 
 The schema is shaped around the decisions the dashboard has to support:
 
-- **Area-level demand** — where field capacity is under strain, and which areas
+- **Area-level demand** - where field capacity is under strain, and which areas
   need more technicians.
-- **Household-level churn** — which households are at risk, and what evidence
+- **Household-level churn** - which households are at risk, and what evidence
   supports that score.
-- **Device-level telemetry** — which dispensers are degrading, offline, or due
+- **Device-level telemetry** - which dispensers are degrading, offline, or due
   for a filter change.
-- **Subscription-level revenue** — what MRR is, how plan mix is shifting, and
+- **Subscription-level revenue** - what MRR is, how plan mix is shifting, and
   which payments are late.
-- **Society-level expansion** — which apartment complexes are penetrated, and
+- **Society-level expansion** - which apartment complexes are penetrated, and
   where the next growth wave should go.
 
 Every table earns its place by supporting one of those decisions. The domain
@@ -123,22 +123,22 @@ step, not a database join.
 
 ## Type decisions
 
-- **`date` for business dates** — `join_date`, `cancel_date`, `billing_month`,
+- **`date` for business dates** - `join_date`, `cancel_date`, `billing_month`,
   `last_filter_change_date`, `raised_date`, `resolved_date`, `visit_date`. These
   are calendar days, compared as strings in `YYYY-MM-DD` form.
-- **`timestamp` for telemetry and created-at** — `readings.recorded_at` and the
+- **`timestamp` for telemetry and created-at** - `readings.recorded_at` and the
   `created_at` defaults on areas, societies, households, and leads. These need
   ordering within a day.
-- **Integer rupees, not floats** — `plans.monthly_price`, `plans.deposit`, and
+- **Integer rupees, not floats** - `plans.monthly_price`, `plans.deposit`, and
   `payments.amount` are integers. No rounding drift in money.
-- **Enums for closed sets** — plan name, household status, subscription status,
+- **Enums for closed sets** - plan name, household status, subscription status,
   dispenser type, ticket type, ticket status, complaint category, complaint
   severity, payment status, and lead role. The database rejects invalid states
   before a query sees them.
-- **`decimal` for measurements** — `readings.ph` is `decimal(3,1)` and
+- **`decimal` for measurements** - `readings.ph` is `decimal(3,1)` and
   `purity_pct` is `decimal(4,1)`. These are sensor values, not money, and the
   decimal scale is part of the reading.
-- **Tri-state SLA outcome** — `service_tickets.sla_met` is nullable. `null`
+- **Tri-state SLA outcome** - `service_tickets.sla_met` is nullable. `null`
   means the ticket is not resolved (or was reopened), `true` means resolved
   within target, `false` means missed. There is no `sla_hours` column:
   <SourceLink
@@ -148,7 +148,7 @@ step, not a database join.
   />
   defines the targets as code constants, and the resolved row stores the boolean
   outcome.
-- **Denormalized `risk_score`** — the score lives on `households` as an integer
+- **Denormalized `risk_score`** - the score lives on `households` as an integer
   so the risk table can sort and filter without recomputing the score for every
   row.
   <SourceLink
@@ -163,8 +163,8 @@ The denormalization is the main type trade-off. Reads are fast and the table can
 sort by a real column, but the stored score goes stale when complaints,
 payments, or tickets change. The app makes that explicit: resolving a complaint
 does not silently re-score the household. An operator clicks **Recompute risk**,
-and the same function that seeded the scores rewrites them. The alternative —
-scoring on every read — would turn a paginated table into a 1,150-row scoring
+and the same function that seeded the scores rewrites them. The alternative -
+scoring on every read - would turn a paginated table into a 1,150-row scoring
 job per request.
 
 ## Indexes
@@ -267,40 +267,40 @@ and
 
 ## Code links
 
-- <SourceLink path="src/db/schema.ts" label="schema.ts" /> — all 12 tables,
+- <SourceLink path="src/db/schema.ts" label="schema.ts" /> - all 12 tables,
   enums, indexes, and relations.
-- <SourceLink path="src/db/index.ts" label="db/index.ts" /> — lazy Neon client.
+- <SourceLink path="src/db/index.ts" label="db/index.ts" /> - lazy Neon client.
 - <SourceLink
     path="src/db/queries/risk.ts"
     symbol="computeHouseholdRisk"
     label="risk.ts"
   />
-  — the scoring function and its weights.
+  - the scoring function and its weights.
 - <SourceLink
     path="src/db/queries/service-ops.ts"
     symbol="getAreaDemand"
     label="service-ops.ts"
   />
-  — the area-demand aggregate.
+  - the area-demand aggregate.
 - <SourceLink
     path="src/db/queries/tickets.ts"
     symbol="SLA_HOURS"
     label="tickets.ts"
   />
-  — SLA targets and ticket mutations.
+  - SLA targets and ticket mutations.
 - <SourceLink
     path="src/db/queries/revenue.ts"
     symbol="getMrrTrend"
     label="revenue.ts"
   />
-  — span-based MRR.
+  - span-based MRR.
 - <SourceLink
     path="drizzle/20261013104841_giant_rocket_raccoon/migration.sql"
     label="initial migration"
   />
-  — tables, keys, and enums.
+  - tables, keys, and enums.
 - <SourceLink
     path="drizzle/20261016121634_aromatic_frank_castle/migration.sql"
     label="index migration"
   />
-  — the 20 indexes above.
+  - the 20 indexes above.

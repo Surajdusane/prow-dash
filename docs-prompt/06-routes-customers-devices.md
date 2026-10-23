@@ -1,4 +1,4 @@
-# Prompt 06 — Customers, Devices, Fleet
+# Prompt 06 - Customers, Devices, Fleet
 
 Read `docs-prompt/00-readme.md` first, then reuse the route-page template from `docs-prompt/05-routes-overview-service-ops.md`.
 
@@ -21,13 +21,13 @@ Each page must explain:
 8. What a reviewer should click/read.
 9. Trade-offs.
 
-## 1. `routes/customers.mdx` — `/customers`
+## 1. `routes/customers.mdx` - `/customers`
 
 Frontmatter:
 
 ```yaml
 ---
-title: "/customers — Churn risk"
+title: "/customers - Churn risk"
 description: Score the book, surface high-risk households, and act on complaints before they cancel.
 ---
 ```
@@ -38,7 +38,7 @@ description: Score the book, surface high-risk households, and act on complaints
 - Support needs a ranked list of households to call, with the reason behind each score.
 - The page must answer: *who is at risk, why, and what can we do now?*
 
-### What I chose — and what I left out
+### What I chose - and what I left out
 
 | Option | Why I rejected it | What I chose instead |
 |---|---|---|
@@ -72,7 +72,7 @@ Live routes: `/customers`, with the household drawer as the detail state.
 
 #### Complaint trend
 
-- Multi-line: water quality, service delay, billing, device malfunction, other — 12 months.
+- Multi-line: water quality, service delay, billing, device malfunction, other - 12 months.
 - **Why:** a category trend explains *what kind* of risk is rising.
 - **Data:** `getComplaintTrend` → `complaints`.
 - **Code:** `complaint-trend-card.tsx`.
@@ -143,13 +143,13 @@ Live routes: `/customers`, with the household drawer as the detail state.
 - No per-plan or per-area calibration.
 - No real outcome tracking in the demo.
 
-## 2. `routes/devices.mdx` — `/devices`
+## 2. `routes/devices.mdx` - `/devices`
 
 Frontmatter:
 
 ```yaml
 ---
-title: "/devices — IoT fleet monitoring"
+title: "/devices - IoT fleet monitoring"
 description: Connectivity, telemetry trends, and the anomalies that need a field visit.
 ---
 ```
@@ -160,7 +160,7 @@ description: Connectivity, telemetry trends, and the anomalies that need a field
 - Ops needs to know: *which devices are offline, degrading, or producing bad water?*
 - The page must turn ~1,000 devices into a short attention list.
 
-### What I chose — and what I left out
+### What I chose - and what I left out
 
 | Option | Why I rejected it | What I chose instead |
 |---|---|---|
@@ -257,13 +257,13 @@ Read `getFleetStats` for the actual fields. Likely: total devices, online rate, 
 - No maintenance cost model.
 - The drawer loads on demand; no prefetch for every device.
 
-## 3. `routes/fleet.mdx` — `/devices/fleet`
+## 3. `routes/fleet.mdx` - `/devices/fleet`
 
 Frontmatter:
 
 ```yaml
 ---
-title: "/devices/fleet — Full dispenser fleet"
+title: "/devices/fleet - Full dispenser fleet"
 description: Every active dispenser with its latest telemetry, filter age, and connectivity state.
 ---
 ```
@@ -273,7 +273,7 @@ description: Every active dispenser with its latest telemetry, filter age, and c
 - The devices overview shows the fleet; the fleet page answers: *what is the state of this specific dispenser?*
 - It is the lookup and comparison surface for ops and support.
 
-### What I chose — and what I left out
+### What I chose - and what I left out
 
 | Option | Why I rejected it | What I chose instead |
 |---|---|---|

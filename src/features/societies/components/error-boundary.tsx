@@ -22,7 +22,7 @@ export function SocietiesErrorBoundary({ children }: { children: ReactNode }): R
               <EmptyHeader>
                 <EmptyTitle>Couldn&apos;t load Societies</EmptyTitle>
                 <EmptyDescription>
-                  The portfolio data request failed. This is usually a cold database — try again.
+                  The portfolio data request failed. This is usually a cold database - try again.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>

@@ -105,14 +105,14 @@ function LeadsTableRows({
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className="text-muted-foreground">{row.role ? LEAD_ROLE_LABELS[row.role] : "—"}</TableCell>
+                <TableCell className="text-muted-foreground">{row.role ? LEAD_ROLE_LABELS[row.role] : "-"}</TableCell>
                 <TableCell>
                   {row.source ? (
                     <Badge size="sm" variant="secondary">
                       {leadSourceLabel(row.source)}
                     </Badge>
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </TableCell>
                 <TableCell className="text-muted-foreground">

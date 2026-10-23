@@ -22,7 +22,7 @@ export function OverviewErrorBoundary({ children }: { children: ReactNode }): Re
               <EmptyHeader>
                 <EmptyTitle>Couldn&apos;t load the overview</EmptyTitle>
                 <EmptyDescription>
-                  The dashboard data request failed. This is usually a cold database — try again.
+                  The dashboard data request failed. This is usually a cold database - try again.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>

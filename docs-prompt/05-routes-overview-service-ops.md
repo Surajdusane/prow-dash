@@ -1,4 +1,4 @@
-# Prompt 05 — Route index, Overview, Service Ops
+# Prompt 05 - Route index, Overview, Service Ops
 
 Read `docs-prompt/00-readme.md` first.
 
@@ -6,9 +6,9 @@ Read `docs-prompt/00-readme.md` first.
 
 Write:
 
-- `src/content/docs/routes/index.mdx` — how to read the route pages + full route map
-- `src/content/docs/routes/overview.mdx` — `/`
-- `src/content/docs/routes/service-ops.mdx` — `/service-ops`
+- `src/content/docs/routes/index.mdx` - how to read the route pages + full route map
+- `src/content/docs/routes/overview.mdx` - `/`
+- `src/content/docs/routes/service-ops.mdx` - `/service-ops`
 
 This prompt also establishes the route-page template that prompts 06–08 will reuse.
 
@@ -18,7 +18,7 @@ Every route page follows this exact order:
 
 ```mdx
 ---
-title: "/route — short label"
+title: "/route - short label"
 description: One sentence explaining the decision this page supports.
 ---
 
@@ -31,7 +31,7 @@ description: One sentence explaining the decision this page supports.
 ## Why this route exists
 The business question and the decision it supports.
 
-## What I chose — and what I left out
+## What I chose - and what I left out
 | Option | Why I rejected it | What I chose instead |
 ...
 
@@ -142,13 +142,13 @@ Link to `/docs/architecture/code-flow`.
 - Then `/devices` for telemetry.
 - Then `/` for the executive summary.
 
-## 2. `routes/overview.mdx` — `/`
+## 2. `routes/overview.mdx` - `/`
 
 Frontmatter:
 
 ```yaml
 ---
-title: "/ — Executive overview"
+title: "/ - Executive overview"
 description: The 60-second health check for the whole ProWater network.
 ---
 ```
@@ -159,7 +159,7 @@ description: The 60-second health check for the whole ProWater network.
 - The page must answer it in under a minute: households, revenue, churn, open service load, fleet purity.
 - It is also the entry point to every other route.
 
-### What I chose — and what I left out
+### What I chose - and what I left out
 
 | Option | Why I rejected it | What I chose instead |
 |---|---|---|
@@ -261,13 +261,13 @@ Explain the denominator for churn: cancellations ÷ households active at the sta
 - No comparison to previous period; a delta indicator would help.
 - Area health is a table; a map would be a nice addition but not required for the decision.
 
-## 3. `routes/service-ops.mdx` — `/service-ops`
+## 3. `routes/service-ops.mdx` - `/service-ops`
 
 Frontmatter:
 
 ```yaml
 ---
-title: "/service-ops — Field operations"
+title: "/service-ops - Field operations"
 description: Triage the service board, see where demand is concentrated, and act before the next complaint.
 ---
 ```
@@ -278,7 +278,7 @@ description: Triage the service board, see where demand is concentrated, and act
 - The page combines a kanban for action with a predictive queue for prevention.
 - It also exposes the capacity story: area demand, SLA, technician load.
 
-### What I chose — and what I left out
+### What I chose - and what I left out
 
 | Option | Why I rejected it | What I chose instead |
 |---|---|---|

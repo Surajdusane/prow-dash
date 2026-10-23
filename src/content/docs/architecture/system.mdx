@@ -2,7 +2,7 @@
 title: System architecture
 description:
   One Next.js deployment, a typed tRPC boundary, Drizzle queries, and Neon
-  Postgres — and why that was the right size for this project.
+  Postgres - and why that was the right size for this project.
 ---
 
 ## The shape of the problem
@@ -118,7 +118,7 @@ validates inputs at the boundary without a separate OpenAPI-first codegen step.
 
 The trade-off is tighter coupling to TypeScript. A non-TypeScript consumer
 cannot import `AppRouter`, and a breaking return-shape change is a breaking
-change for the only client — which is fine here, because both deploy together.
+change for the only client - which is fine here, because both deploy together.
 
 The mitigation is the generated OpenAPI document:
 
@@ -189,7 +189,7 @@ need a database; the first request after a deploy is the first query.
 
 Configuration is intentionally small:
 
-- `DATABASE_URL` is required — the Neon pooled connection string;
+- `DATABASE_URL` is required - the Neon pooled connection string;
   <SourceLink path=".env.example" label=".env.example" /> shows the expected
   shape.
 - `NEXT_PUBLIC_APP_URL` is optional;
@@ -243,19 +243,19 @@ boundary is stated rather than implied.
 
 ## Code links
 
-- <SourceLink path="src/trpc/routers/_app.ts" label="_app.ts" /> — the eight
+- <SourceLink path="src/trpc/routers/_app.ts" label="_app.ts" /> - the eight
   router namespaces.
-- <SourceLink path="src/trpc/server.tsx" label="trpc/server.tsx" /> —
+- <SourceLink path="src/trpc/server.tsx" label="trpc/server.tsx" /> -
   `prefetch`, `batchPrefetch`, `HydrateClient`.
-- <SourceLink path="src/trpc/client.tsx" label="trpc/client.tsx" /> —
+- <SourceLink path="src/trpc/client.tsx" label="trpc/client.tsx" /> -
   `httpBatchLink`, SuperJSON, browser query client.
-- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" /> — stale
+- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" /> - stale
   time and dehydration rules.
-- <SourceLink path="src/db/index.ts" label="src/db/index.ts" /> — lazy Neon
+- <SourceLink path="src/db/index.ts" label="src/db/index.ts" /> - lazy Neon
   connection.
-- <SourceLink path="src/db/schema.ts" label="schema.ts" /> — 12 tables and
+- <SourceLink path="src/db/schema.ts" label="schema.ts" /> - 12 tables and
   relations.
-- <SourceLink path="src/app/api/trpc/[trpc]/route.ts" label="trpc route.ts" /> —
+- <SourceLink path="src/app/api/trpc/[trpc]/route.ts" label="trpc route.ts" /> -
   the HTTP adapter.
-- <SourceLink path="scripts/generate-openapi.ts" label="generate-openapi.ts" />—
+- <SourceLink path="scripts/generate-openapi.ts" label="generate-openapi.ts" />-
   OpenAPI 3.1 generation.

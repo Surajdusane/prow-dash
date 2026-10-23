@@ -47,7 +47,7 @@ export type TechnicianSeed = {
   active: boolean;
   /**
    * Relative ticket load. In high-infra areas 1–2 techs absorb most of the
-   * demand — this is what makes the technician workload chart interesting.
+   * demand - this is what makes the technician workload chart interesting.
    */
   loadWeight: number;
 };

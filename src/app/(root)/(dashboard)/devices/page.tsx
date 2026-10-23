@@ -35,7 +35,7 @@ export default function DevicesPage() {
           <div className="flex flex-col gap-1">
             <h1 className="font-heading text-2xl font-semibold">Devices</h1>
             <p className="text-muted-foreground text-sm">
-              IoT fleet monitoring — connectivity, telemetry trends and the anomalies that need a visit.
+              IoT fleet monitoring - connectivity, telemetry trends and the anomalies that need a visit.
             </p>
           </div>
 
@@ -43,7 +43,7 @@ export default function DevicesPage() {
             <DevicesKpiRow />
           </Suspense>
 
-          {/* Row 1 — gauge, trend and anomaly mix share one line. The grid's
+          {/* Row 1 - gauge, trend and anomaly mix share one line. The grid's
               default stretch keeps all three cards the same height; each card
               distributes or centres its own content to fill. */}
           <div className="grid gap-6 xl:grid-cols-3">
@@ -78,7 +78,7 @@ export default function DevicesPage() {
             </Suspense>
           </div>
 
-          {/* Row 2 — the anomaly feed owns the full width on its own row. */}
+          {/* Row 2 - the anomaly feed owns the full width on its own row. */}
           <Suspense
             fallback={
               <Card>

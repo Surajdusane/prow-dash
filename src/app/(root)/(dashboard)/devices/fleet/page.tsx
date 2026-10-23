@@ -26,7 +26,7 @@ export default function FleetPage() {
           <div className="flex flex-col gap-1">
             <h1 className="font-heading text-2xl font-semibold">Fleet</h1>
             <p className="text-muted-foreground text-sm">
-              Every active household dispenser with its latest telemetry — filter by area, type or connectivity.
+              Every active household dispenser with its latest telemetry - filter by area, type or connectivity.
             </p>
           </div>
 

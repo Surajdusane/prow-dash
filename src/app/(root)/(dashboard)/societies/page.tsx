@@ -31,7 +31,7 @@ export default function SocietiesPage() {
           <div className="flex flex-col gap-1">
             <h1 className="font-heading text-2xl font-semibold">Societies</h1>
             <p className="text-muted-foreground text-sm">
-              Expansion and penetration — onboarding growth, coverage by area and the full society book.
+              Expansion and penetration - onboarding growth, coverage by area and the full society book.
             </p>
           </div>
 
@@ -43,7 +43,7 @@ export default function SocietiesPage() {
             <Suspense fallback={<ChartCardSkeleton />}>
               <ChartCard
                 title="Onboarding growth"
-                description="Cumulative active households per area over the last 24 months — top eight areas plus everything else."
+                description="Cumulative active households per area over the last 24 months - top eight areas plus everything else."
               >
                 <GrowthTrendCard />
               </ChartCard>

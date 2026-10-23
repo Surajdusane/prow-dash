@@ -17,7 +17,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - Content lives in `src/content/docs` (`.mdx` + `meta.json` for sidebar order; subfolders become sidebar groups).
 - MDX components (headings, Tabs, Steps, etc.) in `src/features/docs/components/mdx`; code theme (min-light/vesper) in `source.config.ts`; code-block height cap in `globals.css` (`figure.shiki > div[role="region"]`).
-- Docs shell: `src/app/(docs)/layout.tsx` + shared options in `src/lib/layout.shared.tsx`; `RootProvider` stays in `src/app/layout.tsx` — don't nest another one.
+- Docs shell: `src/app/(docs)/layout.tsx` + shared options in `src/lib/layout.shared.tsx`; `RootProvider` stays in `src/app/layout.tsx` - don't nest another one.
 - After adding pages, run `bun run build` to verify prerender.
 
 ### Add a docs page
@@ -61,8 +61,8 @@ product goes to the merchant's actual store (Shopify, etc).
 ## Charts
 
 - Use the installed evilcharts (`src/components/evilcharts`) first:
-  - `charts/` — `EChartsAreaChart`, `EChartsBarChart`, `EChartsLineChart`, `EChartsPieChart`, `EChartsRadialChart`, `EChartsRadarChart`, `EChartsComposedChart`.
-  - `blocks/` — ready-made dashboard blocks; copy/adapt their composition (all previewed in `dashboard/home/page.tsx`).
+  - `charts/` - `EChartsAreaChart`, `EChartsBarChart`, `EChartsLineChart`, `EChartsPieChart`, `EChartsRadialChart`, `EChartsRadarChart`, `EChartsComposedChart`.
+  - `blocks/` - ready-made dashboard blocks; copy/adapt their composition (all previewed in `dashboard/home/page.tsx`).
 - Charts are client components; always render inside a fixed-height or `h-full` container.
 - Only if evilcharts can't meet the requirement, install shadcn charts: `bunx --bun shadcn@latest add chart`.
 

@@ -6,7 +6,7 @@ import { ChartLegend } from "@/components/dashboard/chart-legend";
 import { EChartsComposedChart, type ChartConfig } from "@/components/evilcharts/charts/echarts-composed-chart";
 import type { HouseholdProfile } from "@/db/queries/customers";
 
-/** Keep the sparkline honest — never plot more than the last month of points. */
+/** Keep the sparkline honest - never plot more than the last month of points. */
 const SPARKLINE_POINTS = 30;
 
 const chartConfig = {
@@ -17,7 +17,7 @@ const chartConfig = {
 const dayFormatter = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
 
 // TDS (~200–500 ppm) and purity (~85–99%) live on very different scales, so each
-// line gets its own auto-scaled axis. Both axes stay invisible — this is a
+// line gets its own auto-scaled axis. Both axes stay invisible - this is a
 // sparkline, the tooltip carries the numbers.
 const chartOptions = {
   yAxis: [

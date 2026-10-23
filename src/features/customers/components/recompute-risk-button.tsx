@@ -8,7 +8,7 @@ import { useRecomputeRisk } from "@/features/customers/hooks";
 import { confirm } from "@/hooks/use-confirm";
 
 /**
- * Global risk recompute — re-scores every household from the last 90 days of
+ * Global risk recompute - re-scores every household from the last 90 days of
  * complaints, payments and SLA misses. Confirmed first because it rewrites the
  * whole book; the table visibly re-sorts once the mutation lands.
  */

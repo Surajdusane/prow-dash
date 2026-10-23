@@ -1,4 +1,4 @@
-# Prompt 10 — Data simulation
+# Prompt 10 - Data simulation
 
 Read `docs-prompt/00-readme.md` first.
 
@@ -6,7 +6,7 @@ Read `docs-prompt/00-readme.md` first.
 
 Write `src/content/docs/architecture/data-simulation.mdx`.
 
-This page is one of the strongest pieces of evidence in the case study. It shows that the insights are not random rows — the patterns the dashboard claims to detect are injected upstream, deterministically.
+This page is one of the strongest pieces of evidence in the case study. It shows that the insights are not random rows - the patterns the dashboard claims to detect are injected upstream, deterministically.
 
 The page must answer:
 
@@ -22,7 +22,7 @@ The page must answer:
 ```yaml
 ---
 title: Simulating 24 months of causal data
-description: A deterministic ten-stage seed that injects filter degradation, seasonal complaints, payment drift and a known risk cohort — so the dashboard's insights are real to the dataset.
+description: A deterministic ten-stage seed that injects filter degradation, seasonal complaints, payment drift and a known risk cohort - so the dashboard's insights are real to the dataset.
 ---
 ```
 
@@ -236,12 +236,12 @@ Explain:
 
 Do not invent precision numbers. Explain how to validate:
 
-1. **Cohort check** — compare the high-risk band with the injected `riskCohort` flag. If the score is working, the high band should be enriched for the cohort.
-2. **Outcome check** — compare high-risk households with later cancellation. The cohort has ~60% cancellation, so a useful score should rank cohort households above the base rate.
-3. **Lift** — top-decile risk vs a random household.
-4. **Precision/recall at band thresholds** — high band precision and recall, with the caveat that the score is a ranking tool, not a classifier.
-5. **Predictive service check** — for dispensers in the predictive queue, did a repair/filter ticket follow within the next N days? The seed’s causal timeline makes this measurable.
-6. **Visual sanity** — high-infra areas should have higher tickets per 100; monsoon months should have more water-quality complaints; plan mix should shift over time.
+1. **Cohort check** - compare the high-risk band with the injected `riskCohort` flag. If the score is working, the high band should be enriched for the cohort.
+2. **Outcome check** - compare high-risk households with later cancellation. The cohort has ~60% cancellation, so a useful score should rank cohort households above the base rate.
+3. **Lift** - top-decile risk vs a random household.
+4. **Precision/recall at band thresholds** - high band precision and recall, with the caveat that the score is a ranking tool, not a classifier.
+5. **Predictive service check** - for dispensers in the predictive queue, did a repair/filter ticket follow within the next N days? The seed’s causal timeline makes this measurable.
+6. **Visual sanity** - high-infra areas should have higher tickets per 100; monsoon months should have more water-quality complaints; plan mix should shift over time.
 
 Include a short code/SQL sketch, e.g.:
 
@@ -262,7 +262,7 @@ group by 1
 order by 1;
 ```
 
-If you run this against the seeded DB, put the real numbers in the page. If you do not, write “the query is the validation method; the numbers depend on the seed date” — do not fabricate.
+If you run this against the seeded DB, put the real numbers in the page. If you do not, write “the query is the validation method; the numbers depend on the seed date” - do not fabricate.
 
 ### 8. Limitations
 

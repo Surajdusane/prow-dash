@@ -13,7 +13,7 @@ const TICKET_TYPE_LABELS: Record<"filter_change" | "repair" | "installation" | "
 };
 
 /**
- * The Devices route is read-only — this is its single write path: an anomaly's
+ * The Devices route is read-only - this is its single write path: an anomaly's
  * "Create ticket" shortcut dispatches into Service Ops and then refreshes both
  * the anomaly feed and the service board.
  */

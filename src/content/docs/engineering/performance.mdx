@@ -2,11 +2,11 @@
 title: Performance
 description:
   Server prefetch, batched queries, Suspense, bounded windows and indexed access
-  — the choices that keep a data-heavy dashboard fast.
+  - the choices that keep a data-heavy dashboard fast.
 ---
 
 A shift lead opening `/service-ops` should see a board, not a spinner chain. The
-dashboard has nine routes and 38 queries prefetched across them — two to six per
+dashboard has nine routes and 38 queries prefetched across them - two to six per
 route. The performance work is mostly about removing waterfalls, bounding
 payloads, and pushing work into Postgres.
 
@@ -103,7 +103,7 @@ table each have a fallback. A slow predictive query cannot hold the board.
 
 The fallbacks are shaped like the content they replace. The shared skeletons
 provide a chart card with a 280 px panel and a table card with real row slots.
-Feature skeletons go further — the risk table renders its actual column heads
+Feature skeletons go further - the risk table renders its actual column heads
 over shimmer rows, so the table does not jump when data arrives.
 
 **Code:**
@@ -267,7 +267,7 @@ fixed-height container, so ECharts gets a measurable box before it initialises.
 
 ECharts is imported modularly. The area chart registers only the line series,
 grid, tooltip, and data-zoom components it uses. A route that does not render a
-chart — the fleet table, for example — does not pull the chart modules into its
+chart - the fleet table, for example - does not pull the chart modules into its
 client graph.
 
 Non-trivial transformations are memoised before they reach the chart. The
@@ -356,36 +356,36 @@ are visible to every visitor.
 
 ## Code links
 
-- <SourceLink path="src/trpc/server.tsx" label="src/trpc/server.tsx" /> —
+- <SourceLink path="src/trpc/server.tsx" label="src/trpc/server.tsx" /> -
   `prefetch`, `batchPrefetch`, `HydrateClient`.
-- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" /> — stale
+- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" /> - stale
   time and pending-query dehydration.
-- <SourceLink path="src/trpc/client.tsx" label="trpc/client.tsx" /> —
+- <SourceLink path="src/trpc/client.tsx" label="trpc/client.tsx" /> -
   `httpBatchLink`, SuperJSON, browser query client.
-- <SourceLink path="src/db/queries/overview.ts" label="overview.ts" /> —
+- <SourceLink path="src/db/queries/overview.ts" label="overview.ts" /> -
   parallel KPI aggregates.
-- <SourceLink path="src/db/queries/service-ops.ts" label="service-ops.ts" /> —
+- <SourceLink path="src/db/queries/service-ops.ts" label="service-ops.ts" /> -
   predictive scoring, area demand, 25-row cap.
-- <SourceLink path="src/db/queries/customers.ts" label="customers.ts" /> —
+- <SourceLink path="src/db/queries/customers.ts" label="customers.ts" /> -
   server-paged risk table and complaint trend.
-- <SourceLink path="src/db/queries/devices.ts" label="devices.ts" /> — fleet
+- <SourceLink path="src/db/queries/devices.ts" label="devices.ts" /> - fleet
   paging and 60-point downsampling.
-- <SourceLink path="src/db/queries/payments.ts" label="payments.ts" /> — billing
+- <SourceLink path="src/db/queries/payments.ts" label="payments.ts" /> - billing
   trend and overdue paging.
-- <SourceLink path="src/db/schema.ts" label="schema.ts" /> — all indexes and
+- <SourceLink path="src/db/schema.ts" label="schema.ts" /> - all indexes and
   enums.
 - <SourceLink
     path="src/components/dashboard/skeletons.tsx"
     label="skeletons.tsx"
   />
-  — shaped fallbacks.
+  - shaped fallbacks.
 - <SourceLink
     path="src/features/service-ops/server/index.ts"
     label="service-ops/server"
   />
-  — the batch prefetch list.
+  - the batch prefetch list.
 - <SourceLink
     path="src/app/(root)/(dashboard)/service-ops/page.tsx"
     label="service-ops/page.tsx"
   />
-  — server route, Suspense boundaries, `force-dynamic`.
+  - server route, Suspense boundaries, `force-dynamic`.

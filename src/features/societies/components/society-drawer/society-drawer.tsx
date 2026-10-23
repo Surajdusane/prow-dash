@@ -123,7 +123,7 @@ export function SocietyDrawer() {
             <div className="flex flex-col items-center gap-3 py-10 text-center">
               <p className="text-sm font-medium">Couldn&apos;t load this society</p>
               <p className="text-muted-foreground text-sm">
-                The profile request failed. This is usually a cold database — try again.
+                The profile request failed. This is usually a cold database - try again.
               </p>
               <Button variant="outline" onClick={() => void refetch()}>
                 Retry
@@ -142,7 +142,7 @@ export function SocietyDrawer() {
                 <Stat label="Open tickets" value={formatNumber(data.openTickets)} hint="Not yet resolved" />
                 <Stat
                   label="Avg TDS (30d)"
-                  value={data.avgTds30d !== null ? formatNumber(data.avgTds30d) : "—"}
+                  value={data.avgTds30d !== null ? formatNumber(data.avgTds30d) : "-"}
                   hint={data.avgTds30d !== null ? "ppm across households" : "No readings in 30 days"}
                 />
                 <Stat label="Active households" value={formatNumber(data.subscribed)} hint="Subscribed today" />

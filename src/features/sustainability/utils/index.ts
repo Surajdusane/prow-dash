@@ -15,7 +15,7 @@ export const PLAN_LABELS: Record<PlanName, string> = {
 export const PLAN_ORDER: PlanName[] = ["starter", "standard", "premium"];
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Series colours — water is sky, jars are emerald, plans reuse the shared set
+   Series colours - water is sky, jars are emerald, plans reuse the shared set
    ──────────────────────────────────────────────────────────────────────────── */
 
 export const LITRES_COLOR_PAIR = categoryColorPair(0);

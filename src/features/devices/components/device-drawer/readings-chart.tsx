@@ -52,7 +52,7 @@ export function ReadingsChart({
     return points.findIndex((point) => point.timestamp >= target);
   }, [points, lastFilterChangeDate]);
 
-  // The stock tooltip only knows series values — swap in a formatter that adds
+  // The stock tooltip only knows series values - swap in a formatter that adds
   // the filter-reset note for the reset reading.
   const chartOptions = useMemo(
     () => ({

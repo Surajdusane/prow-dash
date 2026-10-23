@@ -51,11 +51,11 @@ export function AreaHealthCard() {
                   <TableCell className="text-right tabular-nums">{formatNumber(row.households)}</TableCell>
                   <TableCell className="text-right tabular-nums">{formatNumber(row.openTickets)}</TableCell>
                   <TableCell className="text-right tabular-nums">
-                    {row.avgTds30d === null ? <span className="text-muted-foreground">—</span> : `${row.avgTds30d} ppm`}
+                    {row.avgTds30d === null ? <span className="text-muted-foreground">-</span> : `${row.avgTds30d} ppm`}
                   </TableCell>
                   <TableCell className="pr-6">
                     {row.slaMetPct90d === null ? (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">-</span>
                     ) : (
                       <div className="flex items-center gap-3">
                         <span className="w-10 text-right text-xs font-medium tabular-nums">{row.slaMetPct90d}%</span>

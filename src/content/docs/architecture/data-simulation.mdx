@@ -2,7 +2,7 @@
 title: Simulating 24 months of causal data
 description:
   A deterministic ten-stage seed that injects filter degradation, seasonal
-  complaints, payment drift and a known risk cohort — so the dashboard's
+  complaints, payment drift and a known risk cohort - so the dashboard's
   insights are real to the dataset.
 ---
 
@@ -66,7 +66,7 @@ lifetime, cohort, and season; stage 9 is lead flow; stage 10 scores the book.
 
 Telemetry and tickets share a curve; complaints and payments share the cohort
 window, and complaints add season. Complaints do not come from a specific
-reading — a shared timeline, not a full causal graph.
+reading - a shared timeline, not a full causal graph.
 
 ## Injected patterns
 
@@ -87,8 +87,8 @@ reading — a shared timeline, not a full causal graph.
 
 The shared formulas and the dispenser timeline live in:
 
-- <SourceLink path="src/db/seed/patterns.ts" label="patterns.ts" /> — formulas.
-- <SourceLink path="src/db/seed/generators/readings.ts" label="readings.ts" /> —
+- <SourceLink path="src/db/seed/patterns.ts" label="patterns.ts" /> - formulas.
+- <SourceLink path="src/db/seed/generators/readings.ts" label="readings.ts" /> -
   timeline and telemetry.
 
 ### Filter cycle
@@ -176,9 +176,9 @@ with no proration.
 
 | Month type        | Paid | Late | Failed | Pending |
 | ----------------- | ---: | ---: | -----: | ------: |
-| Normal            |  88% |   8% |     4% |       — |
+| Normal            |  88% |   8% |     4% |       - |
 | Current month     |  58% |   5% |     4% |     33% |
-| Risk-cohort month |  20% |  50% |    30% |       — |
+| Risk-cohort month |  20% |  50% |    30% |       - |
 
 `RISK_COHORT_SHARE = 0.13`, `COHORT_CANCEL_SHARE = 0.6`,
 `BASE_CHURN_SHARE = 0.08`, `RECENT_JOINER_SHARE = 0.07`. Cohort windows are
@@ -231,13 +231,13 @@ the window shifts with the run date.
 
 The validation method is:
 
-1. **Cohort check** — compare the high-risk band with the seed-time cohort list.
-2. **Outcome check** — compare high-risk households with later cancellations;
+1. **Cohort check** - compare the high-risk band with the seed-time cohort list.
+2. **Outcome check** - compare high-risk households with later cancellations;
    the cohort's ~60% cancellation is above the base rate.
-3. **Lift** — top-decile risk versus a random household.
-4. **Precision and recall at band thresholds** — the score is a ranking tool,
+3. **Lift** - top-decile risk versus a random household.
+4. **Precision and recall at band thresholds** - the score is a ranking tool,
    not a classifier.
-5. **Visual sanity** — high-infra areas should carry more tickets per 100
+5. **Visual sanity** - high-infra areas should carry more tickets per 100
    households, and monsoon months should bring more water-quality complaints.
 
 ```sql
@@ -278,14 +278,14 @@ order by 1;
 
 ## Code links
 
-- <SourceLink path="src/db/seed/index.ts" label="seed/index.ts" /> — pipeline
+- <SourceLink path="src/db/seed/index.ts" label="seed/index.ts" /> - pipeline
   orchestration.
-- <SourceLink path="src/db/seed/patterns.ts" label="patterns.ts" /> — formulas.
-- <SourceLink path="src/db/seed/generators/readings.ts" label="readings.ts" /> —
+- <SourceLink path="src/db/seed/patterns.ts" label="patterns.ts" /> - formulas.
+- <SourceLink path="src/db/seed/generators/readings.ts" label="readings.ts" /> -
   filter timeline.
 - <SourceLink
     path="src/db/seed/generators/households.ts"
     label="households.ts"
   />
-  — cohort and churn.
-- <SourceLink path="src/db/queries/risk.ts" label="risk.ts" /> — scoring.
+  - cohort and churn.
+- <SourceLink path="src/db/queries/risk.ts" label="risk.ts" /> - scoring.

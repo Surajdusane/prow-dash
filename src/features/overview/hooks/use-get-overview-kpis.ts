@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { useTRPC } from "@/trpc/client";
 
-/** Overview KPI row — active households, MRR, churn, tickets, new joins, purity. */
+/** Overview KPI row - active households, MRR, churn, tickets, new joins, purity. */
 export const useGetOverviewKpis = () => {
   const trpc = useTRPC();
 

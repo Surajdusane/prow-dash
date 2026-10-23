@@ -8,7 +8,7 @@ import type { GetBoardInput } from "@/trpc/schema";
 /**
  * Kanban board data. Deliberately a non-suspense query: `useSuspenseQuery`
  * ignores `placeholderData`, so every filter change re-suspended and swapped
- * the whole board — toolbar and search box included — for the fallback
+ * the whole board - toolbar and search box included - for the fallback
  * skeleton. `useQuery` + `keepPreviousData` keeps the current columns on
  * screen while the next set loads, and the server prefetch still paints the
  * first board without an extra client fetch.

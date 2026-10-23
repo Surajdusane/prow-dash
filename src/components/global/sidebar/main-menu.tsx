@@ -36,7 +36,7 @@ const icons = {
 type MenuItem = {
   path: string;
   name: string;
-  /** Opens in a new tab — used for the standalone Scalar reference page. */
+  /** Opens in a new tab - used for the standalone Scalar reference page. */
   newTab?: boolean;
   children?: { path: string; name: string }[];
 };

@@ -28,7 +28,7 @@ export const TICKET_TYPES: TicketType[] = ["repair", "filter_change", "inspectio
 
 /**
  * Which kanban column a ticket belongs to. The board derives columns from
- * status + technician presence — "Assigned" is an open ticket with a technician.
+ * status + technician presence - "Assigned" is an open ticket with a technician.
  */
 export function getTicketColumn(ticket: Pick<BoardTicket, "status" | "technicianId">): BoardColumnId {
   if (ticket.status === "resolved") return "resolved";
@@ -51,7 +51,7 @@ export function groupTicketsByColumn(tickets: BoardTicket[]): Record<BoardColumn
   return grouped;
 }
 
-/** Mirrors `SLA_HOURS` in `src/db/queries/tickets.ts` (documented targets — keep in sync). */
+/** Mirrors `SLA_HOURS` in `src/db/queries/tickets.ts` (documented targets - keep in sync). */
 export const SLA_HOURS: Record<TicketType, number> = {
   repair: 48,
   filter_change: 72,
@@ -96,7 +96,7 @@ export function technicianInitials(name: string): string {
     .join("");
 }
 
-/** `YYYY-MM-DD` in local time — mirrors the server's date-key format. */
+/** `YYYY-MM-DD` in local time - mirrors the server's date-key format. */
 export function todayKey(): string {
   const now = new Date();
   const month = String(now.getMonth() + 1).padStart(2, "0");

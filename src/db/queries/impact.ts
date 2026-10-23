@@ -51,7 +51,7 @@ function parseDateKey(key: string): Date {
   return new Date(`${key}T00:00:00`);
 }
 
-/** Active days in `[spanStart, spanEnd)` — endDate (cancel date) is not an active day. */
+/** Active days in `[spanStart, spanEnd)` - endDate (cancel date) is not an active day. */
 function activeDays(spanStart: Date, spanEnd: Date): number {
   return Math.max(0, daysBetween(spanStart, spanEnd));
 }

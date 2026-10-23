@@ -61,7 +61,7 @@ export function CohortRetentionCard(): React.ReactElement {
           <div className="flex flex-col gap-1">
             <CardTitle>Cohort retention</CardTitle>
             <p className="text-muted-foreground text-sm">
-              Share of each join-month cohort still subscribed — darker is stickier.
+              Share of each join-month cohort still subscribed - darker is stickier.
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={() => setExpanded((previous) => !previous)}>

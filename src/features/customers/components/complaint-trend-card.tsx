@@ -25,7 +25,7 @@ const SWATCHES: Record<(typeof COMPLAINT_CATEGORIES)[number], string> = {
   other: "bg-[#059669] dark:bg-[#34d399]",
 };
 
-/** Monthly complaint volume per category — one line per category, 12 months. */
+/** Monthly complaint volume per category - one line per category, 12 months. */
 export function ComplaintTrendCard() {
   const { data } = useGetComplaintTrend();
 
@@ -43,7 +43,7 @@ export function ComplaintTrendCard() {
     return (
       <ChartEmpty
         title="No complaints in range"
-        description="Nothing was raised in the last 12 months — boards stay quiet."
+        description="Nothing was raised in the last 12 months - boards stay quiet."
       />
     );
   }

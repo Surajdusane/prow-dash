@@ -7,7 +7,7 @@ import { useMarkPaid } from "@/features/revenue/hooks";
 
 /**
  * Marks one late/failed payment as paid today. Only the clicked row's button
- * spins — `variables` pins the pending state to the payment being mutated.
+ * spins - `variables` pins the pending state to the payment being mutated.
  */
 export function MarkPaidButton({ paymentId }: { paymentId: number }): React.ReactElement {
   const markPaid = useMarkPaid();

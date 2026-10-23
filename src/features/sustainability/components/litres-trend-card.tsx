@@ -12,7 +12,7 @@ const chartConfig = {
   cumulativeLitres: { label: "Litres served", colors: chartColor(LITRES_COLOR_PAIR) },
 } satisfies ChartConfig;
 
-/** Cumulative litres served since the first subscription — estimated, not metered. */
+/** Cumulative litres served since the first subscription - estimated, not metered. */
 export function LitresTrendCard() {
   const { data } = useGetImpactMonthlyTrend();
 

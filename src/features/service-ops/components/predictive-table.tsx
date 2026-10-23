@@ -31,7 +31,7 @@ export function PredictiveTable() {
       <CardHeader>
         <CardTitle>Predicted next service</CardTitle>
         <p className="text-muted-foreground text-sm">
-          Dispensers trending toward a filter change — ranked by TDS slope and filter age. Raise the ticket before the
+          Dispensers trending toward a filter change - ranked by TDS slope and filter age. Raise the ticket before the
           household complains.
         </p>
       </CardHeader>

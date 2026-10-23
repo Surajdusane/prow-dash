@@ -11,7 +11,7 @@ export const prefetchAnomalies = () => prefetch(trpc.devices.getAnomalies.queryO
 export const prefetchDeviceAreas = () => prefetch(trpc.devices.getAreas.queryOptions());
 
 /**
- * Warms the overview page's above-the-fold queries in one pass — the headline
+ * Warms the overview page's above-the-fold queries in one pass - the headline
  * stats, the telemetry trend and the anomaly feed. Device readings are
  * intentionally excluded: the drawer owns its own windowed query and fetches on
  * open (and on each 30/90-day toggle).

@@ -1,5 +1,5 @@
 ---
-title: "/devices — IoT fleet monitoring"
+title: "devices - IoT fleet monitoring"
 description:
   Connectivity, telemetry trends, and the anomalies that need a field visit.
 ---
@@ -20,7 +20,7 @@ degrading, or producing bad water?**
 With roughly a thousand dispensers, a raw inventory is not an answer. The route
 turns the fleet into a short attention list and keeps evidence one click away.
 
-## What I chose — and what I left out
+## What I chose - and what I left out
 
 | Option                  | Why I rejected it                                    | What I chose instead                       |
 | ----------------------- | ---------------------------------------------------- | ------------------------------------------ |
@@ -40,11 +40,11 @@ purpose: the drawer owns its windowed query and fetches on open.
 
 Four tiles from `getFleetStats`:
 
-- **Online** — share of active-household dispensers with `is_online = true`.
-- **Avg purity (7d)** — mean purity across every reading in the last seven days.
-- **Needs service** — dispensers whose filter is older than 75 days, latest TDS
+- **Online** - share of active-household dispensers with `is_online = true`.
+- **Avg purity (7d)** - mean purity across every reading in the last seven days.
+- **Needs service** - dispensers whose filter is older than 75 days, latest TDS
   is above 450 ppm, or latest purity is below 85%.
-- **Offline > 7d** — dispensers flagged offline **or** with no reading in the
+- **Offline > 7d** - dispensers flagged offline **or** with no reading in the
   last seven days.
 
 The percentage reads the stored `is_online` flag; the offline count also catches
@@ -83,7 +83,7 @@ capped list, not every flagged device.
 
 A composed chart with two lines on separate axes: fleet-wide average TDS (ppm)
 and purity (%). Two units share one timeline because their relationship is the
-insight — as TDS climbs, purity falls. The 30- or 90-day window is bucketed by
+insight - as TDS climbs, purity falls. The 30- or 90-day window is bucketed by
 day; 90-day payloads fold into at most 60 points.
 
 **Data:** `getReadingsTrend` → `readings`. **Code:**
@@ -116,7 +116,7 @@ seven days.
 The six most severe flagged devices, with severity, household, society, area,
 exact reasons, and last report. Each row offers **View device** (opens the
 drawer) and **Create ticket** (writes to `/service-ops`). Sorting is severity
-first, then latest TDS — triage, not lookup.
+first, then latest TDS - triage, not lookup.
 
 **Data:** `getAnomalies` → `dispensers`, `households`, `societies`, `areas`,
 `readings`. **Code:**
@@ -245,7 +245,7 @@ Results sort by severity and TDS, then cap at 100.
      symbol="getAnomalies"
      label="getAnomalies"
    />
-   — thresholds, severity, and reason strings live in one function.
+   - thresholds, severity, and reason strings live in one function.
 
 ## Trade-offs & next
 
@@ -254,7 +254,7 @@ Results sort by severity and TDS, then cap at 100.
 - There is no real-time ingestion, alerting, or paging; the page is a snapshot
   on request.
 - The anomaly mix describes only the capped feed, not the whole fleet.
-- The trend is fleet-wide and unsegmented — no area, plan, or device-model
-  filter — and the drawer loads on demand.
+- The trend is fleet-wide and unsegmented - no area, plan, or device-model
+  filter - and the drawer loads on demand.
 - Connectivity is seeded. The status dot reports the stored flag; the table's
   flag also treats a silent device as offline, so the two can disagree.

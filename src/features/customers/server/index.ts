@@ -14,7 +14,7 @@ export const prefetchCustomerAreas = () => prefetch(trpc.customers.getAreas.quer
 
 /**
  * Warms every above-the-fold Customers query in one pass. The household
- * profile (`getById`) is intentionally excluded — the drawer owns its own
+ * profile (`getById`) is intentionally excluded - the drawer owns its own
  * query and fetches on open.
  */
 export const batchPrefetchCustomers = () =>

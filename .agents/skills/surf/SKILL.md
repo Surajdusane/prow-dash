@@ -385,7 +385,7 @@ surf session.list --refresh
 surf session.info research --refresh
 ```
 
-Each session owns one explicit tab and defaults to a separate unfocused window. Commands for the same tab are FIFO; different session tabs may run concurrently. Browser-wide writers wait for tab lanes to drain. `--no-wait` returns `tab_busy` or `browser_busy` immediately. On `tab_gone` or `session_epoch_stale`, run the exact command printed after `Recovery:`—normally `surf session.reopen <name>`.
+Each session owns one explicit tab and defaults to a separate unfocused window. Commands for the same tab are FIFO; different session tabs may run concurrently. Browser-wide writers wait for tab lanes to drain. `--no-wait` returns `tab_busy` or `browser_busy` immediately. On `tab_gone` or `session_epoch_stale`, run the exact command printed after `Recovery:`-normally `surf session.reopen <name>`.
 
 Browser-login provider commands (`chatgpt`, `gemini`, `perplexity`, `grok`, `kimi`, `aistudio`, and `oracle ask`) take exclusive browser access and print a warning before dispatch. Do not assume Surf is hung while that warning is visible; inspect `surf session.info <name>` from another shell to see the active writer.
 

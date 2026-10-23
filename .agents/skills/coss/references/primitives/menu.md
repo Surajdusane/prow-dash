@@ -67,7 +67,7 @@ Use popup positioning props like `align` / `sideOffset` only when a layout needs
 - **Portal forwarding**: optional `portalProps` on `MenuPopup` → Base UI `Menu.Portal` (`keepMounted`, `container`, …). See [portal-props.md](../portal-props.md).
 - Use `MenuTrigger render={<Button ... />}` as the default trigger composition.
 - Use `openOnHover` on `MenuTrigger` only for explicit hover-driven UX.
-- Use `MenuLinkItem` for navigation links. If migrating from `MenuItem render={<Link href="..." />}`, change the component to `MenuLinkItem` but **keep `render={<Link … />}`** — do not swap to `href` alone with a router Link. Use `href` on `MenuLinkItem` only for plain anchors.
+- Use `MenuLinkItem` for navigation links. If migrating from `MenuItem render={<Link href="..." />}`, change the component to `MenuLinkItem` but **keep `render={<Link … />}`** - do not swap to `href` alone with a router Link. Use `href` on `MenuLinkItem` only for plain anchors.
 - Use `MenuItem closeOnClick` for action menus where selection should always dismiss the popup.
 - Use `MenuCheckboxItem variant="switch"` for toggle-style preferences.
 - Use `MenuRadioGroup` + `MenuRadioItem` with a `defaultValue` when enforcing single-choice selection.

@@ -9,41 +9,22 @@ import { CONTACT_URL, GITHUB_URL, LIVE_URL } from "@/features/docs/constants";
 
 ProWater is a full-stack ops dashboard for a piped RO water business: I modeled
 the domain, simulated 24 months of causal data, and built two predictive
-workflows — area-level service demand and household churn risk — behind a typed
+workflows - area-level service demand and household churn risk - behind a typed
 tRPC API and a server-rendered Next.js UI.
 
-<p className="not-prose flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-  <a href={LIVE_URL} className="font-medium underline underline-offset-4">
-    {"Live demo"}
-  </a>
-  <a href={GITHUB_URL} className="font-medium underline underline-offset-4">
-    {"GitHub"}
-  </a>
-  <a href={CONTACT_URL} className="font-medium underline underline-offset-4">
-    {"Hire me"}
-  </a>
-</p>
-
-<p className="not-prose text-muted-foreground flex flex-wrap gap-x-3 gap-y-1 text-xs">
-  <span>Next.js 16</span>
-  <span>tRPC</span>
-  <span>Drizzle</span>
-  <span>Neon</span>
-  <span>ECharts</span>
-  <span>Fumadocs</span>
-</p>
+<ProjectLinks />
 
 ## The two questions
 
 <Cards>
   <Card
     title="Where will service demand concentrate next, before complaints pile up?"
-    description="Predictive service demand — TDS trend + filter age → ranked queue."
+    description="Predictive service demand - TDS trend + filter age → ranked queue."
     href="/docs/ideas/predictive-service-demand"
   />
   <Card
     title="Which households are about to churn, and why?"
-    description="Complaint-based risk — complaints + payment behaviour + SLA misses → 0–100 score."
+    description="Complaint-based risk - complaints + payment behaviour + SLA misses → 0–100 score."
     href="/docs/ideas/churn-risk"
   />
 </Cards>
@@ -95,9 +76,9 @@ tRPC API and a server-rendered Next.js UI.
   />
 </Cards>
 
-## Reviewer's guide — what to watch
+## Reviewer's guide - what to watch
 
-1. **[/service-ops](/service-ops)** — Drag a kanban card; it mutates
+1. **[/service-ops](/service-ops)** - Drag a kanban card; it mutates
    optimistically and persists. Then open the predictive table and compare the
    top rows with the area demand chart. Code:
    <SourceLink
@@ -111,7 +92,7 @@ tRPC API and a server-rendered Next.js UI.
      label="service-ops.ts"
    />
    .
-2. **[/customers](/customers)** — Filter to high risk, open a household drawer,
+2. **[/customers](/customers)** - Filter to high risk, open a household drawer,
    read the complaint, payment, and SLA signals, then hit “Recompute risk”.
    Code:
    <SourceLink
@@ -125,7 +106,7 @@ tRPC API and a server-rendered Next.js UI.
      label="household-drawer"
    />
    .
-3. **[/revenue](/revenue)** — Read the cohort retention matrix, then mark an
+3. **[/revenue](/revenue)** - Read the cohort retention matrix, then mark an
    overdue payment paid and watch the revenue queries invalidate together. Code:
    <SourceLink
      path="src/features/revenue/hooks/use-mark-paid.ts"
@@ -138,14 +119,14 @@ tRPC API and a server-rendered Next.js UI.
      label="revenue.ts"
    />
    .
-4. **[/](/)** — Scan the six KPIs, billed vs collected, and area health. Code:
+4. **[/](/)** - Scan the six KPIs, billed vs collected, and area health. Code:
    <SourceLink
      path="src/db/queries/overview.ts"
      symbol="getOverviewKpis"
      label="overview.ts"
    />
    .
-5. **Network tab** — One batched tRPC prefetch per route, not a client-side
+5. **Network tab** - One batched tRPC prefetch per route, not a client-side
    fetch waterfall. Code:
    <SourceLink
      path="src/features/service-ops/server/index.ts"
@@ -158,7 +139,7 @@ tRPC API and a server-rendered Next.js UI.
      label="trpc/server.tsx"
    />
    .
-6. **Seed** — Run `bun run db:reset` and confirm the same patterns reappear.
+6. **Seed** - Run `bun run db:reset` and confirm the same patterns reappear.
    Code: <SourceLink path="src/db/seed/index.ts" label="seed/index.ts" />.
 
 ## What this proves
@@ -177,32 +158,32 @@ tRPC API and a server-rendered Next.js UI.
 
 ## Code entry points
 
-- <SourceLink path="src/db/schema.ts" label="src/db/schema.ts" /> — the domain
+- <SourceLink path="src/db/schema.ts" label="src/db/schema.ts" /> - the domain
   model.
-- <SourceLink path="src/db/seed/index.ts" label="src/db/seed/index.ts" /> — the
+- <SourceLink path="src/db/seed/index.ts" label="src/db/seed/index.ts" /> - the
   ten-stage simulation.
 - <SourceLink
     path="src/db/queries/risk.ts"
     symbol="computeHouseholdRisk"
     label="src/db/queries/risk.ts"
   />
-  — the shared churn score.
+  - the shared churn score.
 - <SourceLink
     path="src/db/queries/service-ops.ts"
     symbol="getPredictive"
     label="src/db/queries/service-ops.ts"
   />
-  — the predictive service query.
+  - the predictive service query.
 - <SourceLink
     path="src/features/service-ops/server/index.ts"
     label="src/features/service-ops/server/index.ts"
   />
-  — the server prefetch.
+  - the server prefetch.
 - <SourceLink
     path="src/trpc/routers/_app.ts"
     label="src/trpc/routers/_app.ts"
   />
-  — the API surface.
+  - the API surface.
 
 ## A note on the data
 

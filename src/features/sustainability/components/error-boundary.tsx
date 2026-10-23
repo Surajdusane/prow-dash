@@ -22,7 +22,7 @@ export function SustainabilityErrorBoundary({ children }: { children: ReactNode 
               <EmptyHeader>
                 <EmptyTitle>Couldn&apos;t load Sustainability</EmptyTitle>
                 <EmptyDescription>
-                  The impact data request failed. This is usually a cold database — try again.
+                  The impact data request failed. This is usually a cold database - try again.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>

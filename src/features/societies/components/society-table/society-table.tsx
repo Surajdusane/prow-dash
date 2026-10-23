@@ -187,7 +187,7 @@ function SocietyTableRows({
                   )}
                 </TableCell>
                 <TableCell className="pr-6 text-right tabular-nums">
-                  {row.avgTds30d > 0 ? formatNumber(row.avgTds30d) : <span className="text-muted-foreground">—</span>}
+                  {row.avgTds30d > 0 ? formatNumber(row.avgTds30d) : <span className="text-muted-foreground">-</span>}
                 </TableCell>
               </TableRow>
             ))

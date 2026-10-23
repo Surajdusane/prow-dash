@@ -1,4 +1,4 @@
-# Phase 2 — API Layer
+# Phase 2 - API Layer
 
 > Read `prompt/00-master-plan.md` first (§7 route specs = the API surface). Work in this repo; follow `AGENTS.md`.
 
@@ -53,10 +53,10 @@ Rules: routers stay thin (input validation + call query fn). Every input validat
 
 ### `revenue` (route `/revenue`)
 - `getKpis` → { mrr, arpu, activeSubs, failedPctThisMonth, collectionsRate90d }
-- `getMrrTrend` → 18 months: sum of active-subscription plan prices at each month end (from start/end dates — no snapshot table needed)
+- `getMrrTrend` → 18 months: sum of active-subscription plan prices at each month end (from start/end dates - no snapshot table needed)
 - `getPlanMixTrend` → 18 months × plan subscription counts (stacked)
 - `getPaymentStatusByMonth` → 12 months [{ month, paid, late, failed, pending }]
-- `getCohortRetention` → cohorts by join month: { cohortMonth, size, retention[] } where active-at-t ⇔ `joinDate ≤ t AND (cancelDate IS NULL OR cancelDate > t)`. Fetch ~1.2k households once and shape server-side — simpler and honest
+- `getCohortRetention` → cohorts by join month: { cohortMonth, size, retention[] } where active-at-t ⇔ `joinDate ≤ t AND (cancelDate IS NULL OR cancelDate > t)`. Fetch ~1.2k households once and shape server-side - simpler and honest
 - `getOverdue({ page, limit })` → late/failed payments with household + month + amount
 - Mutation: `markPaid({ paymentId })` (status → paid, paidDate today)
 
@@ -75,7 +75,7 @@ Rules: routers stay thin (input validation + call query fn). Every input validat
 - Mutations: `create({ name, societyName?, role?, source })` · `update({ id, visitDate?, converted?, flatsConverted? })`
 
 ### `impact` (route `/sustainability`)
-- `getTotals` → { litresServed, jarsAvoided, householdsServed, monthsLive } — subscription-days × plan litres/day (8/12/18), ÷ 20L per jar
+- `getTotals` → { litresServed, jarsAvoided, householdsServed, monthsLive } - subscription-days × plan litres/day (8/12/18), ÷ 20L per jar
 - `getMonthlyTrend` → last 24 months litres + jarsAvoided
 - `getByPlan` → litres + jars per plan
 
@@ -89,7 +89,7 @@ Rules: routers stay thin (input validation + call query fn). Every input validat
 ## Verification
 
 - `bun run check-types` clean.
-- Smoke-test every procedure against the seeded DB (temporary script using the tRPC caller or a throwaway page — delete after).
+- Smoke-test every procedure against the seeded DB (temporary script using the tRPC caller or a throwaway page - delete after).
 
 ## Definition of done
 

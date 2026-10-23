@@ -22,7 +22,7 @@ export function DevicesErrorBoundary({ children }: { children: ReactNode }): Rea
               <EmptyHeader>
                 <EmptyTitle>Couldn&apos;t load Devices</EmptyTitle>
                 <EmptyDescription>
-                  The fleet request failed. This is usually a cold database — try again.
+                  The fleet request failed. This is usually a cold database - try again.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>

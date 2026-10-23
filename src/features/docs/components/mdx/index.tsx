@@ -7,6 +7,7 @@ import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 
 import { H1, H2, H3, H4, H5, H6 } from "./headings";
+import { ProjectLinks } from "./project-links";
 import { RouteMeta } from "./route-meta";
 import { SourceLink } from "./source-link";
 
@@ -21,6 +22,7 @@ export function getMDXComponents(components?: MDXComponents) {
     h6: H6,
     SourceLink,
     RouteMeta,
+    ProjectLinks,
     Tab,
     Tabs,
     Step,

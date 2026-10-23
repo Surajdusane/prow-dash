@@ -33,7 +33,7 @@ export default function LeadsPage() {
             <div className="flex flex-col gap-1">
               <h1 className="font-heading text-2xl font-semibold">Leads</h1>
               <p className="text-muted-foreground text-sm">
-                Top of the sales funnel — enquiry volume, site visits and conversions by channel.
+                Top of the sales funnel - enquiry volume, site visits and conversions by channel.
               </p>
             </div>
             <CreateLeadButton />

@@ -1,4 +1,4 @@
-# Prompt 12 — QA, build, and launch
+# Prompt 12 - QA, build, and launch
 
 Read `docs-prompt/00-readme.md` first.
 
@@ -68,7 +68,7 @@ Search for leftovers:
 rg -n "TODO|TBD|Lorem ipsum|example\.com|placeholder" src/content/docs
 ```
 
-Fix everything. If a value is genuinely unknown (email, live URL), make it explicit and use the GitHub fallback — do not leave a fake address.
+Fix everything. If a value is genuinely unknown (email, live URL), make it explicit and use the GitHub fallback - do not leave a fake address.
 
 ## 2. Sidebar order and navigation
 
@@ -77,11 +77,11 @@ Open `src/content/docs/meta.json` and each folder `meta.json`.
 Expected order:
 
 1. Start Here
-2. Overview — Short version, Full case study
-3. The Two Ideas — Predictive service demand, Churn risk
-4. Route by Route — index + 9 routes
-5. How It’s Built — System, Data model, API, Code flow, Data simulation
-6. Engineering — Performance, Quality
+2. Overview - Short version, Full case study
+3. The Two Ideas - Predictive service demand, Churn risk
+4. Route by Route - index + 9 routes
+5. How It’s Built - System, Data model, API, Code flow, Data simulation
+6. Engineering - Performance, Quality
 7. About
 
 Verify:

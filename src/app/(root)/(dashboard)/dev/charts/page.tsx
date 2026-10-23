@@ -18,18 +18,18 @@ export const metadata: Metadata = {
 };
 
 const blocks = [
-  { title: "Portfolio — area chart", Component: EChartsPortfolioAreaChart },
-  { title: "Latency — area chart", Component: EChartsLatencyAreaChart },
-  { title: "Benchmark — area chart", Component: EChartsBenchmarkAreaChart },
-  { title: "Audience — area chart", Component: EChartsAudienceAreaChart },
-  { title: "Peak — bar chart", Component: EChartsPeakBarChart },
-  { title: "Grid — bar chart", Component: EChartsGridBarChart },
-  { title: "Revenue mix — pie chart", Component: EChartsRevenueMixPieChart },
-  { title: "Market share — pie chart", Component: EChartsMarketSharePieChart },
-  { title: "Reliability score — pie chart", Component: EChartsReliabilityScorePieChart },
-  { title: "Budget — radial chart", Component: EChartsBudgetRadialChart },
-  { title: "Cache tiers — radial chart", Component: EChartsCacheTiersRadialChart },
-  { title: "Ride — radial chart", Component: EChartsRideRadialChart },
+  { title: "Portfolio - area chart", Component: EChartsPortfolioAreaChart },
+  { title: "Latency - area chart", Component: EChartsLatencyAreaChart },
+  { title: "Benchmark - area chart", Component: EChartsBenchmarkAreaChart },
+  { title: "Audience - area chart", Component: EChartsAudienceAreaChart },
+  { title: "Peak - bar chart", Component: EChartsPeakBarChart },
+  { title: "Grid - bar chart", Component: EChartsGridBarChart },
+  { title: "Revenue mix - pie chart", Component: EChartsRevenueMixPieChart },
+  { title: "Market share - pie chart", Component: EChartsMarketSharePieChart },
+  { title: "Reliability score - pie chart", Component: EChartsReliabilityScorePieChart },
+  { title: "Budget - radial chart", Component: EChartsBudgetRadialChart },
+  { title: "Cache tiers - radial chart", Component: EChartsCacheTiersRadialChart },
+  { title: "Ride - radial chart", Component: EChartsRideRadialChart },
 ];
 
 export default function DevChartsPage() {

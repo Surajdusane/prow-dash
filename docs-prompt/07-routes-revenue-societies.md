@@ -1,4 +1,4 @@
-# Prompt 07 — Revenue and Societies
+# Prompt 07 - Revenue and Societies
 
 Read `docs-prompt/00-readme.md` first, then reuse the route-page template from `docs-prompt/05-routes-overview-service-ops.md`.
 
@@ -11,28 +11,28 @@ Write:
 
 Both pages must explain the business decision, the options considered, the chart choices, the seed/data logic, the interactions, and the exact code path. Every chart must map to a real query and component.
 
-## 1. `routes/revenue.mdx` — `/revenue`
+## 1. `routes/revenue.mdx` - `/revenue`
 
 Frontmatter:
 
 ```yaml
 ---
-title: "/revenue — Revenue and retention"
-description: MRR, plan mix, payment outcomes and cohort retention — where revenue is leaking and which cohorts stick.
+title: "/revenue - Revenue and retention"
+description: MRR, plan mix, payment outcomes and cohort retention - where revenue is leaking and which cohorts stick.
 ---
 ```
 
 ### Why this route exists
 
 - Revenue is not one number. The ops lead needs to see:
-  - **growth** — is MRR rising?
-  - **mix** — are customers moving up-plan or down-plan?
-  - **leakage** — how much is late, failed, or pending?
-  - **retention** — do newer cohorts stick as well as older ones?
-  - **action** — which overdue payments can be recovered now?
+  - **growth** - is MRR rising?
+  - **mix** - are customers moving up-plan or down-plan?
+  - **leakage** - how much is late, failed, or pending?
+  - **retention** - do newer cohorts stick as well as older ones?
+  - **action** - which overdue payments can be recovered now?
 - The page answers: *where is revenue leaking, and which cohort is weak?*
 
-### What I chose — and what I left out
+### What I chose - and what I left out
 
 | Option | Why I rejected it | What I chose instead |
 |---|---|---|
@@ -58,11 +58,11 @@ Fields from `getRevenueKpis`:
 
 Explain each:
 
-- **MRR** — sum of active plan prices. It is not cash collected.
-- **ARPU** — MRR ÷ active subscriptions.
-- **Active subs** — current active subscription count.
-- **Failed % this month** — failed payments ÷ all payments billed this month.
-- **Collections rate (90d)** — collected ÷ billed over the last three billing months. This is the “are we actually getting paid?” number.
+- **MRR** - sum of active plan prices. It is not cash collected.
+- **ARPU** - MRR ÷ active subscriptions.
+- **Active subs** - current active subscription count.
+- **Failed % this month** - failed payments ÷ all payments billed this month.
+- **Collections rate (90d)** - collected ÷ billed over the last three billing months. This is the “are we actually getting paid?” number.
 
 #### MRR trend
 
@@ -107,7 +107,7 @@ Explain each:
 - Payments are generated per active subscription-month from `startDate` to `endDate` or today.
 - Normal months: 88% paid, 8% late, 4% failed.
 - Current month: 58% paid, 5% late, 4% failed, 33% pending.
-- Risk-cohort months: 20% paid, 50% late, 30% failed — and the bad window starts one month before the complaint cluster.
+- Risk-cohort months: 20% paid, 50% late, 30% failed - and the bad window starts one month before the complaint cluster.
 - Plan prices: starter ₹499, standard ₹799, premium ₹1,199.
 - MRR and impact are reconstructed from subscription spans, so there is one source of truth for “who was active when.”
 
@@ -157,13 +157,13 @@ Explain each:
 - No revenue forecast; the history is too short to make one honest.
 - No per-area revenue view yet.
 
-## 2. `routes/societies.mdx` — `/societies`
+## 2. `routes/societies.mdx` - `/societies`
 
 Frontmatter:
 
 ```yaml
 ---
-title: "/societies — Expansion and penetration"
+title: "/societies - Expansion and penetration"
 description: Where the society book is growing, which areas are under-penetrated, and which societies need attention.
 ---
 ```
@@ -178,7 +178,7 @@ description: Where the society book is growing, which areas are under-penetrated
   - average TDS
 - The page answers: *where should we expand, and which society is underperforming?*
 
-### What I chose — and what I left out
+### What I chose - and what I left out
 
 | Option | Why I rejected it | What I chose instead |
 |---|---|---|
@@ -273,7 +273,7 @@ Fields from `getSocietiesKpis`:
 ### What to notice as a reviewer
 
 1. The growth chart’s series are data-driven; open `growthSeriesKeys` and the component to see how a new area is handled.
-2. Penetration is sorted by percentage, but the tooltip adds infrastructure age and tickets per 100 — the “why” behind the ranking.
+2. Penetration is sorted by percentage, but the tooltip adds infrastructure age and tickets per 100 - the “why” behind the ranking.
 3. Open a society with high penetration and low open tickets; the drawer should show a healthy plan mix and few top-risk households.
 
 ### Trade-offs & next

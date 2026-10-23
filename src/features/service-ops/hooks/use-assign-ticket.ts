@@ -24,7 +24,7 @@ export const useAssignTicket = () => {
         const workload = queryClient.getQueryData<TechnicianWorkloadRow[]>(
           trpc.serviceOps.getTechnicianWorkload.queryKey()
         );
-        // `z.coerce.number()` makes the client-side input type `unknown` — the
+        // `z.coerce.number()` makes the client-side input type `unknown` - the
         // dialog only ever passes a real id or null.
         const technicianId = input.technicianId as number | null;
         const technicianName =

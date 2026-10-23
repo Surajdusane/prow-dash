@@ -1,4 +1,4 @@
-# ProWater Case Study — Docs Prompt Pack
+# ProWater Case Study - Docs Prompt Pack
 
 This folder contains the prompts used to build the recruiter-facing Fumadocs case study at `/docs`.
 
@@ -39,23 +39,23 @@ The goal is **not** to document every file. The goal is to help a recruiter or h
 
 ## Project snapshot
 
-- **Product:** ProWater — a fictional piped RO drinking-water subscription service in Bangalore.
+- **Product:** ProWater - a fictional piped RO drinking-water subscription service in Bangalore.
 - **Dashboard:** Internal ops dashboard for service demand, churn risk, devices, revenue, societies, leads, and sustainability.
 - **Repo:** `https://github.com/Surajdusane/prow-dash`
 - **Docs:** Fumadocs v16 at `/docs`
 - **Docs content:** `src/content/docs`
 - **Dashboard routes:**
-  - `/` — executive overview
-  - `/service-ops` — kanban, predictive service, SLA, technician load
-  - `/customers` — churn risk, complaints, household drawer
-  - `/devices` — fleet telemetry, anomalies
-  - `/devices/fleet` — full dispenser table
-  - `/revenue` — MRR, plan mix, payments, cohorts, overdue
-  - `/societies` — growth, penetration, society book
-  - `/leads` — funnel, source conversion, lead table
-  - `/sustainability` — litres served, jars avoided
-  - `/api-docs` — Scalar/OpenAPI reference
-  - `/dev/charts` — internal chart gallery (not recruiter-facing)
+  - `/` - executive overview
+  - `/service-ops` - kanban, predictive service, SLA, technician load
+  - `/customers` - churn risk, complaints, household drawer
+  - `/devices` - fleet telemetry, anomalies
+  - `/devices/fleet` - full dispenser table
+  - `/revenue` - MRR, plan mix, payments, cohorts, overdue
+  - `/societies` - growth, penetration, society book
+  - `/leads` - funnel, source conversion, lead table
+  - `/sustainability` - litres served, jars avoided
+  - `/api-docs` - Scalar/OpenAPI reference
+  - `/dev/charts` - internal chart gallery (not recruiter-facing)
 
 ### Stack
 
@@ -69,7 +69,7 @@ The goal is **not** to document every file. The goal is to help a recruiter or h
 - Scalar + OpenAPI 3.1
 - Fumadocs for this case study
 
-### Data model — 12 tables
+### Data model - 12 tables
 
 `areas`, `societies`, `plans`, `technicians`, `households`, `subscriptions`, `dispensers`, `readings`, `service_tickets`, `complaints`, `payments`, `leads`.
 
@@ -112,8 +112,8 @@ bun run db:reset   # truncate all 12 tables + reseed
 
 Write for two people at once:
 
-1. **Recruiter / hiring manager** — wants the business problem, the decisions, and the impact.
-2. **Technical interviewer** — wants the code, data model, trade-offs, and proof.
+1. **Recruiter / hiring manager** - wants the business problem, the decisions, and the impact.
+2. **Technical interviewer** - wants the code, data model, trade-offs, and proof.
 
 ### Two reading speeds
 
@@ -122,11 +122,11 @@ Write for two people at once:
 
 ### Structure every technical page the same way
 
-1. **Why this exists** — the business question and the decision it supports.
-2. **Options considered** — what else was possible and why it was rejected.
-3. **Decision** — what was chosen.
-4. **Trade-off** — what the choice costs.
-5. **Evidence** — code links and the chart/data mapping.
+1. **Why this exists** - the business question and the decision it supports.
+2. **Options considered** - what else was possible and why it was rejected.
+3. **Decision** - what was chosen.
+4. **Trade-off** - what the choice costs.
+5. **Evidence** - code links and the chart/data mapping.
 
 ### Code links
 

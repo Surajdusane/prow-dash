@@ -1,4 +1,4 @@
-# Phase 0 — Foundations
+# Phase 0 - Foundations
 
 > Read `prompt/00-master-plan.md` first. Work in this repo; follow `AGENTS.md`.
 
@@ -57,8 +57,8 @@ Then `bun run db:generate` and `bun run db:migrate`. **Verify** the new migratio
 - Update `src/app/(root)/layout.tsx` metadata → ProWater Dashboard title/description.
 
 ### 5. Shared widgets
-- `src/hooks/use-confirm.tsx` — expose `ConfirmationDialog` component + promise-based `confirm()` (per AGENTS.md import shape: `import { ConfirmationDialog, confirm } from "@/hooks/use-confirm";`). Build on the installed `src/components/ui/alert-dialog.tsx`. Render trigger-less; mount once in the dashboard layout or per usage site per the coss pattern.
-- `src/components/dashboard/kpi-card.tsx` — KPI card (label, value, optional delta with up/down arrow + color, optional icon, optional hint) + a `KpiCardSkeleton`.
+- `src/hooks/use-confirm.tsx` - expose `ConfirmationDialog` component + promise-based `confirm()` (per AGENTS.md import shape: `import { ConfirmationDialog, confirm } from "@/hooks/use-confirm";`). Build on the installed `src/components/ui/alert-dialog.tsx`. Render trigger-less; mount once in the dashboard layout or per usage site per the coss pattern.
+- `src/components/dashboard/kpi-card.tsx` - KPI card (label, value, optional delta with up/down arrow + color, optional icon, optional hint) + a `KpiCardSkeleton`.
 
 ### 6. Verify
 - `bun run check-types` · `bun run lint` · `bun run build` all pass.
@@ -71,11 +71,11 @@ Then `bun run db:generate` and `bun run db:migrate`. **Verify** the new migratio
 - [ ] `/` + 7 routes exist with `force-dynamic`, gallery moved to `/dev/charts`
 - [ ] Sidebar shows the 8 ProWater routes with icons; metadata updated
 - [ ] `use-confirm` + `KpiCard` exist and typecheck
-- [ ] check-types / lint / build green — changes left uncommitted
+- [ ] check-types / lint / build green - changes left uncommitted
 
 ## Gotchas
 
-- All imports from `@/` — never relative `../`.
+- All imports from `@/` - never relative `../`.
 - Don't create branches or commits.
 - Next 16 typed routes: new pages may need `bun run check-types` (runs `next typegen`) before links typecheck.
-- Keep the sidebar's existing collapse/expand animation behavior intact — only replace the data arrays and icons.
+- Keep the sidebar's existing collapse/expand animation behavior intact - only replace the data arrays and icons.

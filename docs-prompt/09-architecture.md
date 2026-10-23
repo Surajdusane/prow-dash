@@ -1,4 +1,4 @@
-# Prompt 09 — Architecture pages
+# Prompt 09 - Architecture pages
 
 Read `docs-prompt/00-readme.md` first.
 
@@ -27,7 +27,7 @@ Frontmatter:
 ```yaml
 ---
 title: System architecture
-description: One Next.js deployment, a typed tRPC boundary, Drizzle queries, and Neon Postgres — and why that was the right size for this project.
+description: One Next.js deployment, a typed tRPC boundary, Drizzle queries, and Neon Postgres - and why that was the right size for this project.
 ---
 ```
 
@@ -209,11 +209,11 @@ leads (standalone)
 
 Call out the non-obvious choices:
 
-- **One active subscription per household** — a household buys one plan at a time. History is preserved by `start_date` / `end_date`.
-- **One dispenser per household** — the service installs one unit per flat. The model would need a join table if a household could have multiple devices.
-- **Readings belong to a dispenser, not a household** — telemetry is a property of the physical device. If a device is replaced, the reading history stays with the old device.
-- **Tickets and complaints are separate** — a complaint is the customer’s voice; a ticket is the operational response. One can exist without the other, and linking them would lose that distinction.
-- **Leads are standalone** — a lead may not have a society yet, and a converted lead may create multiple households. A foreign key would over-constrain the funnel.
+- **One active subscription per household** - a household buys one plan at a time. History is preserved by `start_date` / `end_date`.
+- **One dispenser per household** - the service installs one unit per flat. The model would need a join table if a household could have multiple devices.
+- **Readings belong to a dispenser, not a household** - telemetry is a property of the physical device. If a device is replaced, the reading history stays with the old device.
+- **Tickets and complaints are separate** - a complaint is the customer’s voice; a ticket is the operational response. One can exist without the other, and linking them would lose that distinction.
+- **Leads are standalone** - a lead may not have a society yet, and a converted lead may create multiple households. A foreign key would over-constrain the funnel.
 
 #### Type decisions
 
@@ -229,15 +229,15 @@ Explain the trade-off: denormalization makes reads fast, but the score must be r
 
 List the indexes that matter and why:
 
-- `societies_area_idx` — area joins.
-- `households_society_idx` — society → households.
-- `households_status_idx` / `households_risk_idx` — risk table filters and sorting.
-- `dispensers_household_idx` — one-to-one lookup.
-- `readings_dispenser_recorded_idx` — latest readings and trend windows.
-- `tickets_household_idx`, `tickets_status_idx` — board + household drawer.
-- `complaints_household_date_idx` — risk windows and complaint trend.
-- `payments_household_month_idx` — billing and overdue.
-- `leads_created_idx` — recent-first list.
+- `societies_area_idx` - area joins.
+- `households_society_idx` - society → households.
+- `households_status_idx` / `households_risk_idx` - risk table filters and sorting.
+- `dispensers_household_idx` - one-to-one lookup.
+- `readings_dispenser_recorded_idx` - latest readings and trend windows.
+- `tickets_household_idx`, `tickets_status_idx` - board + household drawer.
+- `complaints_household_date_idx` - risk windows and complaint trend.
+- `payments_household_month_idx` - billing and overdue.
+- `leads_created_idx` - recent-first list.
 
 Read the actual schema and confirm the index names before writing. Do not invent indexes.
 
@@ -310,14 +310,14 @@ Example table:
 
 | Namespace | Queries | Mutations |
 |---|---|---|
-| `overview` | `getKpis`, `getRevenueTrend`, `getHouseholdGrowth`, `getPlanMix`, `getAreaHealth` | — |
+| `overview` | `getKpis`, `getRevenueTrend`, `getHouseholdGrowth`, `getPlanMix`, `getAreaHealth` | - |
 | `serviceOps` | `getBoard`, `getAreaDemand`, `getPredictive`, `getSlaStats`, `getTechnicianWorkload`, `getHouseholdsLite` | `createTicket`, `updateStatus`, `assign`, `remove` |
 | `customers` | `getKpis`, `getAreas`, `getRiskTable`, `getRiskDistribution`, `getComplaintTrend`, `getById` | `recomputeRisk`, `createComplaint`, `resolveComplaint` |
-| `devices` | `getAreas`, `getFleet`, `getReadings`, `getReadingsTrend`, `getAnomalies`, `getFleetStats` | — |
+| `devices` | `getAreas`, `getFleet`, `getReadings`, `getReadingsTrend`, `getAnomalies`, `getFleetStats` | - |
 | `revenue` | `getKpis`, `getMrrTrend`, `getPlanMixTrend`, `getPaymentStatusByMonth`, `getCohortRetention`, `getOverdue` | `markPaid` |
-| `societies` | `getKpis`, `getList`, `getGrowthTrend`, `getAreaPenetration`, `getById` | — |
+| `societies` | `getKpis`, `getList`, `getGrowthTrend`, `getAreaPenetration`, `getById` | - |
 | `leads` | `getKpis`, `getFunnel`, `getBySource`, `getList` | `create`, `update` |
-| `impact` | `getTotals`, `getMonthlyTrend`, `getByPlan` | — |
+| `impact` | `getTotals`, `getMonthlyTrend`, `getByPlan` | - |
 
 #### Router discipline
 
@@ -417,7 +417,7 @@ Frontmatter:
 ```yaml
 ---
 title: Code flow
-description: One feature, seven layers — from a Drizzle query to a server prefetch, a client hook, and a rendered chart.
+description: One feature, seven layers - from a Drizzle query to a server prefetch, a client hook, and a rendered chart.
 ---
 ```
 
@@ -427,13 +427,13 @@ description: One feature, seven layers — from a Drizzle query to a server pref
 
 Explain the seven layers as a text flow.
 
-1. **DB query / mutation** — `src/db/queries/*`
-2. **Zod schema** — `src/trpc/schema/*`
-3. **tRPC procedure** — `src/trpc/routers/*`
-4. **Server prefetch** — `src/features/<feature>/server/index.ts`
-5. **Feature hook** — `src/features/<feature>/hooks/*`
-6. **Client component** — `src/features/<feature>/components/*`
-7. **Route page** — `src/app/(root)/(dashboard)/<route>/page.tsx`
+1. **DB query / mutation** - `src/db/queries/*`
+2. **Zod schema** - `src/trpc/schema/*`
+3. **tRPC procedure** - `src/trpc/routers/*`
+4. **Server prefetch** - `src/features/<feature>/server/index.ts`
+5. **Feature hook** - `src/features/<feature>/hooks/*`
+6. **Client component** - `src/features/<feature>/components/*`
+7. **Route page** - `src/app/(root)/(dashboard)/<route>/page.tsx`
 
 Explain the rule: no client page fetches data directly. Every query goes through the same tRPC procedure, whether it runs on the server or in the browser.
 

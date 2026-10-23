@@ -1,5 +1,5 @@
 ---
-title: "/devices/fleet — Full dispenser fleet"
+title: "fleet - Full dispenser fleet"
 description:
   Every active dispenser with its latest telemetry, filter age, and connectivity
   state.
@@ -15,13 +15,13 @@ description:
 
 The devices overview answers "what needs attention across the fleet?" The fleet
 page answers a different question: **what is the state of this specific
-dispenser?** It is the lookup and comparison surface for ops and support — the
+dispenser?** It is the lookup and comparison surface for ops and support - the
 place to find a flat, check its latest reading, see how old the filter is, and
 decide whether the device is healthy.
 
 The overview is for triage; the fleet table is for investigation.
 
-## What I chose — and what I left out
+## What I chose - and what I left out
 
 | Option                 | Why I rejected it                               | What I chose instead                       |
 | ---------------------- | ----------------------------------------------- | ------------------------------------------ |
@@ -43,7 +43,7 @@ Any change resets paging to page 1 and round-trips through `getFleet`. The
 current rows stay on screen and dim while the filtered page resolves, rather
 than being replaced by a full-page skeleton.
 
-**Data:** `getFleet` input — `areaId`, `type`, `online`, `page`, `limit`.
+**Data:** `getFleet` input - `areaId`, `type`, `online`, `page`, `limit`.
 **Code:**
 
 <SourceLink
@@ -109,7 +109,7 @@ Zustand state; the table query is not refetched.
   household is currently active; cancelled households' devices are out of scope.
 - **Latest reading, not history.** `getFleet` builds a
   `DISTINCT ON (dispenser_id)` subquery over readings from the last 30 days and
-  joins it to each dispenser. A device with no reading in that window shows `—`
+  joins it to each dispenser. A device with no reading in that window shows `-`
   and `Never`, not a stale number from months ago.
 - **Filter age** is `today − last_filter_change_date`, computed in SQL.
 - **Connectivity** comes from `dispensers.is_online`.
@@ -178,7 +178,7 @@ Zustand state; the table query is not refetched.
    row count and page footer change together; nothing is filtered in the
    browser.
 3. Open a device from this page, then open the same device from `/devices`. It
-   is the same drawer component and the same `getReadings` query — there is no
+   is the same drawer component and the same `getReadings` query - there is no
    second detail implementation to keep in sync.
 
 ## Trade-offs & next

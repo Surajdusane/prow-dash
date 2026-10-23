@@ -13,12 +13,12 @@ export type SocietySeed = {
 };
 
 /**
- * Onboarding waves across months 1–14 of the window — a growth curve that
+ * Onboarding waves across months 1–14 of the window - a growth curve that
  * starts slow, peaks mid-year one, then tapers (the sales team gets pickier).
  */
 const WAVE_WEIGHTS = [6, 6, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 1];
 
-/** Societies per area — high-infra areas get a little more footprint. */
+/** Societies per area - high-infra areas get a little more footprint. */
 const AREA_ALLOCATION = [6, 8, 6, 5, 6, 7, 7, 5]; // matches AREA_SEEDS order
 
 const NAME_PREFIXES = [

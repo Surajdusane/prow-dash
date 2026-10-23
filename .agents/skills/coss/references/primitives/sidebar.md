@@ -127,7 +127,7 @@ See `p-toolbar-1`, `p-breadcrumb-1`, `p-tabs-1`, `p-menu-1` for related app-shel
 - Forgetting `SidebarProvider` wrapper, which manages collapse state and mobile responsiveness.
 - Skipping the `SidebarMenu` > `SidebarMenuItem` > `SidebarMenuButton` hierarchy for nav items.
 - Missing responsive collapse strategy for narrow/mobile layouts.
-- Replacing `SidebarContent`'s scroll area with a raw `ScrollArea` without `fill` when the body uses `mt-auto` to pin footers—use `fill` (see scroll-area primitive docs).
+- Replacing `SidebarContent`'s scroll area with a raw `ScrollArea` without `fill` when the body uses `mt-auto` to pin footers-use `fill` (see scroll-area primitive docs).
 
 ## Useful particle references
 

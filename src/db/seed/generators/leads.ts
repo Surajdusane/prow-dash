@@ -36,7 +36,7 @@ export function generateLeads(
   const leads: LeadSeed[] = [];
 
   for (let i = 0; i < ctx.count; i += 1) {
-    // Skewed toward recent months — the sales pipeline is growing.
+    // Skewed toward recent months - the sales pipeline is growing.
     const skew = Math.pow(faker.number.float({ min: 0, max: 1 }), 0.65);
     const createdAt = randomTimeOnDay(faker, addDays(ctx.windowStart, Math.round(skew * span)), 9, 19);
 

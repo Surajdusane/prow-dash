@@ -12,7 +12,7 @@ const chartConfig = {
   cumulativeJarsAvoided: { label: "Jars avoided", colors: chartColor(JARS_COLOR_PAIR) },
 } satisfies ChartConfig;
 
-/** Cumulative 20 L jars avoided — the same litres story told in plastic. */
+/** Cumulative 20 L jars avoided - the same litres story told in plastic. */
 export function JarsTrendCard() {
   const { data } = useGetImpactMonthlyTrend();
 

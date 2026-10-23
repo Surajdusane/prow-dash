@@ -13,7 +13,7 @@ import {
 export function stripCodeAnnotations(code: string): string {
   const result: string[] = [];
 
-  // Single pass over the lines — cleaning and filtering together avoids
+  // Single pass over the lines - cleaning and filtering together avoids
   // re-splitting `code` for every line (which made this O(n²)).
   for (const originalLine of code.split("\n")) {
     // Remove // [!code ...] comments

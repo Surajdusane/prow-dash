@@ -1,5 +1,5 @@
 ---
-title: "/service-ops — Field operations"
+title: "service-ops - Field operations"
 description:
   Triage the service board, see where demand is concentrated, and act before the
   next complaint.
@@ -18,7 +18,7 @@ failures**. The page pairs a kanban with a predictive queue, then exposes
 capacity: area demand, SLA performance, and technician load. The decision is
 "who needs a visit next, and who is going to do it?"
 
-## What I chose — and what I left out
+## What I chose - and what I left out
 
 | Option                     | Why I rejected it                       | What I chose instead             |
 | -------------------------- | --------------------------------------- | -------------------------------- |
@@ -36,7 +36,7 @@ The page is `force-dynamic` and warms six queries through
 ### KPI row
 
 **Visual:** four KPI tiles · **Why:** scan the current load before touching the
-board. **Data:** `getSlaStats` → `service_tickets` — open now, overdue backlog
+board. **Data:** `getSlaStats` → `service_tickets` - open now, overdue backlog
 (open for more than seven days), average resolution days, and 90-day SLA met %.
 **Code:**
 
@@ -47,7 +47,7 @@ board. **Data:** `getSlaStats` → `service_tickets` — open now, overdue backl
 
 ### Kanban board
 
-**Visual:** four columns — New, Assigned, In progress, Resolved — with drag and
+**Visual:** four columns - New, Assigned, In progress, Resolved - with drag and
 drop. **Why:** mirrors the ops workflow; dragging is the action, not opening a
 form. The columns are derived from status plus technician presence: `open` + no
 technician → New, `open` + technician → Assigned, `in_progress` → In progress,
@@ -98,7 +98,7 @@ Filter age turns amber at 70 days; TDS turns amber at 300 ppm and rose at 500.
 
 ### Area demand
 
-**Visual:** grouped bar — tickets raised in the last 90 days and tickets per 100
+**Visual:** grouped bar - tickets raised in the last 90 days and tickets per 100
 households, one pair per area. **Why:** volume alone favors big areas; density
 is the fairer comparison. The tooltip adds infrastructure age. **Data:**
 `getAreaDemand` → `service_tickets`, `households`, `societies`, `areas`; sorted
@@ -133,7 +133,7 @@ for the open count. **Code:**
 
 ### Technician workload
 
-**Visual:** sorted horizontal bar — open now vs resolved in the last 30 days.
+**Visual:** sorted horizontal bar - open now vs resolved in the last 30 days.
 **Why:** names are long, and the ranking is the point: who is carrying the
 queue? **Data:** `getTechnicianWorkload` → `technicians`, `areas`,
 `service_tickets`. **Code:**
@@ -176,7 +176,7 @@ behind the shared `confirm()` dialog.
   12 in Electronic City, and 10 in Sarjapur Road, against 3–6 elsewhere.
 
 The predictive heuristic is explicit: a 30-day window, the latest six readings,
-an ordinary-least-squares slope, and two triggers — `slope ≥ 3.5 ppm/day` with
+an ordinary-least-squares slope, and two triggers - `slope ≥ 3.5 ppm/day` with
 `latest TDS ≥ 250`, or `filter age ≥ 70 days`. Candidates are scored with
 `latestTds + slopePpmPerDay × 10 + filterAgeDays × 2` and capped at 25.
 
@@ -241,7 +241,7 @@ not a production one.
 1. Drag a card, watch the optimistic move, then refresh. The persisted status
    should match. The rollback path is in `useUpdateTicketStatus`.
 2. Compare the predictive table's top rows with the area demand chart. The
-   high-stress areas — Whitefield, Electronic City, Sarjapur Road — should line
+   high-stress areas - Whitefield, Electronic City, Sarjapur Road - should line
    up, because both read the same simulated infrastructure stress.
 3. Read `getPredictive`: the `row_number()` window keeps the latest six readings
    per dispenser, `linearSlope` fits the line in TypeScript, and the score is a

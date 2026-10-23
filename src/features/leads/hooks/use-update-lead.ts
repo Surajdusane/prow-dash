@@ -7,7 +7,7 @@ import { formatDateKey } from "@/lib/format";
 import { useTRPC } from "@/trpc/client";
 
 /**
- * Progresses a lead through the funnel — visit date set/cleared, converted
+ * Progresses a lead through the funnel - visit date set/cleared, converted
  * toggled, flats recorded. Invalidates every leads query so the whole route
  * reflects the new stage immediately.
  */

@@ -167,7 +167,7 @@ function RiskTableRows({
                       {PLAN_LABELS[row.planName]}
                     </Badge>
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span className="text-muted-foreground">-</span>
                   )}
                 </TableCell>
                 <TableCell className="text-muted-foreground tabular-nums">{formatTenure(row.tenureDays)}</TableCell>
@@ -228,7 +228,7 @@ function RiskTableRows({
  * prevents the hydration mismatch this table used to race. `state` drives the
  * toolbar urgently while a deferred copy drives the rows, so a sort, filter or
  * page change keeps the current rows on screen (dimmed) instead of flashing a
- * fallback — the same feel `keepPreviousData` used to provide.
+ * fallback - the same feel `keepPreviousData` used to provide.
  */
 export function RiskTable() {
   const [state, setState] = useState<RiskTableState>(DEFAULT_RISK_TABLE_STATE);
@@ -252,7 +252,7 @@ export function RiskTable() {
       <CardHeader>
         <CardTitle>Household risk</CardTitle>
         <p className="text-muted-foreground text-sm">
-          Every household scored from the last 90 days of complaints, payments and SLA misses — highest risk first.
+          Every household scored from the last 90 days of complaints, payments and SLA misses - highest risk first.
         </p>
         <div className="pt-2">
           <RiskTableToolbar state={state} onChange={handleFilterChange} />

@@ -1,5 +1,5 @@
 ---
-title: "/societies — Expansion and penetration"
+title: "societies - Expansion and penetration"
 description:
   Where the society book is growing, which areas are under-penetrated, and which
   societies need attention.
@@ -18,7 +18,7 @@ exist. The team needs to compare areas on active households, penetration against
 flats covered, open tickets, and average TDS. The page answers **where should we
 expand, and which society is underperforming?**
 
-## What I chose — and what I left out
+## What I chose - and what I left out
 
 | Option                         | Why I rejected it                      | What I chose instead                          |
 | ------------------------------ | -------------------------------------- | --------------------------------------------- |
@@ -38,8 +38,8 @@ fetches when a row opens.
 ### KPI row
 
 Four tiles from `getSocietiesKpis`: societies, average penetration, flats
-covered, and areas. Average penetration is one portfolio-wide ratio — active
-households ÷ flats across every onboarded society — not the mean of the eight
+covered, and areas. Average penetration is one portfolio-wide ratio - active
+households ÷ flats across every onboarded society - not the mean of the eight
 area percentages.
 
 **Data:** `getSocietiesKpis` → `societies`, `households`. **Code:**
@@ -57,7 +57,7 @@ area percentages.
 ### Onboarding growth
 
 A stacked area chart of cumulative active households per area over 24 months.
-The series keys are derived from the data by `growthSeriesKeys` — the query
+The series keys are derived from the data by `growthSeriesKeys` - the query
 returns the top eight areas by all-time households plus an "Other" bucket. A
 fixed area list would silently drop a new area; here a new high-volume area
 displaces the eighth, and a low-volume one folds into "Other". Colours are
@@ -224,7 +224,7 @@ id through the close animation and offers a Retry on a failed fetch.
    that list, so a new area cannot be dropped silently. With the current eight
    seeded areas, "Other" stays at zero.
 2. Sort the society table by penetration, then hover the top area bar. The
-   tooltip adds infrastructure age and tickets per 100 households — the "why"
+   tooltip adds infrastructure age and tickets per 100 households - the "why"
    behind the ranking.
 3. Open a society with high penetration and few open tickets. The drawer should
    show a healthy plan mix and few high-risk households; contrast it with an
@@ -238,7 +238,7 @@ id through the close animation and offers a Retry on a failed fetch.
   planning and route density.
 - No lease or contract data per society, so the page cannot distinguish a
   long-term partner from a month-to-month arrangement.
-- No expansion scoring model. The page gives the inputs — penetration, service
-  load, infrastructure age — but not a ranked recommendation.
+- No expansion scoring model. The page gives the inputs - penetration, service
+  load, infrastructure age - but not a ranked recommendation.
 - The drawer is read-only. Creating a ticket or changing a plan still happens on
   the relevant route.
