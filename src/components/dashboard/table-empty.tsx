@@ -7,7 +7,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 /**
- * Shared empty state rendered as a full-width table row — used by every table
+ * Shared empty state rendered as a full-width table row - used by every table
  * when filters or an empty database leave nothing to show.
  */
 export function TableEmpty({

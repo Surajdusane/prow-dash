@@ -1,7 +1,7 @@
 ---
-title: "/leads — Sales funnel"
+title: "leads - Sales funnel"
 description:
-  Enquiry volume, site visits and conversions by channel — a working
+  Enquiry volume, site visits and conversions by channel - a working
   top-of-funnel with create and update flows.
 ---
 
@@ -22,7 +22,7 @@ It is also a working funnel: a header button creates a lead, and every row can
 move through a visit and a conversion, so the charts can be checked against a
 write.
 
-## What I chose — and what I left out
+## What I chose - and what I left out
 
 | Option                  | Why I rejected it                                | What I chose instead                          |
 | ----------------------- | ------------------------------------------------ | --------------------------------------------- |
@@ -68,7 +68,7 @@ but not this tile.
 
 ### Pipeline funnel
 
-**Visual:** one horizontal bar per stage — leads, visits, converted — labelled
+**Visual:** one horizontal bar per stage - leads, visits, converted - labelled
 with its count and share of all leads. **Why:** a funnel is a stage comparison,
 and horizontal bars keep the stage names readable.
 
@@ -76,7 +76,7 @@ The bars use a custom ECharts series. The stock series cannot give every bar its
 own stage colour and value label. ECharts also cannot resolve CSS variables
 inside canvas overrides, so the component picks the hexes per theme.
 
-Every percentage is relative to total leads: 100%, ~40%, and ~9% — not the
+Every percentage is relative to total leads: 100%, ~40%, and ~9% - not the
 stage-to-stage drop. The ~22% visitor conversion rate lives in the source
 tooltip and the seed, not in these labels.
 
@@ -202,8 +202,8 @@ as the demo ages.
 ## Interactions
 
 - **Create.** The mutation posts the validated fields, then a toast names the
-  lead, society, and source. `onSettled` invalidates all four queries — KPIs,
-  funnel, source conversion, list — so the route moves together even on failure.
+  lead, society, and source. `onSettled` invalidates all four queries - KPIs,
+  funnel, source conversion, list - so the route moves together even on failure.
 - **Update.** A visit date moves the visit stage; conversion moves the converted
   stage and the flats count. A toast names the stage change.
 - **Failures.** There is no optimistic write; the dialog keeps its values and

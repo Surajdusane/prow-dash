@@ -70,7 +70,7 @@ Wrap the trigger around the surface that should accept right click or long press
 - **Portal forwarding**: optional `portalProps` on `ContextMenuPopup` -> Base UI `ContextMenu.Portal` (`keepMounted`, `container`, ...). See [portal-props.md](../portal-props.md).
 - Use `ContextMenuTrigger` on a non-interactive wrapper (`div`) around the target surface.
 - Use `ContextMenuLinkItem` for navigation links.
-- If you were on `ContextMenuItem render={<Link href="..." />}`, switch to `ContextMenuLinkItem` but **keep `render={<Link … />}`** — do not use `href` alone with a router Link.
+- If you were on `ContextMenuItem render={<Link href="..." />}`, switch to `ContextMenuLinkItem` but **keep `render={<Link … />}`** - do not use `href` alone with a router Link.
 - Use `href` on `ContextMenuLinkItem` only for plain `<a>` navigation.
 - Use `ContextMenuItem closeOnClick` for action items that should dismiss the menu.
 - Use `ContextMenuCheckboxItem variant="switch"` for toggle-style preferences.

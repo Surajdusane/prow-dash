@@ -1,4 +1,4 @@
-# Prompt 03 — Docs home, short version, long version
+# Prompt 03 - Docs home, short version, long version
 
 Read `docs-prompt/00-readme.md` first.
 
@@ -6,9 +6,9 @@ Read `docs-prompt/00-readme.md` first.
 
 Write the three pages that carry the recruiter story:
 
-- `src/content/docs/index.mdx` — case-study home (2 minutes)
-- `src/content/docs/overview/short.mdx` — short version (5 minutes)
-- `src/content/docs/overview/long.mdx` — long version (20–30 minutes)
+- `src/content/docs/index.mdx` - case-study home (2 minutes)
+- `src/content/docs/overview/short.mdx` - short version (5 minutes)
+- `src/content/docs/overview/long.mdx` - long version (20–30 minutes)
 
 This is the most important prompt. If only these three pages existed, a recruiter should still understand the project and want to inspect the code.
 
@@ -20,13 +20,13 @@ This is the most important prompt. If only these three pages existed, a recruite
 - Every claim either has a number or a code link.
 - Say clearly that the data is simulated.
 
-## 1. Docs home — `src/content/docs/index.mdx`
+## 1. Docs home - `src/content/docs/index.mdx`
 
 Frontmatter:
 
 ```yaml
 ---
-title: ProWater — Case Study
+title: ProWater - Case Study
 description: A full-stack ops dashboard for a piped RO water business, built to turn service telemetry and customer signals into two predictive workflows.
 ---
 ```
@@ -35,10 +35,10 @@ description: A full-stack ops dashboard for a piped RO water business, built to 
 
 #### Hero
 
-- H1: `ProWater — an ops dashboard built around two decisions`
+- H1: `ProWater - an ops dashboard built around two decisions`
 - One-sentence thesis:
 
-> ProWater is a full-stack ops dashboard for a piped RO water business: I modeled the domain, simulated 24 months of causal data, and built two predictive workflows — area-level service demand and household churn risk — behind a typed tRPC API and a server-rendered Next.js UI.
+> ProWater is a full-stack ops dashboard for a piped RO water business: I modeled the domain, simulated 24 months of causal data, and built two predictive workflows - area-level service demand and household churn risk - behind a typed tRPC API and a server-rendered Next.js UI.
 
 - CTA links:
   - **Live demo** → `LIVE_URL`
@@ -51,10 +51,10 @@ description: A full-stack ops dashboard for a piped RO water business, built to 
 Two cards or a two-column block:
 
 1. **Where will service demand concentrate next, before complaints pile up?**
-   - Predictive service demand — TDS trend + filter age → ranked queue.
+   - Predictive service demand - TDS trend + filter age → ranked queue.
    - Link: `/docs/ideas/predictive-service-demand`
 2. **Which households are about to churn, and why?**
-   - Complaint-based risk — complaints + payment behaviour + SLA misses → 0–100 score.
+   - Complaint-based risk - complaints + payment behaviour + SLA misses → 0–100 score.
    - Link: `/docs/ideas/churn-risk`
 
 #### By the numbers
@@ -82,22 +82,22 @@ Use Fumadocs `Cards`/`Card` if available:
 - **Route by route** → `/docs/routes`
 - **Code entry points** → `/docs/architecture/code-flow`
 
-#### Reviewer’s guide — what to watch
+#### Reviewer’s guide - what to watch
 
 Six numbered checkpoints. This is the “what should I mainly look at?” section.
 
-1. **`/service-ops`** — drag a kanban card; it mutates optimistically and persists. Then open the predictive table.
+1. **`/service-ops`** - drag a kanban card; it mutates optimistically and persists. Then open the predictive table.
    - Code: `src/features/service-ops/hooks/use-update-ticket-status.ts`
    - Code: `src/db/queries/service-ops.ts` (`getPredictive`)
-2. **`/customers`** — filter to high risk, open a household drawer, read the complaint/payment/SLA signals, then hit “Recompute risk”.
+2. **`/customers`** - filter to high risk, open a household drawer, read the complaint/payment/SLA signals, then hit “Recompute risk”.
    - Code: `src/db/queries/risk.ts`
-3. **`/revenue`** — read the cohort retention matrix, then mark an overdue payment paid and watch the queries invalidate.
+3. **`/revenue`** - read the cohort retention matrix, then mark an overdue payment paid and watch the queries invalidate.
    - Code: `src/features/revenue/hooks/use-mark-paid.ts`
-4. **`/`** — scan the six KPIs, billed vs collected, and area health. This is the 60-second executive view.
+4. **`/`** - scan the six KPIs, billed vs collected, and area health. This is the 60-second executive view.
    - Code: `src/db/queries/overview.ts`
-5. **Network tab** — one batch prefetch per route, no client-side fetch waterfall.
+5. **Network tab** - one batch prefetch per route, no client-side fetch waterfall.
    - Code: `src/features/*/server/index.ts`
-6. **Seed** — run `bun run db:reset` and confirm the dataset is deterministic.
+6. **Seed** - run `bun run db:reset` and confirm the dataset is deterministic.
    - Code: `src/db/seed/index.ts`
 
 Each item should be a link plus one line explaining what to notice.
@@ -124,12 +124,12 @@ Link each row to the relevant page or file.
 
 Six links only. Do not dump the whole repo:
 
-1. `src/db/schema.ts` — the domain model
-2. `src/db/seed/index.ts` — the simulation pipeline
-3. `src/db/queries/risk.ts` — shared churn score
-4. `src/db/queries/service-ops.ts` — predictive service query
-5. `src/features/service-ops/server/index.ts` — server prefetch
-6. `src/trpc/routers/_app.ts` — the API surface
+1. `src/db/schema.ts` - the domain model
+2. `src/db/seed/index.ts` - the simulation pipeline
+3. `src/db/queries/risk.ts` - shared churn score
+4. `src/db/queries/service-ops.ts` - predictive service query
+5. `src/features/service-ops/server/index.ts` - server prefetch
+6. `src/trpc/routers/_app.ts` - the API surface
 
 Use `<SourceLink>` for each.
 
@@ -149,7 +149,7 @@ Repeat the three links: Live demo, GitHub, Hire me. Add “Built by Suraj Dusane
 
 ≤ 900 words.
 
-## 2. Short version — `src/content/docs/overview/short.mdx`
+## 2. Short version - `src/content/docs/overview/short.mdx`
 
 Frontmatter:
 
@@ -162,15 +162,15 @@ description: The problem, the two predictive workflows, what was built, and what
 
 ### Required sections
 
-1. **One-paragraph summary** — the thesis, in plain language.
-2. **The two questions** — one paragraph each, with the route link.
-3. **What I built** — 5 bullets:
+1. **One-paragraph summary** - the thesis, in plain language.
+2. **The two questions** - one paragraph each, with the route link.
+3. **What I built** - 5 bullets:
    - 12-table Postgres model
    - deterministic 24-month simulation
    - 9 routes across ops, growth, revenue, devices
    - tRPC + TanStack Query + Drizzle, fully typed
    - server-rendered pages with Suspense, skeletons, error boundaries
-4. **How I approached the work** — exactly 7 numbered steps:
+4. **How I approached the work** - exactly 7 numbered steps:
    1. Researched the service and the data it produces.
    2. Designed the schema around the decisions the dashboard must support.
    3. Chose Next.js full-stack so there is no separate backend to maintain.
@@ -178,25 +178,25 @@ description: The problem, the two predictive workflows, what was built, and what
    5. Wrote a deterministic seed with injected patterns.
    6. Built one feature at a time: query → schema → router → prefetch → hook → component.
    7. Chose the chart/route only after the data and the decision were clear.
-5. **What to click first** — 5 links, one line each:
+5. **What to click first** - 5 links, one line each:
    - `/service-ops`
    - `/customers`
    - `/revenue`
    - `/devices`
    - `/`
-6. **What to mainly watch** — 5 concrete checkpoints, each with a code link:
-   1. `/service-ops` — drag a kanban card, then compare the predictive queue with the area demand chart.
+6. **What to mainly watch** - 5 concrete checkpoints, each with a code link:
+   1. `/service-ops` - drag a kanban card, then compare the predictive queue with the area demand chart.
       - `src/features/service-ops/hooks/use-update-ticket-status.ts`
       - `src/db/queries/service-ops.ts`
-   2. `/customers` — filter to high risk, open a household, then hit “Recompute risk”.
+   2. `/customers` - filter to high risk, open a household, then hit “Recompute risk”.
       - `src/db/queries/risk.ts`
-   3. `/revenue` — read the cohort matrix, then mark an overdue payment paid.
+   3. `/revenue` - read the cohort matrix, then mark an overdue payment paid.
       - `src/features/revenue/hooks/use-mark-paid.ts`
-   4. **Network tab** — one batched tRPC prefetch per route, not a client waterfall.
+   4. **Network tab** - one batched tRPC prefetch per route, not a client waterfall.
       - `src/features/service-ops/server/index.ts`
-   5. **Seed** — run `bun run db:reset` and confirm the patterns reappear.
+   5. **Seed** - run `bun run db:reset` and confirm the patterns reappear.
       - `src/db/seed/index.ts`
-7. **Code links** — a compact list, not a repo dump:
+7. **Code links** - a compact list, not a repo dump:
    - `src/db/schema.ts`
    - `src/db/seed/index.ts`
    - `src/db/queries/service-ops.ts`
@@ -204,9 +204,9 @@ description: The problem, the two predictive workflows, what was built, and what
    - `src/features/service-ops/server/index.ts`
    - `src/trpc/routers/_app.ts`
    - GitHub repo: `GITHUB_URL`
-8. **What this proves** — a shorter version of the capability matrix (5 rows).
-9. **What this dashboard shows you** — leave this section **blank**. Add the heading and an MDX comment `{/* User to fill in. */}`. Do not invent content.
-10. **Read next** — long version, the two idea pages, GitHub, live demo, contact.
+8. **What this proves** - a shorter version of the capability matrix (5 rows).
+9. **What this dashboard shows you** - leave this section **blank**. Add the heading and an MDX comment `{/* User to fill in. */}`. Do not invent content.
+10. **Read next** - long version, the two idea pages, GitHub, live demo, contact.
 
 ### What not to do
 
@@ -215,7 +215,7 @@ description: The problem, the two predictive workflows, what was built, and what
 - Do not repeat the README feature table.
 - Do not exceed ~1,200 words.
 
-## 3. Long version — `src/content/docs/overview/long.mdx`
+## 3. Long version - `src/content/docs/overview/long.mdx`
 
 Frontmatter:
 
@@ -350,8 +350,8 @@ Link to `/docs/architecture/code-flow` for the full version.
 
 Two subsections, each ~150 words, then “Read the full deep dive”:
 
-- Predictive service demand — why, what data, what the queue does, what it proves.
-- Churn risk — why, the score, validation, what support can do.
+- Predictive service demand - why, what data, what the queue does, what it proves.
+- Churn risk - why, the score, validation, what support can do.
 
 #### 8. Route map
 
@@ -366,38 +366,38 @@ Link each route to its `/docs/routes/*` page.
 
 Six checkpoints for a reviewer. Each one should say what to click, what to notice, and where the code is:
 
-1. **`/service-ops`** — drag a kanban card; it mutates optimistically and persists. Then open the predictive table and compare the top rows with the area demand chart.
+1. **`/service-ops`** - drag a kanban card; it mutates optimistically and persists. Then open the predictive table and compare the top rows with the area demand chart.
    - `src/features/service-ops/hooks/use-update-ticket-status.ts`
    - `src/db/queries/service-ops.ts`
-2. **`/customers`** — filter to high risk, open a household drawer, read the complaint/payment/SLA evidence, then hit “Recompute risk”.
+2. **`/customers`** - filter to high risk, open a household drawer, read the complaint/payment/SLA evidence, then hit “Recompute risk”.
    - `src/db/queries/risk.ts`
    - `src/features/customers/components/household-drawer/*`
-3. **`/revenue`** — read the cohort retention matrix, then mark an overdue payment paid and watch the queries invalidate.
+3. **`/revenue`** - read the cohort retention matrix, then mark an overdue payment paid and watch the queries invalidate.
    - `src/features/revenue/hooks/use-mark-paid.ts`
    - `src/db/queries/revenue.ts`
-4. **Network tab** — one batched tRPC prefetch per route, no client-side fetch waterfall.
+4. **Network tab** - one batched tRPC prefetch per route, no client-side fetch waterfall.
    - `src/features/service-ops/server/index.ts`
    - `src/trpc/server.tsx`
-5. **Seed** — run `bun run db:reset` and confirm the same patterns reappear.
+5. **Seed** - run `bun run db:reset` and confirm the same patterns reappear.
    - `src/db/seed/index.ts`
    - `src/db/seed/patterns.ts`
-6. **Code flow** — trace the complaint trend from query to chart.
+6. **Code flow** - trace the complaint trend from query to chart.
    - `/docs/architecture/code-flow`
 
 #### 8.2 Code links and repo
 
 A compact “start here” list, not a repo dump. Use `<SourceLink>`:
 
-- `src/db/schema.ts` — the 12-table domain model
-- `src/db/seed/index.ts` — the ten-stage simulation
-- `src/db/queries/service-ops.ts` — predictive service
-- `src/db/queries/risk.ts` — churn score
-- `src/db/queries/overview.ts` — executive KPIs
-- `src/db/queries/customers.ts` — risk table + household profile
-- `src/db/queries/revenue.ts` — MRR, plan mix, cohorts
-- `src/features/service-ops/server/index.ts` — server prefetch
-- `src/trpc/routers/_app.ts` — the API surface
-- `src/trpc/server.tsx` — `prefetch` / `batchPrefetch` / `HydrateClient`
+- `src/db/schema.ts` - the 12-table domain model
+- `src/db/seed/index.ts` - the ten-stage simulation
+- `src/db/queries/service-ops.ts` - predictive service
+- `src/db/queries/risk.ts` - churn score
+- `src/db/queries/overview.ts` - executive KPIs
+- `src/db/queries/customers.ts` - risk table + household profile
+- `src/db/queries/revenue.ts` - MRR, plan mix, cohorts
+- `src/features/service-ops/server/index.ts` - server prefetch
+- `src/trpc/routers/_app.ts` - the API surface
+- `src/trpc/server.tsx` - `prefetch` / `batchPrefetch` / `HydrateClient`
 
 Add the GitHub repo link explicitly:
 
@@ -426,7 +426,7 @@ Be explicit:
 - Risk score is a transparent heuristic, not a trained model.
 - Predictive list is a batch query over recent readings, not streaming.
 - No auth; public demo by design.
-- No automated test suite (if true) — say what you did instead and what you would add.
+- No automated test suite (if true) - say what you did instead and what you would add.
 - Single-tenant demo; no multi-company isolation.
 
 This section builds trust. Do not hide it at the bottom of the page.

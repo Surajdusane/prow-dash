@@ -39,7 +39,7 @@ const db = getDb();
    --------------------------------------------------------- */
 
 const FAKER_SEED = 42;
-const CHUNK_SIZE = 1_000; // Neon HTTP param limits — keep batches at/under 1k rows
+const CHUNK_SIZE = 1_000; // Neon HTTP param limits - keep batches at/under 1k rows
 const SOCIETY_COUNT = 50;
 const LEAD_COUNT = 450;
 
@@ -111,7 +111,7 @@ async function main(): Promise<void> {
   const faker = new Faker({ locale: en });
   faker.seed(FAKER_SEED);
 
-  log(`ProWater seed — 24-month window ${toDateKey(windowStart)} → ${toDateKey(today)} (faker seed ${FAKER_SEED})`);
+  log(`ProWater seed - 24-month window ${toDateKey(windowStart)} → ${toDateKey(today)} (faker seed ${FAKER_SEED})`);
 
   if (fresh) {
     log("Truncating all 12 tables (RESTART IDENTITY CASCADE)…");
@@ -125,7 +125,7 @@ async function main(): Promise<void> {
       process.exitCode = 1;
       return;
     }
-    log("Database is empty — proceeding (re-run with --fresh to skip this check).");
+    log("Database is empty - proceeding (re-run with --fresh to skip this check).");
   }
 
   /* ---------- Stage 1: reference data ---------- */

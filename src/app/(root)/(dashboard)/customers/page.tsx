@@ -34,7 +34,7 @@ export default function CustomersPage() {
             <div className="flex flex-col gap-1">
               <h1 className="font-heading text-2xl font-semibold">Customers</h1>
               <p className="text-muted-foreground text-sm">
-                Churn and risk — score the book, surface high-risk households and act on complaints before they cancel.
+                Churn and risk - score the book, surface high-risk households and act on complaints before they cancel.
               </p>
             </div>
             <RecomputeRiskButton />
@@ -52,7 +52,7 @@ export default function CustomersPage() {
             <Suspense fallback={<ChartCardSkeleton />}>
               <ChartCard
                 title="Risk distribution"
-                description="The active book split by risk band — low, medium and high."
+                description="The active book split by risk band - low, medium and high."
               >
                 <RiskDistributionCard />
               </ChartCard>

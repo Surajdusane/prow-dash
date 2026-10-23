@@ -1,8 +1,8 @@
 ---
-title: "/sustainability — Impact estimate"
+title: "sustainability - Impact estimate"
 description:
   Litres served and 20 L jars avoided, estimated from subscription-days and plan
-  usage — with the method stated.
+  usage - with the method stated.
 ---
 
 <RouteMeta
@@ -22,7 +22,7 @@ The page answers **how much water did we serve, and how many jars did that
 displace?** It also shows how to present an estimate honestly: the formula, plan
 assumptions, and exclusions sit next to the number.
 
-## What I chose — and what I left out
+## What I chose - and what I left out
 
 | Option                     | Why I rejected it                      | What I chose instead                |
 | -------------------------- | -------------------------------------- | ----------------------------------- |
@@ -90,7 +90,7 @@ current month is partial: an open span ends at today.
 
 ### Cumulative jars avoided
 
-**Visual:** an area chart of cumulative 20 L jars avoided — the same story in
+**Visual:** an area chart of cumulative 20 L jars avoided - the same story in
 the unit a customer or investor can picture. **Why:** it is deliberately
 parallel to the litres chart, so a reader can switch units without re-learning
 the chart.
@@ -115,11 +115,11 @@ cannot drift apart.
 
 **Visual:** a vertical bar of all-time litres per plan, each bar labelled with
 its jar equivalent. **Why:** there are three categories, and the plan drives
-usage — 8, 12, or 18 L per day. A bar keeps the ranking readable; a pie would
+usage - 8, 12, or 18 L per day. A bar keeps the ranking readable; a pie would
 hide how different the volumes are.
 
 A custom ECharts series gives every bar its plan colour and a top label. The
-tooltip repeats both units. Plan order is fixed — starter, standard, premium —
+tooltip repeats both units. Plan order is fixed - starter, standard, premium -
 so the chart does not reshuffle.
 
 **Data:** `getImpactByPlan` → `subscriptions` + `plans`, grouped all-time.

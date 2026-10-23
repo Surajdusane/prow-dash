@@ -1,7 +1,7 @@
 ---
 title: Code flow
 description:
-  One feature, seven layers — from a Drizzle query to a server prefetch, a
+  One feature, seven layers - from a Drizzle query to a server prefetch, a
   client hook, and a rendered chart.
 ---
 
@@ -156,7 +156,7 @@ promise resolves, instead of requiring every prefetch to finish before the page
 streams.
 
 The prefetch list is a manual contract. A hook missing from `batchPrefetchX` has
-no server entry; it suspends and fetches after hydration — not broken, but a
+no server entry; it suspends and fetches after hydration - not broken, but a
 waterfall the prefetch was meant to remove.
 
 ## The client hook pattern
@@ -306,51 +306,51 @@ keeps the dialog open.
   or the overview; resolving a complaint intentionally leaves the trend alone.
   Those are defensible choices, but they are conventions held in hooks, not
   constraints enforced by the type system.
-- **The same query options are written twice** — once in the server prefetch and
+- **The same query options are written twice** - once in the server prefetch and
   once in the hook. They must match, or hydration misses and the client fetches.
   A shared options factory would remove the duplication at the cost of an
   indirection.
 
 ## Code links
 
-- <SourceLink path="src/trpc/server.tsx" label="server.tsx" /> — `prefetch`,
+- <SourceLink path="src/trpc/server.tsx" label="server.tsx" /> - `prefetch`,
   `batchPrefetch`, `HydrateClient`.
-- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" /> — stale
+- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" /> - stale
   time, SuperJSON dehydration, pending queries.
-- <SourceLink path="src/trpc/client.tsx" label="client.tsx" /> — browser
+- <SourceLink path="src/trpc/client.tsx" label="client.tsx" /> - browser
   provider and batch link.
 - <SourceLink
     path="src/features/customers/server/index.ts"
     label="customers/server"
   />
-  — `batchPrefetchCustomers`.
+  - `batchPrefetchCustomers`.
 - <SourceLink
     path="src/features/customers/hooks/use-get-complaint-trend.ts"
     label="use-get-complaint-trend.ts"
   />
-  — the thin query hook.
+  - the thin query hook.
 - <SourceLink
     path="src/features/customers/components/complaint-trend-card.tsx"
     label="complaint-trend-card.tsx"
   />
-  — the rendered chart.
+  - the rendered chart.
 - <SourceLink
     path="src/app/(root)/(dashboard)/customers/page.tsx"
     label="customers/page.tsx"
   />
-  — prefetch, Suspense, error boundary.
+  - prefetch, Suspense, error boundary.
 - <SourceLink
     path="src/features/service-ops/hooks/use-update-ticket-status.ts"
     label="use-update-ticket-status.ts"
   />
-  — optimistic mutation and rollback.
+  - optimistic mutation and rollback.
 - <SourceLink
     path="src/features/customers/hooks/use-resolve-complaint.ts"
     label="use-resolve-complaint.ts"
   />
-  — a narrow invalidation set.
+  - a narrow invalidation set.
 - <SourceLink
     path="src/features/revenue/hooks/use-mark-paid.ts"
     label="use-mark-paid.ts"
   />
-  — a non-optimistic money mutation.
+  - a non-optimistic money mutation.

@@ -13,7 +13,7 @@ import {
 import { formatDateKey } from "@/lib/format";
 
 /**
- * Complaint history with inline resolve. The list is capped by the caller —
+ * Complaint history with inline resolve. The list is capped by the caller -
  * this component renders exactly what it is given.
  */
 export function ComplaintsList({ complaints }: { complaints: ComplaintRow[] }) {

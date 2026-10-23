@@ -7,7 +7,7 @@ import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "@/c
 import { useGetLeadsBySource } from "@/features/leads/hooks";
 import { leadSourceLabel, type LeadsTableState } from "@/features/leads/utils";
 
-/** Sentinel for "no filter applied" — Base UI Select needs a concrete value. */
+/** Sentinel for "no filter applied" - Base UI Select needs a concrete value. */
 const ALL = "all";
 const CONVERTED_ITEMS = [
   { value: ALL, label: "All leads" },
@@ -17,7 +17,7 @@ const CONVERTED_ITEMS = [
 
 /**
  * Leads table filters. Every change flows through the parent as a patch so it
- * can reset paging — a filter change always jumps back to page 1.
+ * can reset paging - a filter change always jumps back to page 1.
  */
 export function LeadsTableToolbar({
   state,

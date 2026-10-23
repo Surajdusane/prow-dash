@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Sortable column header, generic over the server's sort-key union. Sorting
- * runs server-side — clicking only flips the `sort`/`dir` input keys, so the
+ * runs server-side - clicking only flips the `sort`/`dir` input keys, so the
  * table keeps its current rows while the next ordering loads.
  */
 export function SortableTableHead<T extends string>({

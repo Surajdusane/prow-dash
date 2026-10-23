@@ -3,7 +3,7 @@ import { JAR_SIZE_LITRES, PLAN_LITRES_PER_DAY } from "@/db/queries/plans";
 import { PLAN_LABELS, PLAN_ORDER } from "@/features/sustainability/utils";
 
 /**
- * Required method note — every sustainability number is an estimate derived
+ * Required method note - every sustainability number is an estimate derived
  * from subscription-days, not a meter reading, and the page must say so.
  */
 export function MethodNoteCard(): React.ReactElement {
@@ -26,7 +26,7 @@ export function MethodNoteCard(): React.ReactElement {
           Active days run from subscription start to cancellation, or to today for an open subscription.
         </p>
         <p className="text-muted-foreground">
-          Jars avoided = litres ÷ {JAR_SIZE_LITRES} L — the equivalent single-use 20 L jars displaced.
+          Jars avoided = litres ÷ {JAR_SIZE_LITRES} L - the equivalent single-use 20 L jars displaced.
         </p>
         <p className="text-muted-foreground">
           Totals cover every subscription since the first one, including cancelled households.

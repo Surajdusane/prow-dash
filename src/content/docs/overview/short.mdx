@@ -9,7 +9,7 @@ import { CONTACT_URL, GITHUB_URL, LIVE_URL } from "@/features/docs/constants";
 
 ProWater is a full-stack ops dashboard for a piped RO water business: I modeled
 the domain, simulated 24 months of causal data, and built two predictive
-workflows — area-level service demand and household churn risk — behind a typed
+workflows - area-level service demand and household churn risk - behind a typed
 tRPC API and a server-rendered Next.js UI. The company is fictional; the schema,
 the queries, and the scoring paths are real code running against a deterministic
 dataset.
@@ -38,7 +38,7 @@ explains the weights.
   causal patterns from filter degradation to churn.
 - Nine dashboard routes across operations, growth, revenue, devices, and
   sustainability.
-- A fully typed path — tRPC v11, TanStack Query v5, Drizzle ORM, Zod v4 — with
+- A fully typed path - tRPC v11, TanStack Query v5, Drizzle ORM, Zod v4 - with
   no mock JSON in the client.
 - Server-rendered pages with batched prefetch, Suspense boundaries, shaped
   skeletons, and error boundaries with retry.
@@ -61,19 +61,19 @@ explains the weights.
 
 ## What to click first
 
-- **[/service-ops](/service-ops)** — the kanban, the predictive queue, and area
+- **[/service-ops](/service-ops)** - the kanban, the predictive queue, and area
   demand on one screen.
-- **[/customers](/customers)** — the risk table, complaint trend, and household
+- **[/customers](/customers)** - the risk table, complaint trend, and household
   drawer.
-- **[/revenue](/revenue)** — MRR, plan mix, cohort retention, and overdue
+- **[/revenue](/revenue)** - MRR, plan mix, cohort retention, and overdue
   payments.
-- **[/devices](/devices)** — fleet health, telemetry trend, and the anomaly
+- **[/devices](/devices)** - fleet health, telemetry trend, and the anomaly
   feed.
-- **[/](/)** — six KPIs and the 60-second executive view.
+- **[/](/)** - six KPIs and the 60-second executive view.
 
 ## What to mainly watch
 
-1. **[/service-ops](/service-ops)** — drag a kanban card, then compare the
+1. **[/service-ops](/service-ops)** - drag a kanban card, then compare the
    predictive queue with the area demand chart.
    <SourceLink
      path="src/features/service-ops/hooks/use-update-ticket-status.ts"
@@ -86,7 +86,7 @@ explains the weights.
      label="service-ops.ts"
    />
    .
-2. **[/customers](/customers)** — filter to high risk, open a household, then
+2. **[/customers](/customers)** - filter to high risk, open a household, then
    hit “Recompute risk”.
    <SourceLink
      path="src/db/queries/risk.ts"
@@ -94,14 +94,14 @@ explains the weights.
      label="risk.ts"
    />
    .
-3. **[/revenue](/revenue)** — read the cohort matrix, then mark an overdue
+3. **[/revenue](/revenue)** - read the cohort matrix, then mark an overdue
    payment paid and watch the queries invalidate.
    <SourceLink
      path="src/features/revenue/hooks/use-mark-paid.ts"
      label="use-mark-paid.ts"
    />
    .
-4. **Network tab** — one batched tRPC prefetch per route, not a client
+4. **Network tab** - one batched tRPC prefetch per route, not a client
    waterfall.
    <SourceLink
      path="src/features/service-ops/server/index.ts"
@@ -114,38 +114,38 @@ explains the weights.
      label="trpc/server.tsx"
    />
    .
-5. **Seed** — run `bun run db:reset` and confirm the patterns reappear.
+5. **Seed** - run `bun run db:reset` and confirm the patterns reappear.
    <SourceLink path="src/db/seed/index.ts" label="seed/index.ts" />.
 
 ## Code links
 
-- <SourceLink path="src/db/schema.ts" label="src/db/schema.ts" /> — the 12-table
+- <SourceLink path="src/db/schema.ts" label="src/db/schema.ts" /> - the 12-table
   model.
-- <SourceLink path="src/db/seed/index.ts" label="src/db/seed/index.ts" /> — the
+- <SourceLink path="src/db/seed/index.ts" label="src/db/seed/index.ts" /> - the
   simulation pipeline.
 - <SourceLink
     path="src/db/queries/service-ops.ts"
     symbol="getPredictive"
     label="src/db/queries/service-ops.ts"
   />
-  — the predictive queue.
+  - the predictive queue.
 - <SourceLink
     path="src/db/queries/risk.ts"
     symbol="computeHouseholdRisk"
     label="src/db/queries/risk.ts"
   />
-  — the churn score.
+  - the churn score.
 - <SourceLink
     path="src/features/service-ops/server/index.ts"
     label="src/features/service-ops/server/index.ts"
   />
-  — server prefetch.
+  - server prefetch.
 - <SourceLink
     path="src/trpc/routers/_app.ts"
     label="src/trpc/routers/_app.ts"
   />
-  — the API surface.
-- [GitHub repository](https://github.com/Surajdusane/prow-dash) — the full
+  - the API surface.
+- [GitHub repository](https://github.com/Surajdusane/prow-dash) - the full
   project.
 
 ## What this proves
@@ -160,12 +160,12 @@ explains the weights.
 
 ## Read next
 
-- [The full case study](/docs/overview/long) — research, schema, stack, seed,
+- [The full case study](/docs/overview/long) - research, schema, stack, seed,
   and trade-offs.
-- [Predictive service demand](/docs/ideas/predictive-service-demand) — the TDS
+- [Predictive service demand](/docs/ideas/predictive-service-demand) - the TDS
   and filter-age method.
-- [Churn risk](/docs/ideas/churn-risk) — the score, its signals, and its limits.
-- [Route map](/docs/routes) — every route, its question, and its code map.
-- <a href={GITHUB_URL}>GitHub repository</a> — the code.
-- <a href={LIVE_URL}>Live demo</a> — the deployed dashboard.
-- <a href={CONTACT_URL}>Hire me</a> — contact.
+- [Churn risk](/docs/ideas/churn-risk) - the score, its signals, and its limits.
+- [Route map](/docs/routes) - every route, its question, and its code map.
+- <a href={GITHUB_URL}>GitHub repository</a> - the code.
+- <a href={LIVE_URL}>Live demo</a> - the deployed dashboard.
+- <a href={CONTACT_URL}>Hire me</a> - contact.

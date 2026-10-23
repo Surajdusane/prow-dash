@@ -30,7 +30,7 @@ export const PAYMENT_STATUS_ORDER: PaymentStatus[] = ["paid", "late", "failed", 
 
 export { PAYMENT_STATUS_COLOR_PAIRS, PAYMENT_STATUS_SWATCHES, PLAN_COLOR_PAIRS, PLAN_SWATCHES };
 
-/** Badge tone for an overdue payment's status (pending is never overdue — just safe). */
+/** Badge tone for an overdue payment's status (pending is never overdue - just safe). */
 export function paymentStatusVariant(status: PaymentStatus): "success" | "warning" | "error" | "outline" {
   if (status === "paid") return "success";
   if (status === "late") return "warning";
@@ -55,7 +55,7 @@ export function toOverdueTableInput(state: OverdueTableState): GetOverdueInput {
 
 /**
  * Days since the billing month's due date. The seed anchors every month's bill
- * to its 1st (paid dates are `month + 0–6d`), so "late by" counts from there —
+ * to its 1st (paid dates are `month + 0–6d`), so "late by" counts from there -
  * never negative, and zero-safe for the current month.
  */
 export function daysLate(billingMonth: string, now: Date = new Date()): number {
@@ -75,7 +75,7 @@ export const COHORT_MAX_COLUMNS = 12;
 
 /**
  * Whole months between a cohort's join month and `now`. Cells past this age
- * have no data yet — the query zero-fills them with today's snapshot, so the
+ * have no data yet - the query zero-fills them with today's snapshot, so the
  * UI must blank them instead of drawing a fake future.
  */
 export function cohortAgeMonths(cohortMonth: string, now: Date = new Date()): number {

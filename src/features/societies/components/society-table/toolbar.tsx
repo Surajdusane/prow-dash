@@ -10,7 +10,7 @@ import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "@/c
 import { useGetAreaPenetration } from "@/features/societies/hooks";
 import type { SocietyTableState } from "@/features/societies/utils";
 
-/** Sentinel for "no filter applied" — Base UI Select needs a concrete value. */
+/** Sentinel for "no filter applied" - Base UI Select needs a concrete value. */
 const ALL = "all";
 const SEARCH_DEBOUNCE_MS = 300;
 

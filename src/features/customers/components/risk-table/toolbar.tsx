@@ -9,7 +9,7 @@ import type { RiskBand } from "@/db/queries/risk";
 import { useGetAreaOptions } from "@/features/customers/hooks";
 import { HOUSEHOLD_STATUS_LABELS, RISK_BAND_LABELS, type RiskTableState } from "@/features/customers/utils";
 
-/** Sentinel for "no filter applied" — Base UI Select needs a concrete value. */
+/** Sentinel for "no filter applied" - Base UI Select needs a concrete value. */
 const ALL = "all";
 
 const BAND_ITEMS = [
@@ -27,7 +27,7 @@ const STATUS_ITEMS = [
 
 /**
  * Risk table filters. Every change flows through the parent as a patch so it
- * can reset paging — a filter change always jumps back to page 1.
+ * can reset paging - a filter change always jumps back to page 1.
  */
 export function RiskTableToolbar({
   state,

@@ -1,5 +1,5 @@
 /**
- * Shared plan reference for the analytics queries — mirrors the documented
+ * Shared plan reference for the analytics queries - mirrors the documented
  * assumptions in the master plan (§6). Plan pricing itself lives in the DB;
  * litres-per-day is a documented estimate used by /sustainability.
  */

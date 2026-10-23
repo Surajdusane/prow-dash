@@ -7,7 +7,7 @@ import type { BoardTicket } from "@/db/queries/tickets";
 /**
  * Cross-section UI state for the Service Ops route: the create dialog is opened
  * from the page header and the predictive table, while the assign dialog is
- * opened by the board — a tiny store keeps those triggers decoupled.
+ * opened by the board - a tiny store keeps those triggers decoupled.
  */
 type ServiceOpsUiState = {
   isCreateOpen: boolean;

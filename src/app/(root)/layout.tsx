@@ -29,18 +29,27 @@ export const metadata: Metadata = {
     default: "ProWater · Internal Ops Dashboard",
     template: "ProWater · %s",
   },
-  description: "Internal ops dashboard for ProWater — piped RO water subscriptions across Bangalore.",
+  description: "Internal ops dashboard for ProWater - piped RO water subscriptions across Bangalore.",
+  icons: {
+    icon: [
+      { url: "/favicon-96x96.png", type: "image/png", sizes: "96x96" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
+  },
+  manifest: "/site.webmanifest",
   openGraph: {
     type: "website",
     siteName: "ProWater Dashboard",
     title: "ProWater · Internal Ops Dashboard",
-    description: "Internal ops dashboard for ProWater — piped RO water subscriptions across Bangalore.",
+    description: "Internal ops dashboard for ProWater - piped RO water subscriptions across Bangalore.",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "ProWater internal ops dashboard" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "ProWater · Internal Ops Dashboard",
-    description: "Internal ops dashboard for ProWater — piped RO water subscriptions across Bangalore.",
+    description: "Internal ops dashboard for ProWater - piped RO water subscriptions across Bangalore.",
     images: ["/og.png"],
   },
 };

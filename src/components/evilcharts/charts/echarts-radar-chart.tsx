@@ -60,15 +60,15 @@ export type {
   TooltipVariant,
 };
 
-// Modular registration keeps the bundle lean — only the pieces this chart needs.
+// Modular registration keeps the bundle lean - only the pieces this chart needs.
 // `RadarComponent` is the polar coordinate system (indicators, rings, spokes);
-// `RadarChart` is the series that draws polygons inside it. No GraphicComponent —
+// `RadarChart` is the series that draws polygons inside it. No GraphicComponent -
 // this chart has no zrender overlays (the recharts twin has no brush).
 echarts.use([RadarChart, RadarComponent, TooltipComponent]);
 
 type EChartsInstance = ReturnType<typeof echarts.init>;
 
-// The exact option surface this chart uses — radar series, the radar coordinate
+// The exact option surface this chart uses - radar series, the radar coordinate
 // component, and the tooltip. Narrower than echarts' full EChartsOption, so a
 // misspelled key fails the compile instead of silently reaching setOption. Radar
 // has no cartesian axes, so unlike the area chart there are no derived x/y types.
@@ -91,7 +91,7 @@ const REVEAL_DURATION = 1000; // intro draw-in length, in milliseconds
 // ECharts grows the polygon from the center but SNAPS the vertex symbols straight
 // to their final positions (its RadarView reads `oldPoints` from the polyline
 // AFTER `initProps` has already committed the target points, so every symbol
-// starts and ends at the same place and never moves — verified empirically). That
+// starts and ends at the same place and never moves - verified empirically). That
 // left the dots detached from the still-collapsing shape. Instead we disable the
 // native entrance and ramp every series' VALUES from 0 (all vertices at the center)
 // to their final magnitude over REVEAL_DURATION, re-pushing the data each frame.
@@ -101,17 +101,17 @@ const REVEAL_DURATION = 1000; // intro draw-in length, in milliseconds
 const LOADING_DEFAULT_POINTS = 6; // matches the recharts twin's LOADING_POINTS
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Theme knobs — every neutral line in the chart draws from these. Base colors
+// Theme knobs - every neutral line in the chart draws from these. Base colors
 // come from the consumer's CSS tokens (resolved from the live DOM), so only the
-// opacity factors live here. Factors MULTIPLY the token's own alpha — a border
+// opacity factors live here. Factors MULTIPLY the token's own alpha - a border
 // token that is already 10%-white stays subtle. Tune here, not in the builder.
 // ─────────────────────────────────────────────────────────────────────────────
 // Recharts draws the polar grid at ~border/20, but SVG dashes render pixel-crisp
-// while canvas at 2× DPR spreads a 1px line across device pixels — roughly halving
+// while canvas at 2× DPR spreads a 1px line across device pixels - roughly halving
 // perceived intensity. Using the border token's full alpha lands both engines at
 // the same apparent brightness.
 const GRID_LINE_OPACITY = 1; // dashed rings + radial spokes, × border alpha
-// The skeleton is CLIPPED to a small sweeping window — only the polygon section
+// The skeleton is CLIPPED to a small sweeping window - only the polygon section
 // inside it exists (stroke + fill), everything outside is fully transparent, like
 // a clip-path sliding across the chart.
 const LOADING_STROKE_OPACITY = 0.5; // outline inside the window, × foreground alpha
@@ -130,28 +130,28 @@ export type GridType = "polygon" | "circle";
 // imported + re-exported at the top of this file.
 
 export interface EChartsRadarChartProps<TData extends Record<string, unknown>> {
-  data: TData[]; // rows rendered by the chart — each row is one angle-axis category
+  data: TData[]; // rows rendered by the chart - each row is one angle-axis category
   config: ChartConfig; // series colors + labels
   className?: string; // extra classes for the chart container
-  renderer?: EChartsRenderer; // rendering engine — canvas by default, or SVG
-  animation?: boolean; // master switch for the intro draw-in — false renders instantly
+  renderer?: EChartsRenderer; // rendering engine - canvas by default, or SVG
+  animation?: boolean; // master switch for the intro draw-in - false renders instantly
   defaultSelectedDataKey?: string | null; // series selected on first render
   onSelectionChange?: (key: string | null) => void; // fires when the selected series changes
   isLoading?: boolean; // shows the animated loading skeleton
   loadingPoints?: number; // number of points in the loading skeleton
   chartOptions?: Record<string, unknown>; // escape hatch merged over the built ECharts option
-  children?: ReactNode; // declarative config — <Radar>, <PolarGrid>, <PolarAngleAxis>, …
+  children?: ReactNode; // declarative config - <Radar>, <PolarGrid>, <PolarAngleAxis>, …
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Composible parts — DECLARATIVE CONFIG. Every part renders `null`; the root
+// Composible parts - DECLARATIVE CONFIG. Every part renders `null`; the root
 // walks `children` by reference (child.type === Radar, …) to collect its props.
 // Presence semantics mirror the Recharts twin: omit a child and that part does
-// not render. These are never mounted into the tree — they only carry props.
+// not render. These are never mounted into the tree - they only carry props.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface RadarProps {
-  dataKey: string; // series key — must exist on the data + config
+  dataKey: string; // series key - must exist on the data + config
   variant?: RadarVariant; // "filled" shows the fill, "lines" only the outline
   fillOpacity?: number; // opacity of the filled area when variant="filled"
   isClickable?: boolean; // lets this radar be selected by clicking it
@@ -159,9 +159,9 @@ export interface RadarProps {
 }
 
 /**
- * A single radar series — one polygon over all angle-axis categories. Declares
+ * A single radar series - one polygon over all angle-axis categories. Declares
  * its own fill/clickability and, optionally, resting/active vertex markers
- * via composed <Dot> / <ActiveDot>. Renders nothing — the root reads these props
+ * via composed <Dot> / <ActiveDot>. Renders nothing - the root reads these props
  * to build the ECharts radar series.
  */
 const Radar: FC<RadarProps> = () => null;
@@ -181,13 +181,13 @@ export interface PolarGridProps {
 }
 
 /**
- * Presence draws the polar grid — the concentric rings and the radial spokes.
+ * Presence draws the polar grid - the concentric rings and the radial spokes.
  * `gridType` picks the ring shape. Renders nothing.
  */
 const PolarGrid: FC<PolarGridProps> = () => null;
 
 export interface PolarAngleAxisProps {
-  dataKey?: string; // data key whose values label the perimeter — overrides auto-detect
+  dataKey?: string; // data key whose values label the perimeter - overrides auto-detect
 }
 
 /** Presence shows the angle-axis category labels around the perimeter. Renders nothing. */
@@ -202,7 +202,7 @@ export interface TooltipProps {
   position?: TooltipPosition; // "variable" follows the pointer (default); "fixed" pins the tooltip near the top and tracks the pointer's X
   // Data index shown by default with no hover. On canvas the radar tooltip is
   // item-triggered (per polygon), so this selects the DEFAULT SERIES to reveal
-  // — see the note in the sync effect.
+  // - see the note in the sync effect.
   defaultIndex?: number;
 }
 
@@ -220,7 +220,7 @@ export interface LegendProps {
 const Legend: FC<LegendProps> = () => null;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Children collection — walk the declarative config into plain objects the
+// Children collection - walk the declarative config into plain objects the
 // option builder consumes. <Dot> / <ActiveDot> are read from each <Radar>'s own
 // children; a missing dot child means that marker does not render.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -341,14 +341,14 @@ function collectConfig(children: ReactNode): CollectedConfig {
 // @/registry/ui/echarts-chart module, imported at the top of this file.
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Radar paints — the ECharts analogue of the twin's SVG gradients.
+// Radar paints - the ECharts analogue of the twin's SVG gradients.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GRAY = "rgba(120, 120, 120, 1)";
 
 // Diagonal multi-stop stroke, mirroring the twin's StrokeGradient (x1,y1 → x2,y2
 // = 0,0 → 1,1). A solid string when there is only one color. The gradient is
-// bbox-relative, so each polygon vertex takes the color at its position — the
+// bbox-relative, so each polygon vertex takes the color at its position - the
 // canvas echo of the SVG stroke gradient clipping the polygon path.
 function radarStrokePaint(slots: string[]): string | echarts.graphic.LinearGradient {
   if (slots.length <= 1) return slots[0] ?? GRAY;
@@ -386,7 +386,7 @@ function radarFillPaint(slots: string[]): echarts.graphic.RadialGradient {
 // 0.5) rather than tinting each vertex individually.
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Selection opacity — the twin only dims a CLICKABLE radar that isn't selected;
+// Selection opacity - the twin only dims a CLICKABLE radar that isn't selected;
 // a non-clickable radar keeps full opacity even when a sibling is selected.
 // Split into stroke/fill/dot factors (mirroring the area chart's getOpacity): the
 // base state keeps stroke and dots at full, and a dimmed radar's fill drops twice
@@ -407,7 +407,7 @@ function selectionOpacity(
 // Loading skeleton helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Skeleton polygon as a smooth random walk in a comfortable band — reads like a
+// Skeleton polygon as a smooth random walk in a comfortable band - reads like a
 // resting radar instead of raw noise spikes. Values live in [0, LOADING_MAX].
 const LOADING_MAX = 100;
 function getLoadingData(points: number): number[] {
@@ -431,7 +431,7 @@ function shimmerWindowStops(center: number, color: string, peak: number) {
     const dist = Math.abs(x - center);
     if (dist <= half - feather) return peak;
     if (dist >= half) return 0;
-    // Sine-eased falloff — a linear ramp still reads as a hard cut.
+    // Sine-eased falloff - a linear ramp still reads as a hard cut.
     return peak * Math.sin(((1 - (dist - (half - feather)) / feather) * Math.PI) / 2);
   };
 
@@ -449,14 +449,14 @@ function shimmerWindowStops(center: number, color: string, peak: number) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Tooltip + legend HTML — the tooltip shell styling (roundnessClass,
+// Tooltip + legend HTML - the tooltip shell styling (roundnessClass,
 // tooltipVariantClass, tooltipRow, tooltipIndicatorHtml) and the legend overlay
 // (LegendOverlay + its indicators) now live in the shared
 // @/registry/ui/echarts/{tooltip,legend} modules, imported at the top of this file.
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Option builders — pure functions from a snapshot context to ECharts option
+// Option builders - pure functions from a snapshot context to ECharts option
 // fragments. The component reads its refs and props ONCE per build into this
 // context; nothing below touches React state or the chart instance, so each
 // fragment can be reasoned about (and tested) in isolation.
@@ -491,7 +491,7 @@ function radarCenterY(legendSlot: LegendSlot): string {
   return "50%";
 }
 
-// The radar coordinate system — indicators (one per category), rings, spokes, and
+// The radar coordinate system - indicators (one per category), rings, spokes, and
 // the two label sets. Grid visibility is gated on <PolarGrid>, perimeter labels
 // on <PolarAngleAxis>, and the radial scale on <PolarRadiusAxis>, matching the
 // twin's presence semantics.
@@ -509,26 +509,26 @@ function buildRadarComponent(ctx: OptionBuildContext): RadarOption {
     shape: gridSlot.gridType,
     splitNumber: 4,
     indicator: categories.map((name) => ({ name, max: indicatorMax })),
-    // Perimeter category labels — the twin's <PolarAngleAxis>.
+    // Perimeter category labels - the twin's <PolarAngleAxis>.
     axisName: {
       show: angleAxisSlot.present && !isLoading,
       color: tokens.mutedForeground,
       fontSize: 10,
     },
-    // Radial spokes from the center — part of the twin's <PolarGrid>.
+    // Radial spokes from the center - part of the twin's <PolarGrid>.
     axisLine: {
       show: gridSlot.present && !isLoading,
       lineStyle: { color: gridColor },
     },
     axisTick: { show: false },
-    // Concentric rings — the other half of <PolarGrid>. Dashed [3, 4] mirrors the
+    // Concentric rings - the other half of <PolarGrid>. Dashed [3, 4] mirrors the
     // twin's strokeDasharray. Hidden while loading so the skeleton floats clean.
     splitLine: {
       show: gridSlot.present && !isLoading,
       lineStyle: { color: gridColor, type: [3, 4] as [number, number] },
     },
     splitArea: { show: false },
-    // Radial value scale — the twin's <PolarRadiusAxis>. Hidden while loading.
+    // Radial value scale - the twin's <PolarRadiusAxis>. Hidden while loading.
     axisLabel: {
       show: radiusAxisSlot.present && !isLoading,
       color: tokens.mutedForeground,
@@ -539,8 +539,8 @@ function buildRadarComponent(ctx: OptionBuildContext): RadarOption {
 }
 
 // Tooltip HTML builder, closed over the build context. Radar tooltips are
-// item-triggered (one polygon at a time), so — unlike the axis-triggered area
-// chart — the hovered series is the header and its per-category values are the
+// item-triggered (one polygon at a time), so - unlike the axis-triggered area
+// chart - the hovered series is the header and its per-category values are the
 // rows. Accepted deviation from the Recharts twin, which anchors on a category.
 function createTooltipFormatter(ctx: OptionBuildContext) {
   const { config, selectedDataKey, tooltipSlot, categories } = ctx;
@@ -566,7 +566,7 @@ function createTooltipFormatter(ctx: OptionBuildContext) {
     // One row per angle-axis category. Radar rows share the area chart's
     // indicator + label + value shape, so they reuse the shared tooltipRow +
     // tooltipIndicatorHtml. dimmed is "" per row because a radar tooltip is a
-    // single series — the dim is applied to the whole shell below instead.
+    // single series - the dim is applied to the whole shell below instead.
     const body = categories
       .map((category, i) => {
         const raw = values[i];
@@ -582,7 +582,7 @@ function createTooltipFormatter(ctx: OptionBuildContext) {
 
     // Custom shell (not the shared tooltipShell): a radar tooltip dims the WHOLE
     // surface for a non-selected series and keeps a foreground-colored header (no
-    // text-primary) — both byte-identical to the pre-refactor markup.
+    // text-primary) - both byte-identical to the pre-refactor markup.
     return `<div class="grid min-w-32 items-start gap-1.5 border border-border/50 px-2.5 py-1.5 text-xs shadow-xl${dimmed} ${roundnessClass[tooltipSlot.roundness]} ${tooltipVariantClass[tooltipSlot.variant]}">
       <div class="font-medium">${labelText}</div>
       <div class="grid gap-1.5">${body}</div>
@@ -611,7 +611,7 @@ function buildTooltipOption(ctx: OptionBuildContext): TooltipComponentOption {
   };
 }
 
-// One radar series per <Radar> — each carries a single polygon (one data item)
+// One radar series per <Radar> - each carries a single polygon (one data item)
 // over every category, so all of its styling lives at the series level.
 function buildRadarSeries(ctx: OptionBuildContext): RadarSeriesOption[] {
   const { data, config, radars, selectedDataKey, hasSelection, categories, resolved } = ctx;
@@ -620,7 +620,7 @@ function buildRadarSeries(ctx: OptionBuildContext): RadarSeriesOption[] {
     const key = radar.dataKey;
     const slots = resolved.series[key] ?? [GRAY];
     const strokePaint = radarStrokePaint(slots);
-    // A radar series is one data item — every vertex shares one dot color (§sampleGradient).
+    // A radar series is one data item - every vertex shares one dot color (§sampleGradient).
     const dotColor = sampleGradient(slots, 0.5);
     const isSelected = selectedDataKey === null || selectedDataKey === key;
     const opacity = selectionOpacity(selectedDataKey, key, radar.isClickable);
@@ -641,7 +641,7 @@ function buildRadarSeries(ctx: OptionBuildContext): RadarSeriesOption[] {
 
     // ECharts radar has no per-state symbolSize and no numeric emphasis scale, so
     // the hover marker swaps STYLE (e.g. colored-border → solid) at the resting
-    // size rather than growing — the twin's r3→r3 markers already match sizes.
+    // size rather than growing - the twin's r3→r3 markers already match sizes.
     const symbol = restingVisible || activeVisible ? "circle" : "none";
 
     return {
@@ -663,7 +663,7 @@ function buildRadarSeries(ctx: OptionBuildContext): RadarSeriesOption[] {
         : { ...activeDot.itemStyle, opacity: 0 },
       // While a click selection is active it owns the canvas: native hover
       // emphasis (the dot promotion) forces a dimmed radar's dot back to full
-      // opacity, fighting the selection dim — so hover highlighting stops entirely
+      // opacity, fighting the selection dim - so hover highlighting stops entirely
       // until the selection clears. The option rebuilds on every selection change,
       // so this is a build-time switch.
       emphasis: hasSelection
@@ -686,7 +686,7 @@ function buildRadarSeries(ctx: OptionBuildContext): RadarSeriesOption[] {
   });
 }
 
-// Loading skeleton — ONE gray polygon regardless of declared radars (Recharts
+// Loading skeleton - ONE gray polygon regardless of declared radars (Recharts
 // parity: its skeleton is a single LoadingRadar), swept by the shimmer rAF. The
 // radar coordinate system exists but every visual axis element is hidden, so the
 // polygon floats on a clean canvas exactly like the twin (all its axis parts
@@ -730,14 +730,14 @@ function buildLoadingOption(ctx: OptionBuildContext): EChartsOption {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Live imperative state — everything the ECharts event handlers, rAF loops, and
+// Live imperative state - everything the ECharts event handlers, rAF loops, and
 // theme/resize repushes read or write OUTSIDE the React render cycle, grouped in
 // one ref-stable object so the whole imperative surface is visible at a glance.
 // None of it is render output, which is exactly why it is not React state.
 // ─────────────────────────────────────────────────────────────────────────────
 
 type LiveState = {
-  resolved: ResolvedColors | null; // colors read off the live DOM — feeds builds and rAF loops
+  resolved: ResolvedColors | null; // colors read off the live DOM - feeds builds and rAF loops
   hasRevealed: boolean; // the intro draw-in already played on this chart instance
   revealRaf: number; // rAF handle of the data-driven entrance ramp (0 when idle)
   loadingRows: number[] | null; // skeleton data, lazily rolled and re-rolled per shimmer sweep
@@ -750,7 +750,7 @@ type LiveState = {
     seriesKeys: string[];
   };
   // Update-style re-push for paths that bypass React entirely (theme flips,
-  // resizes) — set by the sync effect.
+  // resizes) - set by the sync effect.
   repush: () => void;
 };
 
@@ -762,8 +762,8 @@ type LiveState = {
  * Apache ECharts port of the EvilCharts radar chart, exposing a compound-as-config
  * API so its JSX reads identically to the Recharts twin. The root owns the data,
  * config, selection state, loading skeleton, and intro reveal; every visual part
- * — `<Radar>`, `<PolarGrid>`, `<PolarAngleAxis>`, `<PolarRadiusAxis>`,
- * `<Tooltip>`, `<Legend>` — is composed as a declarative child that renders
+ * - `<Radar>`, `<PolarGrid>`, `<PolarAngleAxis>`, `<PolarRadiusAxis>`,
+ * `<Tooltip>`, `<Legend>` - is composed as a declarative child that renders
  * nothing. The root walks those children by reference and drives a single
  * imperative ECharts instance. Fully self-contained: its only dependencies are
  * `react`, `echarts`, and `motion`.
@@ -790,7 +790,7 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
 
   // The single imperative surface (see LiveState). `resolved` lives here rather
   // than in state: as state it forced an extra render pass and an effect whose
-  // only job was to trigger the option push — the "chain of computations"
+  // only job was to trigger the option push - the "chain of computations"
   // react.dev/learn/you-might-not-need-an-effect warns about. The object
   // identity is stable for the component's lifetime.
   const live = useRef<LiveState>({
@@ -808,7 +808,7 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
     repush: () => {},
   }).current;
 
-  // Skeleton rows roll lazily on first use — an impure useRef initializer would
+  // Skeleton rows roll lazily on first use - an impure useRef initializer would
   // re-roll Math.random() on every render.
   const loadingData = useCallback(() => (live.loadingRows ??= getLoadingData(loadingPoints)), [live, loadingPoints]);
   const shouldReduceMotion = useReducedMotion();
@@ -880,7 +880,7 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
     live.categories = categories;
 
     // Every spoke shares one radius scale, so the largest value across all series
-    // touches the outer ring — the recharts default domain.
+    // touches the outer ring - the recharts default domain.
     let indicatorMax = 0;
     for (const key of seriesKeys) {
       for (const row of data) indicatorMax = Math.max(indicatorMax, Number(row[key]) || 0);
@@ -913,7 +913,7 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
       animation: false,
       radar: buildRadarComponent(ctx),
       tooltip: buildTooltipOption(ctx),
-      // The radar polygons — their seriesIndex feeds the click handler.
+      // The radar polygons - their seriesIndex feeds the click handler.
       series: buildRadarSeries(ctx),
     };
   }, [
@@ -947,7 +947,7 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
     const resizeObserver = new ResizeObserver(() => {
       // Observers always fire once right after observe(). Repushing on that
       // no-op fire would land one frame into the intro and stomp the radar's
-      // reveal — only react when the renderer size actually changed.
+      // reveal - only react when the renderer size actually changed.
       if (mount.clientWidth === chart.getWidth() && mount.clientHeight === chart.getHeight()) {
         return;
       }
@@ -956,7 +956,7 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
     });
     resizeObserver.observe(mount);
 
-    // Light/dark flips change no React state — re-resolve and push directly.
+    // Light/dark flips change no React state - re-resolve and push directly.
     const themeObserver = new MutationObserver(() => {
       live.repush();
     });
@@ -968,7 +968,7 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
     chart.on("click", (params) => {
       const { clickableKeys: clickable, seriesKeys: keys } = live.handlers;
       const p = params as { seriesId?: string; seriesIndex?: number };
-      // Symbol clicks carry seriesId; polygon clicks may only carry seriesIndex —
+      // Symbol clicks carry seriesId; polygon clicks may only carry seriesIndex -
       // recover the key by position. Main radar series come first in the series
       // array (the loading skeleton is silent), so the index maps directly.
       const id = p.seriesId ?? (typeof p.seriesIndex === "number" ? keys[p.seriesIndex] : undefined);
@@ -992,13 +992,13 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [renderer]);
 
-  // ── Sync ECharts with props/theme/selection — resolve, build, push ────────────
+  // ── Sync ECharts with props/theme/selection - resolve, build, push ────────────
   useEffect(() => {
     const chart = echartsRef.current;
     const container = containerRef.current;
     if (!chart || !container) return;
 
-    // Colors come from the <style> committed just before this effect ran — read
+    // Colors come from the <style> committed just before this effect ran - read
     // them here, right before the push, rather than round-tripping through state.
     live.resolved = resolveColors(container, config, seriesKeys);
 
@@ -1016,25 +1016,25 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
     const buildMerged = (): EChartsOption => {
       const option = buildOption();
       const merged = chartOptions ? { ...option, ...chartOptions } : option;
-      // Native animation stays off — the entrance is data-driven (see below), and
+      // Native animation stays off - the entrance is data-driven (see below), and
       // notMerge would otherwise replay a native entrance on every repush.
       Object.assign(merged, { animation: false, animationDurationUpdate: 0 });
-      // chartOptions is an untyped escape hatch — the spread erases the option's
+      // chartOptions is an untyped escape hatch - the spread erases the option's
       // shape, so re-assert it.
       return merged as EChartsOption;
     };
 
-    // Settled push — full-magnitude data, no entrance. Every non-first render
+    // Settled push - full-magnitude data, no entrance. Every non-first render
     // (selection, theme, resize) and the animation-off path lands here.
     const pushStatic = () => {
       cancelReveal();
       chart.setOption(buildMerged(), { notMerge: true });
     };
 
-    // Entrance push — collapse every radar series to the center, then ramp the
+    // Entrance push - collapse every radar series to the center, then ramp the
     // values back out to full magnitude. Because each
     // vertex symbol tracks its datum, the dots ride the polygon out from the center
-    // and stay glued to the shape at every frame — the fix for ECharts snapping
+    // and stay glued to the shape at every frame - the fix for ECharts snapping
     // radar symbols straight to their final positions during its native entrance.
     const pushReveal = () => {
       cancelReveal();
@@ -1042,7 +1042,7 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
       const series = (merged.series as unknown as RevealSeries[] | undefined) ?? [];
       const finals = series.map((s) => s.data?.[0]?.value ?? []);
 
-      // First paint fully collapsed — no flash of the final shape before the ramp.
+      // First paint fully collapsed - no flash of the final shape before the ramp.
       chart.setOption(
         {
           ...merged,
@@ -1054,7 +1054,7 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
       const start = performance.now();
       const frame = (now: number) => {
         const t = Math.min((now - start) / REVEAL_DURATION, 1);
-        const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic — decelerate into place
+        const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic - decelerate into place
         chart.setOption(
           {
             series: series.map((s, i) => ({
@@ -1069,7 +1069,7 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
       live.revealRaf = requestAnimationFrame(frame);
     };
 
-    // Intro reveal — plays only on the first real render. A loading cycle re-arms
+    // Intro reveal - plays only on the first real render. A loading cycle re-arms
     // it: the Recharts twin remounts its <Radar>s while loading and replays the
     // intro on remount, so data → loading → data draws in again here too.
     if (isLoading) live.hasRevealed = false;
@@ -1109,7 +1109,7 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
     tooltipSlot.defaultIndex,
   ]);
 
-  // ── Loading shimmer — rAF sweeps a bright band, regenerating data off-screen ─
+  // ── Loading shimmer - rAF sweeps a bright band, regenerating data off-screen ─
   useEffect(() => {
     const chart = echartsRef.current;
     if (!chart || !isLoading) return;
@@ -1213,7 +1213,7 @@ export function EChartsRadarChart<TData extends Record<string, unknown>>({
 
 // Compound API: every part hangs off the root as a static member, so a consumer
 // writes <EChartsRadarChart.Radar/>, <EChartsRadarChart.Tooltip/>, … from a single
-// import — no colliding named marker exports when several charts share one file.
+// import - no colliding named marker exports when several charts share one file.
 EChartsRadarChart.Radar = Radar;
 EChartsRadarChart.Dot = Dot;
 EChartsRadarChart.ActiveDot = ActiveDot;

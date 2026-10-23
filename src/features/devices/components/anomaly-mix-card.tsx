@@ -34,7 +34,7 @@ const chartConfig = {
 const ISSUES = Object.keys(ISSUE_LABELS) as AnomalyIssue[];
 
 /**
- * Primary issue for a flagged device — offline/silent first, then high TDS,
+ * Primary issue for a flagged device - offline/silent first, then high TDS,
  * then low purity. Mirrors the flag priority the fleet query derives.
  */
 function primaryIssue(anomaly: AnomalyRow): AnomalyIssue {
@@ -47,7 +47,7 @@ function primaryIssue(anomaly: AnomalyRow): AnomalyIssue {
 
 /**
  * Donut of the anomaly feed bucketed by primary signal, with a readable legend.
- * Each device counts once — the same list the panel below renders.
+ * Each device counts once - the same list the panel below renders.
  */
 export function AnomalyMixCard() {
   const { data } = useGetAnomalies();
@@ -70,7 +70,7 @@ export function AnomalyMixCard() {
     return (
       <ChartEmpty
         icon={<CheckCircle2 />}
-        title="No anomalies — fleet healthy"
+        title="No anomalies - fleet healthy"
         description="Connectivity and water quality are inside bounds."
       />
     );

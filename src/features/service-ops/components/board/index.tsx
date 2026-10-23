@@ -46,7 +46,7 @@ export function ServiceBoard() {
   const [filters, setFilters] = useState<GetBoardInput>({});
 
   // Non-suspense query: filter changes keep the board mounted (previous columns
-  // stay via `keepPreviousData`), so the toolbar — search included — never
+  // stay via `keepPreviousData`), so the toolbar - search included - never
   // unmounts or loses focus while results load.
   const { data: tickets, isFetching, isError, error } = useGetBoard(filters);
   const updateStatus = useUpdateTicketStatus();
@@ -88,7 +88,7 @@ export function ServiceBoard() {
 
     switch (targetColumn) {
       case "assigned":
-        // Dragged onto Assigned without a technician — ask who should take it.
+        // Dragged onto Assigned without a technician - ask who should take it.
         if (ticket.technicianId === null) {
           openAssignDialog(ticket);
           return;
@@ -109,7 +109,7 @@ export function ServiceBoard() {
   };
 
   // Failed with nothing to show (first load, or a filter change that errored
-  // with no previous data left) — let the route's error boundary take over
+  // with no previous data left) - let the route's error boundary take over
   // instead of leaving the board on a permanent skeleton.
   if (isError && tickets === undefined) throw error;
 
@@ -125,7 +125,7 @@ export function ServiceBoard() {
         <div className="flex flex-col gap-1">
           <h2 className="font-heading text-lg font-semibold">Service board</h2>
           <p className="text-muted-foreground text-sm">
-            Drag tickets between stages — dropping a card applies the change immediately.
+            Drag tickets between stages - dropping a card applies the change immediately.
           </p>
         </div>
 

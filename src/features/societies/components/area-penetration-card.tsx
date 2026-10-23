@@ -17,7 +17,7 @@ const MUTED_SWATCH = '<div class="h-2.5 w-2.5 shrink-0 rounded-[2px] bg-muted-fo
 
 /**
  * Household penetration per area, highest first. The stock tooltip only knows
- * the bar value — a custom formatter also surfaces infrastructure age and
+ * the bar value - a custom formatter also surfaces infrastructure age and
  * ticket intensity, the two numbers that explain why an area lags.
  */
 export function AreaPenetrationCard() {

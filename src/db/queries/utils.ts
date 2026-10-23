@@ -1,7 +1,7 @@
 /**
  * Small pure date/number helpers shared by the query modules.
  *
- * App queries must never import from `src/db/seed` — these helpers keep the two
+ * App queries must never import from `src/db/seed` - these helpers keep the two
  * worlds apart while sharing the same calendar conventions.
  */
 
@@ -51,7 +51,7 @@ export function toMonthKey(date: Date): string {
 }
 
 export type MonthWindow = {
-  /** `YYYY-MM` — safe to use directly as a chart x-axis value. */
+  /** `YYYY-MM` - safe to use directly as a chart x-axis value. */
   key: string;
   start: Date;
   end: Date;
@@ -78,7 +78,7 @@ export function toPercent(numerator: number, denominator: number, digits = 1): n
   return roundTo((numerator / denominator) * 100, digits);
 }
 
-/** Postgres `numeric`/`decimal` columns arrive as strings — normalise to numbers. */
+/** Postgres `numeric`/`decimal` columns arrive as strings - normalise to numbers. */
 export function asNumber(value: number | string | null | undefined): number | null {
   if (value === null || value === undefined) return null;
   const parsed = typeof value === "number" ? value : Number(value);

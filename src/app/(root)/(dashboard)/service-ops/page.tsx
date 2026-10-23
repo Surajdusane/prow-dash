@@ -36,7 +36,7 @@ export default function ServiceOpsPage() {
             <div className="flex flex-col gap-1">
               <h1 className="font-heading text-2xl font-semibold">Service Ops</h1>
               <p className="text-muted-foreground text-sm">
-                Field operations for the ProWater network — triage the board, balance technician load and beat the SLA.
+                Field operations for the ProWater network - triage the board, balance technician load and beat the SLA.
               </p>
             </div>
             <CreateTicketButton />

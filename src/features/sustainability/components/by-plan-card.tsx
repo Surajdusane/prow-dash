@@ -16,7 +16,7 @@ const chartConfig = {
   litres: { label: "Litres served", colors: chartColor(LITRES_COLOR_PAIR) },
 } satisfies ChartConfig;
 
-/** Tooltip indicator painted with a literal hex — overrides can't use CSS vars. */
+/** Tooltip indicator painted with a literal hex - overrides can't use CSS vars. */
 function indicatorHtml(color: string): string {
   return `<div class="h-2.5 w-2.5 shrink-0 rounded-[2px]" style="background:${color}"></div>`;
 }
@@ -24,7 +24,7 @@ function indicatorHtml(color: string): string {
 /**
  * All-time litres served per plan, each bar labelled with its jar equivalent.
  * One custom series replaces the built ones so every bar can carry its plan
- * colour and a jars label — the stock bar series supports neither, so the
+ * colour and a jars label - the stock bar series supports neither, so the
  * hexes are picked per theme here.
  */
 export function ByPlanCard() {

@@ -152,13 +152,13 @@ function FleetTableRows({ state, onPageChange }: { state: FleetTableState; onPag
                   )}
                 </TableCell>
                 <TableCell className={cn("text-right font-medium tabular-nums", tdsTone(row.latestTds))}>
-                  {row.latestTds === null ? "—" : `${formatNumber(row.latestTds)} ppm`}
+                  {row.latestTds === null ? "-" : `${formatNumber(row.latestTds)} ppm`}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
-                  {row.latestPh === null ? <span className="text-muted-foreground">—</span> : row.latestPh.toFixed(1)}
+                  {row.latestPh === null ? <span className="text-muted-foreground">-</span> : row.latestPh.toFixed(1)}
                 </TableCell>
                 <TableCell className={cn("text-right font-medium tabular-nums", purityTone(row.latestPurity))}>
-                  {row.latestPurity === null ? "—" : `${row.latestPurity.toFixed(1)}%`}
+                  {row.latestPurity === null ? "-" : `${row.latestPurity.toFixed(1)}%`}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {row.filterAgeDays >= SERVICE_DUE_DAYS ? (
@@ -207,7 +207,7 @@ function FleetTableRows({ state, onPageChange }: { state: FleetTableState; onPag
  * identically on the server and during hydration, which is what prevents the
  * hydration mismatch this table used to race. `state` drives the toolbar
  * urgently while a deferred copy drives the rows, so a filter or page change
- * keeps the current rows on screen (dimmed) instead of flashing a fallback —
+ * keeps the current rows on screen (dimmed) instead of flashing a fallback -
  * the same feel `keepPreviousData` used to provide.
  */
 export function FleetTable() {
@@ -224,7 +224,7 @@ export function FleetTable() {
       <CardHeader>
         <CardTitle>All devices</CardTitle>
         <p className="text-muted-foreground text-sm">
-          Oldest filter first — click a row for telemetry and the full reading history.
+          Oldest filter first - click a row for telemetry and the full reading history.
         </p>
         <div className="pt-2">
           <FleetTableToolbar state={state} onChange={handleFilterChange} />

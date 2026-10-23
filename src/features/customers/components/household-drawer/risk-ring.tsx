@@ -3,7 +3,7 @@
 import { RISK_BAND_STROKES, RISK_BAND_TEXT, riskBandOf } from "@/features/customers/utils";
 import { cn } from "@/lib/utils";
 
-/** Compact risk dial — band-colored progress ring with the 0–100 score in the middle. */
+/** Compact risk dial - band-colored progress ring with the 0–100 score in the middle. */
 export function RiskRing({ score, className }: { score: number; className?: string }) {
   const band = riskBandOf(score);
   const radius = 26;

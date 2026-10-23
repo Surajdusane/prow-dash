@@ -3,7 +3,7 @@ import type { Faker } from "@faker-js/faker";
 /**
  * Shared deterministic helpers for the seed pipeline.
  *
- * Every function is pure — randomness is injected through a `Faker` instance so
+ * Every function is pure - randomness is injected through a `Faker` instance so
  * re-running the seed with a different faker seed produces a different (but
  * internally consistent) dataset.
  */
@@ -113,7 +113,7 @@ export function round1(value: number): number {
   return Math.round(value * 10) / 10;
 }
 
-/** Knuth sampling for small lambdas — keeps pattern distributions honest. */
+/** Knuth sampling for small lambdas - keeps pattern distributions honest. */
 export function poisson(faker: Faker, lambda: number): number {
   const limit = Math.exp(-lambda);
   let product = faker.number.float({ min: 0, max: 1 }) || 1;
@@ -127,7 +127,7 @@ export function poisson(faker: Faker, lambda: number): number {
 
 /**
  * Distribute `total` items across buckets by weight, always allocating exactly
- * `total` (largest-remainder method) — used for onboarding waves.
+ * `total` (largest-remainder method) - used for onboarding waves.
  */
 export function allocateExactly(total: number, weights: readonly number[]): number[] {
   const weightSum = weights.reduce((sum, weight) => sum + weight, 0);
@@ -170,7 +170,7 @@ export function monsoonHardnessBoost(date: Date): number {
 }
 
 /* ---------------------------------------------------------
-   Filter degradation — the causal core
+   Filter degradation - the causal core
    --------------------------------------------------------- */
 
 export const TDS_REPAIR_THRESHOLD = 500;

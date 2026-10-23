@@ -20,7 +20,7 @@ const chartConfig = {
   pending: { label: "Pending", colors: chartColor(PAYMENT_STATUS_COLOR_PAIRS.pending) },
 } satisfies ChartConfig;
 
-/** Payment outcomes per billing month — semantic colours, stacked counts. */
+/** Payment outcomes per billing month - semantic colours, stacked counts. */
 export function PaymentStatusCard() {
   const { data } = useGetPaymentStatus();
 

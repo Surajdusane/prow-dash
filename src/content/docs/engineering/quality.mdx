@@ -2,7 +2,7 @@
 title: Code quality
 description:
   End-to-end types, feature boundaries, validation, error states, accessibility
-  and tooling — what keeps the codebase maintainable.
+  and tooling - what keeps the codebase maintainable.
 ---
 
 ## The quality goal
@@ -107,7 +107,7 @@ code is in one of two places, not a 600-line page.
 
 Every mutation takes a Zod object: create and resolve a complaint, recompute
 risk, create, update, assign, or remove a ticket, create, update, or delete a
-lead, and mark a payment paid. Query inputs are validated too — pagination, sort
+lead, and mark a payment paid. Query inputs are validated too - pagination, sort
 direction, risk band, area id, status, and search length.
 
 Shared contracts live in `src/trpc/schema/common.ts`: `page` is at least 1,
@@ -190,8 +190,9 @@ board. Dragging a card must feel immediate. `useUpdateTicketStatus` cancels the
 board query, snapshots every cached board page, writes the new status, and
 returns the snapshot as context. On error it restores the snapshot and shows the
 message. On settle it invalidates the board, SLA stats, and technician workload
-— the three queries whose numbers the move changes. It does not invalidate the
-world.
+
+- the three queries whose numbers the move changes. It does not invalidate the
+  world.
 
 **Code:**
 
@@ -324,7 +325,7 @@ log. Those are deliberate omissions for a portfolio demo, not features to claim.
 - <SourceLink path="src/db/index.ts" label="db/index.ts" />
 - <SourceLink path="src/trpc/server.tsx" label="trpc/server.tsx" />
 
-## Testing — the honest gap
+## Testing - the honest gap
 
 There is no test suite: no unit, integration, or end-to-end tests, no test
 runner in `package.json`, and no test files. The checks that do exist are static
@@ -333,7 +334,7 @@ of nine routes, and a deterministic seed that makes a bug reproducible.
 
 What I would add first, in order:
 
-1. Unit tests for `computeHouseholdRisk` — each cap, the 0 and 100 clamps, and
+1. Unit tests for `computeHouseholdRisk` - each cap, the 0 and 100 clamps, and
    the 34/67 band boundaries.
 2. Unit tests for the predictive slope and filter-age triggers, including flat
    and missing readings.
@@ -349,37 +350,37 @@ exercised, not test-covered.
 
 ## Code links
 
-- <SourceLink path="src/db/schema.ts" label="schema.ts" /> — tables, enums,
+- <SourceLink path="src/db/schema.ts" label="schema.ts" /> - tables, enums,
   foreign keys, and indexes.
-- <SourceLink path="src/db/queries/customers.ts" label="customers.ts" /> —
+- <SourceLink path="src/db/queries/customers.ts" label="customers.ts" /> -
   server-paged risk query and explicit row types.
-- <SourceLink path="src/trpc/routers/customers.ts" label="customers router" /> —
+- <SourceLink path="src/trpc/routers/customers.ts" label="customers router" /> -
   schema-first procedures.
 - <SourceLink
     path="src/features/customers/hooks/use-get-risk-table.ts"
     label="use-get-risk-table.ts"
   />
-  — inferred query data.
+  - inferred query data.
 - <SourceLink
     path="src/features/customers/components/risk-table/risk-score-cell.tsx"
     label="risk-score-cell.tsx"
   />
-  — typed component prop.
+  - typed component prop.
 - <SourceLink path="src/trpc/schema/common.ts" label="schema/common.ts" /> and
   <SourceLink path="src/trpc/schema/customers.ts" label="schema/customers.ts" />
-  — shared validation contracts.
-- <SourceLink path="src/hooks/use-confirm.tsx" label="use-confirm.tsx" /> —
+  - shared validation contracts.
+- <SourceLink path="src/hooks/use-confirm.tsx" label="use-confirm.tsx" /> -
   promise-based confirmation.
 - <SourceLink
     path="src/features/service-ops/hooks/use-update-ticket-status.ts"
     label="use-update-ticket-status.ts"
   />
-  — optimistic update and rollback.
-- <SourceLink path="src/db/queries/risk.ts" label="risk.ts" /> — shared scoring
+  - optimistic update and rollback.
+- <SourceLink path="src/db/queries/risk.ts" label="risk.ts" /> - shared scoring
   used by seed and mutation.
-- <SourceLink path="src/db/seed/index.ts" label="seed/index.ts" /> —
+- <SourceLink path="src/db/seed/index.ts" label="seed/index.ts" /> -
   deterministic seed and non-empty guard.
 - <SourceLink path="eslint.config.mjs" label="eslint.config.mjs" />,
   <SourceLink path=".prettierrc.json" label=".prettierrc.json" />, and
-  <SourceLink path=".husky/pre-commit" label=".husky/pre-commit" /> — tooling.
-- <SourceLink path="package.json" label="package.json" /> — the check commands.
+  <SourceLink path=".husky/pre-commit" label=".husky/pre-commit" /> - tooling.
+- <SourceLink path="package.json" label="package.json" /> - the check commands.

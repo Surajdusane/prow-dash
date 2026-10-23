@@ -16,7 +16,7 @@ export const DEFAULT_ECHARTS_RENDERER = ECHARTS_RENDERERS.canvas;
 echarts.use([CanvasRenderer, SVGRenderer]);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Theme keys + config — replicated from the repo's <ChartStyle> so the ECharts
+// Theme keys + config - replicated from the repo's <ChartStyle> so the ECharts
 // charts stay self-contained (no recharts ui imports). Shared by every ECharts
 // chart and the tooltip/legend/brush ui modules.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -26,7 +26,7 @@ export const THEMES = { light: "", dark: ".dark" } as const;
 export type ThemeKey = keyof typeof THEMES;
 export const THEME_KEYS = Object.keys(THEMES) as ThemeKey[];
 
-// Require at least one theme key — identical constraint to the repo's ChartConfig.
+// Require at least one theme key - identical constraint to the repo's ChartConfig.
 export type AtLeastOneThemeColor = { light: string[]; dark?: string[] } | { light?: string[]; dark: string[] };
 
 export type ChartConfig = Record<
@@ -39,7 +39,7 @@ export type ChartConfig = Record<
 >;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Color plumbing — replicated from the repo's <ChartStyle> so the charts stay
+// Color plumbing - replicated from the repo's <ChartStyle> so the charts stay
 // self-contained (no @/registry/ui/recharts imports).
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -171,7 +171,7 @@ export function resolveColors(container: HTMLElement, config: ChartConfig, serie
   return { series, tokens };
 }
 
-// Horizontal multi-stop color for a series — a solid string when there is only
+// Horizontal multi-stop color for a series - a solid string when there is only
 // one color, else an evenly-distributed left→right LinearGradient. Reused for the
 // stroke, symbol fills, and as the base tint for the area fill.
 export function seriesPaint(slots: string[]): string | echarts.graphic.LinearGradient {
@@ -180,7 +180,7 @@ export function seriesPaint(slots: string[]): string | echarts.graphic.LinearGra
   return new echarts.graphic.LinearGradient(0, 0, 1, 0, stops);
 }
 
-// Solid var / gradient of vars for a series indicator — mirrors getIndicatorColorStyle.
+// Solid var / gradient of vars for a series indicator - mirrors getIndicatorColorStyle.
 // Used by BOTH the tooltip rows and the legend indicators.
 export function indicatorBackground(key: string, colorsCount: number): string {
   if (colorsCount <= 1) return `var(--color-${key}-0)`;

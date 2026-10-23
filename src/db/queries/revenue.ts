@@ -108,7 +108,7 @@ export async function getRevenueKpis(db: Database): Promise<RevenueKpis> {
 }
 
 /**
- * MRR at each month end, reconstructed from subscription start/end dates —
+ * MRR at each month end, reconstructed from subscription start/end dates -
  * no snapshot table needed. The current month is capped at today.
  */
 export async function getMrrTrend(db: Database, months = 18): Promise<MrrTrendPoint[]> {

@@ -10,7 +10,7 @@ import { addDays, lastMonths, roundTo, startOfDay, startOfMonth, toDateKey, toPe
 export type OverviewKpis = {
   activeHouseholds: number;
   mrr: number;
-  /** 90-day churn % — cancellations ÷ households active at the start of the window. */
+  /** 90-day churn % - cancellations ÷ households active at the start of the window. */
   churnRate90d: number;
   openTickets: number;
   newThisMonth: number;
@@ -89,7 +89,7 @@ export async function getOverviewKpis(db: Database): Promise<OverviewKpis> {
   };
 }
 
-/** Billed vs collected per billing month — the overview version of the revenue chart. */
+/** Billed vs collected per billing month - the overview version of the revenue chart. */
 export async function getRevenueTrend(db: Database, months = 18): Promise<BillingTrendPoint[]> {
   return getBillingTrend(db, months);
 }

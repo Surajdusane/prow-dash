@@ -40,7 +40,7 @@ export type HouseholdLite = {
 const PREDICTIVE_LIMIT = 25;
 const READINGS_WINDOW_DAYS = 30;
 const MAX_READINGS_PER_DISPENSER = 6;
-/** ppm/day — sustained growth beyond this is "rising fast". */
+/** ppm/day - sustained growth beyond this is "rising fast". */
 const SLOPE_TRIGGER_PPM_PER_DAY = 3.5;
 const SLOPE_MIN_TDS = 250;
 /** A filter older than this is due regardless of the TDS curve. */
@@ -132,7 +132,7 @@ function linearSlope(points: { x: number; y: number }[]): number {
  * The predictive-service list: dispensers whose recent TDS trend is climbing
  * and/or whose filter is beyond its natural cycle, ranked by a composite score.
  * Reads the last 30 days of telemetry (index-friendly) and keeps the latest
- * six readings per dispenser — enough for an honest linear slope.
+ * six readings per dispenser - enough for an honest linear slope.
  */
 export async function getPredictive(db: Database): Promise<PredictiveRow[]> {
   const now = new Date();

@@ -21,7 +21,7 @@ const SLA_BADGE_VARIANT: Record<SlaTone, BadgeProps["variant"]> = {
 interface TicketCardContentProps {
   ticket: BoardTicket;
   onOpen?: (ticket: BoardTicket) => void;
-  /** Drag overlay copy — no click handler, lifted instead. */
+  /** Drag overlay copy - no click handler, lifted instead. */
   overlay?: boolean;
 }
 
@@ -74,7 +74,7 @@ export function TicketCardContent({ ticket, onOpen, overlay = false }: TicketCar
   );
 }
 
-/** Sortable/draggable wrapper — dnd id is the stringified ticket id. */
+/** Sortable/draggable wrapper - dnd id is the stringified ticket id. */
 export function SortableTicketCard({ ticket, onOpen }: { ticket: BoardTicket; onOpen: (ticket: BoardTicket) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: String(ticket.id),

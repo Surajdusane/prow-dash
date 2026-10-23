@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
 
-/** Card shell for chart sections — keeps every chart in a fixed-height container. */
+/** Card shell for chart sections - keeps every chart in a fixed-height container. */
 export function ChartCard({
   title,
   description,

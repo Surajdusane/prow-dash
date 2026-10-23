@@ -1,4 +1,4 @@
-# Prompt 11 — Engineering and About
+# Prompt 11 - Engineering and About
 
 Read `docs-prompt/00-readme.md` first.
 
@@ -19,7 +19,7 @@ Frontmatter:
 ```yaml
 ---
 title: Performance
-description: Server prefetch, batched queries, Suspense, bounded windows and indexed access — the choices that keep a data-heavy dashboard fast.
+description: Server prefetch, batched queries, Suspense, bounded windows and indexed access - the choices that keep a data-heavy dashboard fast.
 ---
 ```
 
@@ -45,7 +45,7 @@ description: Server prefetch, batched queries, Suspense, bounded windows and ind
 
 Explain the subtle part:
 
-- `prefetch` uses `void queryClient.prefetchQuery(...)` — it does not block the server render.
+- `prefetch` uses `void queryClient.prefetchQuery(...)` - it does not block the server render.
 - `HydrateClient` dehydrates pending queries too, because `shouldDehydrateQuery` includes `query.state.status === "pending"`.
 - The client `useSuspenseQuery` suspends until the server promise resolves.
 - This is why the page can stream while queries are still in flight.
@@ -171,7 +171,7 @@ Frontmatter:
 ```yaml
 ---
 title: Code quality
-description: End-to-end types, feature boundaries, validation, error states, accessibility and tooling — what keeps the codebase maintainable.
+description: End-to-end types, feature boundaries, validation, error states, accessibility and tooling - what keeps the codebase maintainable.
 ---
 ```
 
@@ -281,7 +281,7 @@ Explain why: a feature can be read, moved, or deleted without hunting across the
 - `server-only` prevents server modules from leaking into the client.
 - Do not claim tenant isolation, RBAC, or audit logging.
 
-#### Testing — the honest gap
+#### Testing - the honest gap
 
 If the repo has no test suite, say so:
 
@@ -392,9 +392,9 @@ description: Who built ProWater, what I was optimising for, and how to get in to
 #### Contact
 
 - GitHub: `https://github.com/Surajdusane`
-- Email: `[your email]` — ask the user; do not invent.
-- LinkedIn: `[your LinkedIn]` — ask the user; do not invent.
-- CV: `[link]` — optional.
+- Email: `[your email]` - ask the user; do not invent.
+- LinkedIn: `[your LinkedIn]` - ask the user; do not invent.
+- CV: `[link]` - optional.
 - CTA: “Hire me” → `CONTACT_URL`.
 
 If contact details are unknown, keep the GitHub link and add a clear TODO. Do not ship a fake email.

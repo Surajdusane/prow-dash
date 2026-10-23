@@ -1,4 +1,4 @@
-# Prompt 01 — Docs foundation and shell
+# Prompt 01 - Docs foundation and shell
 
 Read `docs-prompt/00-readme.md` first.
 
@@ -71,13 +71,13 @@ src/content/docs/
 
 Sidebar order:
 
-1. `index` — Start Here
-2. `overview` — Short version, Long version
-3. `ideas` — Predictive service demand, Churn risk
-4. `routes` — route index + 9 route pages
-5. `architecture` — System, Data model, API, Code flow, Data simulation
-6. `engineering` — Performance, Quality
-7. `about` — About
+1. `index` - Start Here
+2. `overview` - Short version, Long version
+3. `ideas` - Predictive service demand, Churn risk
+4. `routes` - route index + 9 route pages
+5. `architecture` - System, Data model, API, Code flow, Data simulation
+6. `engineering` - Performance, Quality
+7. `about` - About
 
 Use folder `meta.json` titles such as:
 
@@ -199,7 +199,7 @@ Register all three in `getMDXComponents` in `src/features/docs/components/mdx/in
 Add one line near the top:
 
 ```md
-> **Case study:** open `/docs` for the recruiter-facing walkthrough — problem, design decisions, route-by-route code maps, and engineering notes.
+> **Case study:** open `/docs` for the recruiter-facing walkthrough - problem, design decisions, route-by-route code maps, and engineering notes.
 ```
 
 ## Verification

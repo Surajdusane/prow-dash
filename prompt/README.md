@@ -1,4 +1,4 @@
-# ProWater Dashboard — Build Prompts
+# ProWater Dashboard - Build Prompts
 
 This folder contains the full build plan for the **ProWater Internal Monitoring Dashboard**, split into prompts you can hand to an AI coding agent one phase at a time.
 
@@ -24,14 +24,14 @@ This folder contains the full build plan for the **ProWater Internal Monitoring 
 
 ## Locked decisions
 
-- **No auth gate** — fully public demo, all mutations live. The README must state this is a deliberate demo choice.
+- **No auth gate** - fully public demo, all mutations live. The README must state this is a deliberate demo choice.
 - **@dnd-kit** (`@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities`) for the Kanban board.
 - **All 8 routes**, built in the order above, each shipped end-to-end.
-- **Strictly tRPC** for app data — no REST route handlers except the optional cron endpoint.
+- **Strictly tRPC** for app data - no REST route handlers except the optional cron endpoint.
 - **evilcharts** for every chart; **coss/shadcn** for UI; **toast** (`toastManager`) for all messages; **use-confirm** for all confirmations; imports always from `@/`.
 
 ## Sequencing rules
 
 - Never start a phase before the previous phase's acceptance checks pass.
 - Run `bun run check-types` and `bun run build` at the end of every phase.
-- Never create git branches, worktrees, or commits automatically — leave changes uncommitted.
+- Never create git branches, worktrees, or commits automatically - leave changes uncommitted.

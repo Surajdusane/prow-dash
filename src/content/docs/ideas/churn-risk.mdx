@@ -50,9 +50,9 @@ against real outcomes.
 An additive 0–100 score with three bands, used as a ranking tool, not a
 probability. The bands create an operating rhythm:
 
-- **low** (`< 34`) — monitor.
-- **medium** (`34–66`) — review.
-- **high** (`≥ 67`) — call.
+- **low** (`< 34`) - monitor.
+- **medium** (`34–66`) - review.
+- **high** (`≥ 67`) - call.
 
 `computeHouseholdRisk` runs in the seed, the recompute mutation, and any future
 cron job, so there is no second implementation to drift.
@@ -163,25 +163,25 @@ Seed links:
     symbol="generateHouseholds"
     label="households.ts"
   />
-  — cohort share, cohort window, and cancel logic.
+  - cohort share, cohort window, and cancel logic.
 - <SourceLink
     path="src/db/seed/generators/complaints.ts"
     symbol="generateComplaints"
     label="complaints.ts"
   />
-  — the 2–4 complaint cluster and severity mix.
+  - the 2–4 complaint cluster and severity mix.
 - <SourceLink
     path="src/db/seed/generators/payments.ts"
     symbol="generatePayments"
     label="payments.ts"
   />
-  — late and failed payments starting before the window.
+  - late and failed payments starting before the window.
 - <SourceLink
     path="src/db/seed/generators/tickets.ts"
     symbol="buildDispenserTickets"
     label="tickets.ts"
   />
-  — SLA misses.
+  - SLA misses.
 
 ## The UI
 

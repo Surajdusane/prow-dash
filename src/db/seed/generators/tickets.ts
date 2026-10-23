@@ -80,11 +80,11 @@ function makeTicket(
   let slaMet: boolean | null = null;
 
   if (resolved > ctx.now) {
-    // Still in flight — the visit is due but hasn't happened yet.
+    // Still in flight - the visit is due but hasn't happened yet.
     status = chance(faker, 0.5) ? "open" : "in_progress";
   } else if (ageDays > 14) {
     if (chance(faker, 0.06)) {
-      // A small share of old tickets get neglected — these feed the "overdue >7d" KPI.
+      // A small share of old tickets get neglected - these feed the "overdue >7d" KPI.
       status = chance(faker, 0.4) ? "open" : "in_progress";
     } else {
       status = "resolved";

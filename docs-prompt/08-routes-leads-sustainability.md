@@ -1,4 +1,4 @@
-# Prompt 08 — Leads and Sustainability
+# Prompt 08 - Leads and Sustainability
 
 Read `docs-prompt/00-readme.md` first, then reuse the route-page template from `docs-prompt/05-routes-overview-service-ops.md`.
 
@@ -11,14 +11,14 @@ Write:
 
 These are the two “growth and impact” routes. They are less operational than Service Ops or Customers, but they show a different kind of product thinking: a working sales funnel and a defensible impact estimate.
 
-## 1. `routes/leads.mdx` — `/leads`
+## 1. `routes/leads.mdx` - `/leads`
 
 Frontmatter:
 
 ```yaml
 ---
-title: "/leads — Sales funnel"
-description: Enquiry volume, site visits and conversions by channel — a working top-of-funnel with create and update flows.
+title: "/leads - Sales funnel"
+description: Enquiry volume, site visits and conversions by channel - a working top-of-funnel with create and update flows.
 ---
 ```
 
@@ -32,7 +32,7 @@ description: Enquiry volume, site visits and conversions by channel — a workin
   - which leads need a follow-up
 - The page answers: *is the funnel working, and where is it leaking?*
 
-### What I chose — and what I left out
+### What I chose - and what I left out
 
 | Option | Why I rejected it | What I chose instead |
 |---|---|---|
@@ -141,14 +141,14 @@ Explain the denominator: all rates are relative to total leads, not to the previ
 - Conversion is binary; there is no “qualified” stage.
 - The source list is a fixed enum in the seed, not a database table.
 
-## 2. `routes/sustainability.mdx` — `/sustainability`
+## 2. `routes/sustainability.mdx` - `/sustainability`
 
 Frontmatter:
 
 ```yaml
 ---
-title: "/sustainability — Impact estimate"
-description: Litres served and 20 L jars avoided, estimated from subscription-days and plan usage — with the method stated.
+title: "/sustainability - Impact estimate"
+description: Litres served and 20 L jars avoided, estimated from subscription-days and plan usage - with the method stated.
 ---
 ```
 
@@ -159,7 +159,7 @@ description: Litres served and 20 L jars avoided, estimated from subscription-da
 - The page answers: *how much water did we serve, and how many jars did that displace?*
 - It also shows how to present an estimate honestly: formula, assumptions, and a method note.
 
-### What I chose — and what I left out
+### What I chose - and what I left out
 
 | Option | Why I rejected it | What I chose instead |
 |---|---|---|

@@ -133,7 +133,7 @@ export function HouseholdDrawer() {
             <div className="flex flex-col items-center gap-3 py-10 text-center">
               <p className="text-sm font-medium">Couldn&apos;t load this household</p>
               <p className="text-muted-foreground text-sm">
-                The profile request failed. This is usually a cold database — try again.
+                The profile request failed. This is usually a cold database - try again.
               </p>
               <Button variant="outline" onClick={() => void refetch()}>
                 Retry

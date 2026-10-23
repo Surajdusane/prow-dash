@@ -2494,7 +2494,7 @@
                       "string",
                       "null"
                     ],
-                    "description": "`null` clears a previously set visit date — the UI's \"clear\" affordance."
+                    "description": "`null` clears a previously set visit date - the UI's \"clear\" affordance."
                   },
                   "converted": {
                     "type": "boolean"
@@ -2650,7 +2650,7 @@
           },
           "churnRate90d": {
             "type": "number",
-            "description": "90-day churn % — cancellations ÷ households active at the start of the window."
+            "description": "90-day churn % - cancellations ÷ households active at the start of the window."
           },
           "openTickets": {
             "type": "number"
@@ -2724,7 +2724,7 @@
               "standard",
               "premium"
             ],
-            "description": "Shared plan reference for the analytics queries — mirrors the documented\r\nassumptions in the master plan (§6). Plan pricing itself lives in the DB;\r\nlitres-per-day is a documented estimate used by /sustainability."
+            "description": "Shared plan reference for the analytics queries - mirrors the documented\r\nassumptions in the master plan (§6). Plan pricing itself lives in the DB;\r\nlitres-per-day is a documented estimate used by /sustainability."
           },
           "count": {
             "type": "number"
@@ -3311,7 +3311,7 @@
                       "standard",
                       "premium"
                     ],
-                    "description": "Shared plan reference for the analytics queries — mirrors the documented\r\nassumptions in the master plan (§6). Plan pricing itself lives in the DB;\r\nlitres-per-day is a documented estimate used by /sustainability."
+                    "description": "Shared plan reference for the analytics queries - mirrors the documented\r\nassumptions in the master plan (§6). Plan pricing itself lives in the DB;\r\nlitres-per-day is a documented estimate used by /sustainability."
                   },
                   "monthlyPrice": {
                     "type": "number"
@@ -3811,7 +3811,7 @@
         "properties": {
           "day": {
             "type": "string",
-            "description": "`YYYY-MM-DD` — stable chart x-axis key."
+            "description": "`YYYY-MM-DD` - stable chart x-axis key."
           },
           "avgTds": {
             "type": "number"
@@ -4349,7 +4349,7 @@
                     "standard",
                     "premium"
                   ],
-                  "description": "Shared plan reference for the analytics queries — mirrors the documented\r\nassumptions in the master plan (§6). Plan pricing itself lives in the DB;\r\nlitres-per-day is a documented estimate used by /sustainability."
+                  "description": "Shared plan reference for the analytics queries - mirrors the documented\r\nassumptions in the master plan (§6). Plan pricing itself lives in the DB;\r\nlitres-per-day is a documented estimate used by /sustainability."
                 },
                 "count": {
                   "type": "number"
@@ -4698,7 +4698,7 @@
               "standard",
               "premium"
             ],
-            "description": "Shared plan reference for the analytics queries — mirrors the documented\r\nassumptions in the master plan (§6). Plan pricing itself lives in the DB;\r\nlitres-per-day is a documented estimate used by /sustainability."
+            "description": "Shared plan reference for the analytics queries - mirrors the documented\r\nassumptions in the master plan (§6). Plan pricing itself lives in the DB;\r\nlitres-per-day is a documented estimate used by /sustainability."
           },
           "litres": {
             "type": "number"

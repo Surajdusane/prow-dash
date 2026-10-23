@@ -32,7 +32,7 @@ export default function RevenuePage() {
           <div className="flex flex-col gap-1">
             <h1 className="font-heading text-2xl font-semibold">Revenue</h1>
             <p className="text-muted-foreground text-sm">
-              Subscriptions and billing — MRR trend, plan mix, cohort retention and overdue payments.
+              Subscriptions and billing - MRR trend, plan mix, cohort retention and overdue payments.
             </p>
           </div>
 
@@ -59,7 +59,7 @@ export default function RevenuePage() {
             <Suspense fallback={<ChartCardSkeleton />}>
               <ChartCard
                 title="Payment outcomes"
-                description="Every billing month's payments by status — paid, late, failed and pending."
+                description="Every billing month's payments by status - paid, late, failed and pending."
               >
                 <PaymentStatusCard />
               </ChartCard>

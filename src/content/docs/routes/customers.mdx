@@ -1,5 +1,5 @@
 ---
-title: "/customers — Churn risk"
+title: "customers - Churn risk"
 description:
   Score the book, surface high-risk households, and act on complaints before
   they cancel.
@@ -15,10 +15,10 @@ description:
 
 Retention is cheaper than acquisition, but a churn rate does not tell support
 who to call. This route ranks households, shows the evidence behind each score,
-and makes the next action available in the same place — answering **who, why,
+and makes the next action available in the same place - answering **who, why,
 and what now**.
 
-## What I chose — and what I left out
+## What I chose - and what I left out
 
 | Option                          | Why I rejected it                     | What I chose instead                             |
 | ------------------------------- | ------------------------------------- | ------------------------------------------------ |
@@ -62,7 +62,7 @@ visible without a separate column.
 
 Visible columns sort server-side (`tenure`, `risk`, `complaints`,
 `latePayments`); the toolbar filters by risk band, area, and household status.
-The default includes cancelled households — switch to Active for a call list.
+The default includes cancelled households - switch to Active for a call list.
 
 **Data:** `getRiskTable` → `households`, `societies`, `areas`, `subscriptions`,
 `plans`, `complaints`, `payments`. **Code:**
@@ -96,8 +96,8 @@ many households?"
 
 ### Complaint trend
 
-Five lines, one per category — water quality, service delay, billing, device
-malfunction, other — over 12 months. The mix explains what kind of risk is
+Five lines, one per category - water quality, service delay, billing, device
+malfunction, other - over 12 months. The mix explains what kind of risk is
 rising: a water-quality spike and a billing spike call for different
 interventions. Months are zero-filled.
 
@@ -149,7 +149,7 @@ table, and it keeps the last id through the close animation.
 "Add complaint" opens a category and severity dialog; unresolved complaints have
 inline Resolve buttons. Both toast on success and failure. Adding refreshes the
 profile, trend, and table; resolving refreshes the profile and table. Neither
-re-scores — stored scores change only on recompute, so the donut and KPIs are
+re-scores - stored scores change only on recompute, so the donut and KPIs are
 untouched here.
 
 **Code:**
@@ -252,7 +252,7 @@ The result is clamped to 0–100 and banded at 34 and 67.
 - **Add or resolve a complaint.** Toast, then invalidate the affected profile
   and list. Adding also refreshes the trend; both refresh the risk table.
 - **Recompute risk.** Confirmation, toast with the household count, then
-  invalidate table, distribution, KPIs, and profile. No optimistic scoring —
+  invalidate table, distribution, KPIs, and profile. No optimistic scoring -
   showing a new rank before the server re-scores would mislead.
 
 ## Code map
@@ -281,7 +281,7 @@ The result is clamped to 0–100 and banded at 34 and 67.
      symbol="computeHouseholdRisk"
      label="risk.ts"
    />
-   — one function with named weights.
+   - one function with named weights.
 3. Resolve a complaint, then click **Recompute risk**. The table re-sorts and
    the donut re-reads the rewritten scores.
 

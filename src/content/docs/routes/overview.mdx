@@ -1,5 +1,5 @@
 ---
-title: "/ — Executive overview"
+title: "Executive overview"
 description: The 60-second health check for the whole ProWater network.
 ---
 
@@ -20,7 +20,7 @@ The page is not a data catalogue. It is a hierarchy: six numbers first, four
 supporting visuals second, one cross-area table last. Everything else belongs on
 a dedicated route.
 
-## What I chose — and what I left out
+## What I chose - and what I left out
 
 | Option                   | Why I rejected it                                 | What I chose instead                       |
 | ------------------------ | ------------------------------------------------- | ------------------------------------------ |
@@ -58,7 +58,7 @@ households this month, and the 7-day fleet average purity.
 
 <Callout type="info" title="The churn denominator matters">
   Churn is not `cancelled ÷ active today`. The denominator is households that
-  had joined by the 90-day cutoff and had not cancelled by it — the active base
+  had joined by the 90-day cutoff and had not cancelled by it - the active base
   at the start of the window. The numerator is any household whose cancellation
   falls after the cutoff. That keeps the percentage comparable across a growing
   book, though a household that joins and cancels inside the window can land in
@@ -214,7 +214,7 @@ page.
    today's active count. Read `getOverviewKpis` and check the four `filter`
    clauses in the household aggregate.
 2. Area health is five grouped queries in one `Promise.all`, then a TypeScript
-   merge by `areaId` — not five sequential queries and not an N+1 loop.
+   merge by `areaId` - not five sequential queries and not an N+1 loop.
 3. The page has no client-side data fetching of its own: `batchPrefetchOverview`
    warms the cache and every card reads the same query key through
    `useSuspenseQuery`.

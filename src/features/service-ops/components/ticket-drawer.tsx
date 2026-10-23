@@ -131,7 +131,7 @@ export function TicketDrawer({ ticket, onClose }: { ticket: BoardTicket | null; 
                     {view.resolvedDate ? (
                       formatDateKey(view.resolvedDate)
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </dd>
                 </div>

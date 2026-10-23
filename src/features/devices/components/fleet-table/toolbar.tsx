@@ -8,7 +8,7 @@ import type { DispenserType } from "@/db/queries/devices";
 import { useGetAreaOptions } from "@/features/devices/hooks";
 import { DISPENSER_TYPE_LABELS, type FleetTableState } from "@/features/devices/utils";
 
-/** Sentinel for "no filter applied" — Base UI Select needs a concrete value. */
+/** Sentinel for "no filter applied" - Base UI Select needs a concrete value. */
 const ALL = "all";
 
 const TYPE_ITEMS = [
@@ -27,7 +27,7 @@ const ONLINE_ITEMS = [
 
 /**
  * Fleet table filters. Every change flows through the parent as a patch so it
- * can reset paging — a filter change always jumps back to page 1.
+ * can reset paging - a filter change always jumps back to page 1.
  */
 export function FleetTableToolbar({
   state,

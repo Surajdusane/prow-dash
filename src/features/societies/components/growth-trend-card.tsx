@@ -12,7 +12,7 @@ import { formatCompact, formatMonth, formatNumber } from "@/lib/format";
 
 /**
  * Cumulative active households per area, stacked. Series keys come from the
- * data (top eight areas plus "Other" — a fixed list would silently drop a new
+ * data (top eight areas plus "Other" - a fixed list would silently drop a new
  * area), and colours are assigned by rank so an area keeps its hue across
  * renders.
  */

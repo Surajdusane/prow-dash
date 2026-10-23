@@ -31,7 +31,7 @@ export default function OverviewPage() {
           <div className="flex flex-col gap-1">
             <h1 className="font-heading text-2xl font-semibold">Overview</h1>
             <p className="text-muted-foreground text-sm">
-              Executive summary of the ProWater network — KPIs, revenue health, household growth and area performance.
+              Executive summary of the ProWater network - KPIs, revenue health, household growth and area performance.
             </p>
           </div>
 

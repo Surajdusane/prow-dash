@@ -10,10 +10,10 @@ const inrFormatter = new Intl.NumberFormat("en-IN", {
 
 const numberFormatter = new Intl.NumberFormat("en-IN");
 
-/** ₹7,32,154 — full Indian-grouped rupees, for KPI cards and tables. */
+/** ₹7,32,154 - full Indian-grouped rupees, for KPI cards and tables. */
 export const formatInr = (value: number): string => inrFormatter.format(value);
 
-/** ₹7.3L / ₹1.2Cr — axis-friendly rupee shorthand. */
+/** ₹7.3L / ₹1.2Cr - axis-friendly rupee shorthand. */
 export const formatInrCompact = (value: number): string => {
   const abs = Math.abs(value);
   const sign = value < 0 ? "-" : "";
@@ -27,7 +27,7 @@ export const formatInrCompact = (value: number): string => {
 /** 1,234 */
 export const formatNumber = (value: number): string => numberFormatter.format(value);
 
-/** 1.2k / 3.4L — compact axis labels. */
+/** 1.2k / 3.4L - compact axis labels. */
 export const formatCompact = (value: number): string =>
   new Intl.NumberFormat("en-IN", { notation: "compact", maximumFractionDigits: 1 }).format(value);
 
@@ -45,5 +45,5 @@ export const formatDateKey = (dateKey: string): string => {
 
 const dateFormatter = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
-/** Date object → "15 Oct 2026" — for timestamps that cross tRPC as real Dates. */
+/** Date object → "15 Oct 2026" - for timestamps that cross tRPC as real Dates. */
 export const formatDate = (value: Date): string => dateFormatter.format(value);

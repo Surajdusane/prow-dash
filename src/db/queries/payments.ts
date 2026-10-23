@@ -59,7 +59,7 @@ const overdueSelection = {
 
 /**
  * Billed vs collected per billing month (last `months` months, zero-filled).
- * "Collected" counts any payment that carries a `paidDate` — late payers that
+ * "Collected" counts any payment that carries a `paidDate` - late payers that
  * eventually settled are money in the bank.
  */
 export async function getBillingTrend(db: Database, months = 18): Promise<BillingTrendPoint[]> {
@@ -105,7 +105,7 @@ export async function getPaymentStatusByMonth(db: Database, months = 12): Promis
   }
   for (const row of rows) {
     const point = byMonth.get(row.month);
-    if (!point) continue; // outside the window — nothing to chart
+    if (!point) continue; // outside the window - nothing to chart
     point[row.status] = row.total;
   }
 

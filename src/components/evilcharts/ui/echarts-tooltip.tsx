@@ -3,7 +3,7 @@ import type { TooltipComponentOption } from "echarts/components";
 import { indicatorBackground, type ResolvedColors } from "@/components/evilcharts/ui/echarts-chart";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Tooltip — the shared HTML shell/row primitives and the chart-agnostic option
+// Tooltip - the shared HTML shell/row primitives and the chart-agnostic option
 // fields. The tooltip DOM lives inside `[data-chart={id}]`, so the injected
 // `--color-*` vars and Tailwind classes resolve directly (no color read). Each
 // chart composes its own rows but shares the shell/styling and base option.
@@ -28,7 +28,7 @@ export const tooltipVariantClass: Record<TooltipVariant, string> = {
   "frosted-glass": "bg-background/50 backdrop-blur-md",
 };
 
-// The standard series indicator swatch — a rounded square filled with the
+// The standard series indicator swatch - a rounded square filled with the
 // series' solid var or multi-stop gradient (indicatorBackground). A chart drops
 // this into a tooltipRow's `indicatorHtml`.
 export function tooltipIndicatorHtml(key: string, colorsCount: number): string {
@@ -58,8 +58,8 @@ export function tooltipRow({
         </div>`;
 }
 
-// The outer tooltip surface — border, padding, shadow, roundness + variant
-// classes — wrapping the axis label and the composed rows.
+// The outer tooltip surface - border, padding, shadow, roundness + variant
+// classes - wrapping the axis label and the composed rows.
 export function tooltipShell({
   label,
   body,

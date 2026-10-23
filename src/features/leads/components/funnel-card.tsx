@@ -20,7 +20,7 @@ const chartConfig = {
   count: { label: "Leads", colors: { light: ["#0284c7"], dark: ["#38bdf8"] } },
 } satisfies ChartConfig;
 
-/** Tooltip indicator painted with a literal hex — canvas/HTML overrides can't use CSS vars. */
+/** Tooltip indicator painted with a literal hex - canvas/HTML overrides can't use CSS vars. */
 function indicatorHtml(color: string): string {
   return `<div class="h-2.5 w-2.5 shrink-0 rounded-[2px]" style="background:${color}"></div>`;
 }
@@ -28,7 +28,7 @@ function indicatorHtml(color: string): string {
 /**
  * Leads → visits → converted as one horizontal bar each, with %-of-leads
  * labels. A single custom series replaces the built ones so every bar can
- * carry its own stage colour and value label — the stock bar series supports
+ * carry its own stage colour and value label - the stock bar series supports
  * neither, and ECharts can't resolve CSS variables inside canvas overrides,
  * so the hexes are picked per theme here.
  */

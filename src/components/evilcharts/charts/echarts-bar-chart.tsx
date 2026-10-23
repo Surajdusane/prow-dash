@@ -63,16 +63,16 @@ import {
 // existing consumers/examples keep importing them from the chart module.
 export type { ChartConfig, EChartsRenderer, LegendVariant, TooltipPosition, TooltipRoundness, TooltipVariant };
 
-// Modular registration keeps the bundle lean — only the pieces this chart needs.
+// Modular registration keeps the bundle lean - only the pieces this chart needs.
 // `DataZoomComponent` bundles both the slider (brush footer) and inside (wheel/drag)
 // zoom. The brush's frame/handles/labels are raw zrender elements, not the
-// graphic component — see syncBrushOverlay. No LineChart: the main plot, the
+// graphic component - see syncBrushOverlay. No LineChart: the main plot, the
 // loading skeleton, and the brush mini chart are ALL bar series.
 echarts.use([BarChart, GridComponent, TooltipComponent, DataZoomComponent]);
 
 type EChartsInstance = ReturnType<typeof echarts.init>;
 
-// The exact option surface this chart uses — bar series, grid, tooltip, and
+// The exact option surface this chart uses - bar series, grid, tooltip, and
 // dataZoom, plus the axis options they pull in as dependencies. Narrower than
 // echarts' full EChartsOption, so a misspelled key fails the compile instead of
 // silently reaching setOption.
@@ -80,7 +80,7 @@ type EChartsOption = ComposeOption<
   BarSeriesOption | GridComponentOption | TooltipComponentOption | DataZoomComponentOption
 >;
 
-// Single-entry views of the composed option's array-or-single fields — the
+// Single-entry views of the composed option's array-or-single fields - the
 // modular entry points don't export the axis option types directly.
 type ArrayItem<T> = T extends readonly (infer U)[] ? U : T;
 type XAxisOption = ArrayItem<NonNullable<EChartsOption["xAxis"]>>;
@@ -98,10 +98,10 @@ const BAR_STAGGER = 50; // delay between consecutive bars in the reveal, in mill
 const LOADING_DEFAULT_BARS = 12;
 // `revealEndsAt` marks when the intro grow-in finishes. The stripped-cap post-layout
 // correction (a notMerge repush) waits for it so it never lands mid-entrance and
-// stomps the grow — the same reason the area chart tracks this timestamp.
+// stomps the grow - the same reason the area chart tracks this timestamp.
 const SELECTION_DIM = 0.3; // opacity of an unselected series while a selection is active
 const HOVER_BLUR = 0.3; // opacity of the non-hovered bars while hover-highlight is on
-// Soft outer glow — the canvas analogue of the Recharts feGaussianBlur filter
+// Soft outer glow - the canvas analogue of the Recharts feGaussianBlur filter
 // (stdDeviation 8, alpha 0.5). A generous shadowBlur keeps the halo soft with no
 // hard rim; the shadowColor is sampled PER BAR so a multi-stop gradient series
 // glows in its own colors across the plot instead of one flat tint.
@@ -116,8 +116,8 @@ const GLOW_OPACITY = 0.65; // per-datum shadowColor alpha, × the sampled series
 // line up across every column.
 // The `expandable` variant draws every bar at full width but fills only a narrow
 // centre strip, so it reads as a thin line; hovering one grows its strip out to
-// the full width and back on leave. The bar geometry never changes — only the
-// horizontal extent of its fill — so nothing re-lays out mid-hover.
+// the full width and back on leave. The bar geometry never changes - only the
+// horizontal extent of its fill - so nothing re-lays out mid-hover.
 const EXPAND_COLLAPSED = 0.12; // resting strip width, as a fraction of the bar
 const EXPAND_TAU = 70; // ease time-constant, in milliseconds (exponential approach)
 
@@ -125,8 +125,8 @@ const BLOCK_SIZE = 8; // filled segment height, in pixels
 const BLOCK_GAP = 4; // transparent gap between segments, in pixels
 const BLOCK_TRACK_OPACITY = 0.22; // unfilled block tone, x the muted-foreground alpha
 // Stacked segments would otherwise butt straight into each other and read as one
-// solid column. The separation is a REAL gap — transparent spacer series stacked
-// between the real ones — not a background-colored border: a border paints on all
+// solid column. The separation is a REAL gap - transparent spacer series stacked
+// between the real ones - not a background-colored border: a border paints on all
 // four sides, so it outlines each segment (obvious the moment a bar glows) instead
 // of only parting them.
 const STACK_SEGMENT_GAP = 4; // separation between stacked segments, in pixels
@@ -136,7 +136,7 @@ const MAX_HIGHLIGHT_DIM = 0.16; // non-winning columns under enableMaxValueHighl
 // height (Recharts draws a fixed ~2px strip on top of a dimmed body, identical on
 // tall and short bars). The cap is expressed PER DATUM as a fraction of that bar's
 // own pixel height, so a fixed pixel height maps to a shrinking fraction as the bar
-// grows — the fraction is derived at runtime from the measured value-axis
+// grows - the fraction is derived at runtime from the measured value-axis
 // pixels-per-unit (see measureValuePxPerUnit). A canvas gradient alone can't do
 // this: its bright band is a fraction of the bounding box, so it would scale with
 // bar length (the bug this replaced).
@@ -146,23 +146,23 @@ const STRIPPED_CAP_MAX_FRACTION = 0.85; // cap never swallows a whole (very shor
 const STRIPPED_FALLBACK_FRACTION = 0.12; // used before the axis geometry is measured
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Theme knobs — every neutral line in the chart draws from these. Base colors
+// Theme knobs - every neutral line in the chart draws from these. Base colors
 // come from the consumer's CSS tokens (resolved from the live DOM), so only the
-// opacity factors live here. Factors MULTIPLY the token's own alpha — a border
+// opacity factors live here. Factors MULTIPLY the token's own alpha - a border
 // token that is already 10%-white stays subtle. Tune here, not in the builder.
 // ─────────────────────────────────────────────────────────────────────────────
 // Recharts draws its grid at border/50, but SVG dashes render pixel-crisp while
-// canvas at 2× DPR spreads a 1px line across device pixels — roughly halving
+// canvas at 2× DPR spreads a 1px line across device pixels - roughly halving
 // perceived intensity. Using the border token's full alpha lands both engines at
 // the same apparent brightness.
 const GRID_LINE_OPACITY = 1; // dashed value-axis split lines, × border alpha
-// The skeleton is CLIPPED to a small sweeping window — only the bars inside it
+// The skeleton is CLIPPED to a small sweeping window - only the bars inside it
 // exist, everything outside is fully transparent, like a spotlight sliding across.
 const LOADING_SHIMMER_MAX_OPACITY = 0.22; // gray bar fill inside the window, × foreground alpha
 const LOADING_SHIMMER_BAND = 0.2; // window half-width, fraction of the 45° sweep axis
 const LOADING_SHIMMER_FEATHER = 0.2; // eased edge softening of the clip window
 const BRUSH_FILL_OPACITY = 0.5; // mini-chart bar fill
-const BRUSH_FILLER_OPACITY = 0; // selected-range wash — evil-brush draws none
+const BRUSH_FILLER_OPACITY = 0; // selected-range wash - evil-brush draws none
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public types
@@ -180,40 +180,40 @@ export type BarAnimationType = "none" | "left-to-right" | "right-to-left" | "cen
 export interface EChartsBarChartProps<TData extends Record<string, unknown>> {
   data: TData[]; // rows rendered by the chart
   config: ChartConfig; // series colors + labels
-  renderer?: EChartsRenderer; // rendering engine — defaults to canvas
-  xDataKey?: keyof TData & string; // category key — falls back to the axis dataKey / first free column
+  renderer?: EChartsRenderer; // rendering engine - defaults to canvas
+  xDataKey?: keyof TData & string; // category key - falls back to the axis dataKey / first free column
   className?: string; // extra classes for the chart container
   stackType?: StackType; // how multiple bars combine
   layout?: BarLayout; // orientation of the bars
   barRadius?: number; // default corner radius every <Bar> inherits
-  animation?: boolean; // master switch for the intro grow-in — false renders instantly
+  animation?: boolean; // master switch for the intro grow-in - false renders instantly
   animationType?: BarAnimationType; // default grow-in order each <Bar> inherits
   barGap?: number; // gap between bars within the same category, in pixels
   barCategoryGap?: number; // gap between categories of bars, in pixels
   defaultSelectedDataKey?: string | null; // series selected on first render
   onSelectionChange?: (key: string | null) => void; // fires when the selected series changes
   // Colors ONLY the tallest column and mutes the rest. With several series the
-  // comparison is per COLUMN — the totals across every series at that category —
+  // comparison is per COLUMN - the totals across every series at that category -
   // so a whole stack or group lights up together, not one bar inside it.
   enableMaxValueHighlight?: boolean;
   isLoading?: boolean; // shows the animated loading skeleton
   loadingBars?: number; // number of bars in the loading skeleton
   chartOptions?: Record<string, unknown>; // escape hatch merged over the built ECharts option
-  children?: ReactNode; // declarative config — <Bar>, <XAxis>, <YAxis>, <Grid>, <Tooltip>, <Legend>, <Brush>
+  children?: ReactNode; // declarative config - <Bar>, <XAxis>, <YAxis>, <Grid>, <Tooltip>, <Legend>, <Brush>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Composible parts — DECLARATIVE CONFIG. Every part renders `null`; the root
+// Composible parts - DECLARATIVE CONFIG. Every part renders `null`; the root
 // walks `children` by reference (child.type === Bar, …) to collect its props.
 // Presence semantics mirror the Recharts twin: omit a child and that part does
-// not render. These are never mounted into the tree — they only carry props.
+// not render. These are never mounted into the tree - they only carry props.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BarProps {
-  dataKey: string; // series key — must exist on the data + config
+  dataKey: string; // series key - must exist on the data + config
   variant?: BarVariant; // fill style for this bar only
-  radius?: number; // corner radius — falls back to the root barRadius
-  animationType?: BarAnimationType; // grow-in order — falls back to the root animationType
+  radius?: number; // corner radius - falls back to the root barRadius
+  animationType?: BarAnimationType; // grow-in order - falls back to the root animationType
   isClickable?: boolean; // lets this bar be selected by clicking it
   enableHoverHighlight?: boolean; // dims the other bars while one is hovered
   glowing?: boolean; // applies a soft outer glow to this bar
@@ -222,14 +222,14 @@ export interface BarProps {
 
 /**
  * A single bar series. Declares its own fill variant, radius, glow, buffer, and
- * clickability. Renders nothing — the root reads these props to build the
+ * clickability. Renders nothing - the root reads these props to build the
  * ECharts series.
  */
 const Bar: FC<BarProps> = () => null;
 
 export interface XAxisProps {
-  dataKey?: string; // category key — overrides the root xDataKey (vertical layout)
-  // Category values are stringified, so the formatter always sees a string —
+  dataKey?: string; // category key - overrides the root xDataKey (vertical layout)
+  // Category values are stringified, so the formatter always sees a string -
   // letting examples share `(value) => value.substring(0, 3)` with the Recharts twin.
   tickFormatter?: (value: string, index: number) => string; // formats x tick labels
   label?: string; // axis title, centered below the x-position tick labels
@@ -243,7 +243,7 @@ export interface XAxisProps {
 const XAxis: FC<XAxisProps> = () => null;
 
 export interface YAxisProps {
-  dataKey?: string; // category key — overrides the root xDataKey (horizontal layout)
+  dataKey?: string; // category key - overrides the root xDataKey (horizontal layout)
   tickFormatter?: (value: string, index: number) => string; // formats y tick labels
   label?: string; // axis title, rotated alongside the y-position tick labels
   hideDots?: boolean; // hides the tick dots beside this axis's labels
@@ -279,7 +279,7 @@ export interface LegendProps {
 const Legend: FC<LegendProps> = () => null;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Children collection — walk the declarative config into plain objects the
+// Children collection - walk the declarative config into plain objects the
 // option builder consumes.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -316,7 +316,7 @@ type LegendSlot = {
   isClickable: boolean;
 };
 type BrushSlot = {
-  present: boolean; // a <Brush> child was passed — replaces the old showBrush prop
+  present: boolean; // a <Brush> child was passed - replaces the old showBrush prop
   height?: number;
   formatLabel?: (value: string, index: number) => string;
   onChange?: (range: { startIndex: number; endIndex: number }) => void;
@@ -426,7 +426,7 @@ function collectConfig(children: ReactNode): CollectedConfig {
 // top of this file.
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Fill paints — the ECharts analogue of the Recharts bar fill variants. Unlike
+// Fill paints - the ECharts analogue of the Recharts bar fill variants. Unlike
 // the area chart's fills (which run the color gradient HORIZONTALLY), a bar's
 // base color gradient runs VERTICALLY top→bottom (Recharts `ColorGradient` uses
 // x1=x2=0), so each bar shows the full multi-stop gradient in its own box.
@@ -437,7 +437,7 @@ const GRAY = "rgba(120, 120, 120, 1)";
 // sampleGradient (the color the series gradient shows at t ∈ [0, 1]) now lives in
 // @/registry/ui/echarts-dot and is imported at the top of this file.
 
-// Solid vertical top→bottom color for a series — a plain string when there is
+// Solid vertical top→bottom color for a series - a plain string when there is
 // one color, else a vertical multi-stop LinearGradient in each bar's own box.
 // The `default` variant paints from this at full alpha.
 function solidVerticalPaint(slots: string[], alpha: number): string | echarts.graphic.LinearGradient {
@@ -467,7 +467,7 @@ function verticalFadePaint(slots: string[]): echarts.graphic.LinearGradient {
 
 // The `duotone` family: a hard alpha split across the bar's short axis (its width
 // for vertical bars, its height for horizontal). Recharts splits at 50% via an
-// objectBoundingBox mask — exact for single-color series; multi-color duotone
+// objectBoundingBox mask - exact for single-color series; multi-color duotone
 // falls back to the base color (an accepted approximation, matching the twin's
 // single-color examples).
 function duotoneSplitPaint(
@@ -490,11 +490,11 @@ function duotoneSplitPaint(
 }
 
 // The `stripped` variant: a small BRIGHT cap sitting on top of a dimmed (20%) body
-// — the canvas twin of Recharts' fixed strip. The cap is baked into a per-datum
+// - the canvas twin of Recharts' fixed strip. The cap is baked into a per-datum
 // vertical gradient whose bright band spans exactly `capFraction` of the bar
 // (offset 0 = the tip). Because `capFraction` is passed in as
 // STRIPPED_CAP_HEIGHT / barPixelHeight (see strippedCapFraction), the cap reads the
-// SAME pixel height on every bar — the fraction shrinks as the bar grows. A hard
+// SAME pixel height on every bar - the fraction shrinks as the bar grows. A hard
 // two-stop edge (coincident offsets at `capFraction`) keeps the cap a crisp pill
 // rather than a fade, and the bar's rounded top corners round the cap's top. The
 // cap sits at the tip: the top for vertical bars, the value end (right) for
@@ -532,13 +532,13 @@ function strippedCapFraction(value: number, valuePxPerUnit: number | null): numb
 }
 
 // Pixels per one value-axis unit, read straight off the live coordinate system.
-// Returns null before the first layout (no coordinate system yet) — callers fall
+// Returns null before the first layout (no coordinate system yet) - callers fall
 // back then. Turns the stripped cap's fixed pixel height into a per-bar gradient
 // fraction, so the cap stays constant as the value axis rescales on resize/zoom.
 function measureValuePxPerUnit(chart: EChartsInstance, isHorizontal: boolean): number | null {
   const finder = isHorizontal ? { xAxisIndex: 0 } : { yAxisIndex: 0 };
   // convertToPixel throws before the first setOption (no coordinate system yet) and
-  // whenever the value axis isn't laid out — treat any failure as "not measurable".
+  // whenever the value axis isn't laid out - treat any failure as "not measurable".
   try {
     const p0 = chart.convertToPixel(finder, 0);
     const p1 = chart.convertToPixel(finder, 1);
@@ -553,7 +553,7 @@ function measureValuePxPerUnit(chart: EChartsInstance, isHorizontal: boolean): n
 // Measures the rendered width of one bar, so the `blocks` variant can make its
 // segments square (their width IS the bar width, and only layout knows it). The
 // category pitch comes from the axis; the bar occupies that minus the category
-// gap — a px number when the consumer set one, else ECharts' own "20%" default.
+// gap - a px number when the consumer set one, else ECharts' own "20%" default.
 function measureBarWidthPx(
   chart: EChartsInstance,
   isHorizontal: boolean,
@@ -574,7 +574,7 @@ function measureBarWidthPx(
 }
 
 // Tiling texture fills tinted with the series' first color. Stripes are drawn
-// STRAIGHT (trivially seamless) and the pattern itself is rotated — zrender
+// STRAIGHT (trivially seamless) and the pattern itself is rotated - zrender
 // applies pattern transforms the same way ECharts decals do. Baking a diagonal
 // into a square tile clips the stroke at the corners, which reads as periodic
 // gaps once tiled. Tiles render at devicePixelRatio and scale back down so the
@@ -685,7 +685,7 @@ function barFillPaint(
 }
 
 // Border radius per variant/layout. Non-stripped bars round every corner
-// (Recharts passes a plain number); stripped rounds only the tip corners — the
+// (Recharts passes a plain number); stripped rounds only the tip corners - the
 // top for vertical bars, the right end for horizontal.
 function barBorderRadius(radius: number, variant: BarVariant, isHorizontal: boolean): number | number[] {
   // Blocks draw their own square segments; a radius would clip the end one. An
@@ -705,7 +705,7 @@ function selectionOpacity(selected: string | null, key: string): number {
   return selected === null || selected === key ? 1 : SELECTION_DIM;
 }
 
-// How many stagger steps a bar at `index` waits before it grows in — the order
+// How many stagger steps a bar at `index` waits before it grows in - the order
 // encoded by `animationType`. Bars are independent rectangles, so unlike the
 // area chart's single left-to-right clip, the direction values are honored here
 // via a per-datum `animationDelay`.
@@ -739,7 +739,7 @@ function barStaggerDelay(type: BarAnimationType, index: number, count: number): 
 // likewise live in the shared tooltip/legend/chart modules.
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Option builders — pure functions from a snapshot context to ECharts option
+// Option builders - pure functions from a snapshot context to ECharts option
 // fragments. The component reads its refs ONCE per build into this context;
 // nothing below touches React state or the chart instance, so each fragment can
 // be reasoned about in isolation.
@@ -773,9 +773,9 @@ type OptionBuildContext = {
   categories: string[];
   brushRange: BrushRange; // zoom window carried through rebuilds
   valuePxPerUnit: number | null; // measured value-axis pixels-per-unit (null pre-layout)
-  barWidthPx: number | null; // measured bar width — sizes the blocks variant's squares (null pre-layout)
+  barWidthPx: number | null; // measured bar width - sizes the blocks variant's squares (null pre-layout)
   // Openness per bar index for the expandable variant, plus which one the pointer
-  // is on — driven by the hover rAF, read at build.
+  // is on - driven by the hover rAF, read at build.
   expand: { key: string | null; hovered: number | null; progress: Map<number, number> };
   maxHighlightIndex: number | null; // column to keep colored under enableMaxValueHighlight
 };
@@ -822,7 +822,7 @@ function buildMainAxes(ctx: OptionBuildContext): { xAxis: XAxisOption; yAxis: YA
 
   const axisLabelColor = tokens.mutedForeground;
   const splitLineColor = withAlpha(tokens.border, GRID_LINE_OPACITY);
-  // Gridline gray as an opaque color — see flattenColor.
+  // Gridline gray as an opaque color - see flattenColor.
   const tickDotColor = flattenColor(splitLineColor, tokens.background);
   const catData = isLoading ? loadingData().map((_, i) => i) : categories;
   const catFormatter = categorySlot.tickFormatter;
@@ -837,20 +837,20 @@ function buildMainAxes(ctx: OptionBuildContext): { xAxis: XAxisOption; yAxis: YA
   const valueNameGap = isHorizontal ? 30 : 38;
 
   // NOTE: these are left un-annotated so their inferred literal type stays free
-  // of an axis-specific `position` — the layout swap below assigns the category
+  // of an axis-specific `position` - the layout swap below assigns the category
   // axis to y (and the value axis to x) for horizontal bars, and XAxisOption vs
   // YAxisOption disagree on `position`, so a fixed annotation would reject one
   // branch. `type` is pinned with `as const` to satisfy the axis-kind union.
   const categoryAxis = {
     type: "category" as const,
-    // Bars sit BETWEEN ticks — the opposite of the area chart's boundaryGap:false.
+    // Bars sit BETWEEN ticks - the opposite of the area chart's boundaryGap:false.
     boundaryGap: true,
     show: true,
     // The Recharts YAxis lists its first category at the TOP; ECharts' y category
     // axis defaults to bottom-up, so flip it when the category axis is on y.
     inverse: isHorizontal,
     data: catData,
-    // Axis title — same size/color as the tick labels, pushed clear of them. The
+    // Axis title - same size/color as the tick labels, pushed clear of them. The
     // category axis carries the label of whichever <XAxis>/<YAxis> child renders it.
     name: isLoading ? undefined : categorySlot.label,
     nameLocation: "middle" as const,
@@ -863,7 +863,7 @@ function buildMainAxes(ctx: OptionBuildContext): { xAxis: XAxisOption; yAxis: YA
       show: !isLoading && categorySlot.present && !categorySlot.hideDots,
       length: 0.5,
       // Bars use boundaryGap, so ECharts would drop each tick on the BOUNDARY
-      // between two categories — a dot floating between labels rather than under
+      // between two categories - a dot floating between labels rather than under
       // one. Align them to the labels instead.
       alignWithLabel: true,
       lineStyle: { color: tickDotColor, width: 3, cap: "round" as const },
@@ -885,7 +885,7 @@ function buildMainAxes(ctx: OptionBuildContext): { xAxis: XAxisOption; yAxis: YA
     type: "value" as const,
     show: valueSlot.present || showGrid,
     max: isPercent ? 1 : undefined,
-    // Axis title — same styling as the category axis; the value axis carries the
+    // Axis title - same styling as the category axis; the value axis carries the
     // label of the other of the two <XAxis>/<YAxis> children.
     name: isLoading ? undefined : valueSlot.label,
     nameLocation: "middle" as const,
@@ -896,17 +896,17 @@ function buildMainAxes(ctx: OptionBuildContext): { xAxis: XAxisOption; yAxis: YA
     axisTick: {
       show: valueSlot.present && !isLoading && !valueSlot.hideDots,
       length: 0.5,
-      // Inert here — ECharts only honors it for CATEGORY ticks, and this axis is
+      // Inert here - ECharts only honors it for CATEGORY ticks, and this axis is
       // always type:"value". Carried so both axes' tick config stays identical.
       lineStyle: { color: tickDotColor, width: 3, cap: "round" as const },
     },
     splitLine: {
-      // Hidden while loading — the skeleton floats on a clean canvas.
+      // Hidden while loading - the skeleton floats on a clean canvas.
       show: showGrid && !isLoading,
       lineStyle: { color: splitLineColor, type: [3, 3] as [number, number], width: 1 },
     },
     axisLabel: {
-      // Hidden while loading — skeleton values are meaningless, and the Recharts
+      // Hidden while loading - skeleton values are meaningless, and the Recharts
       // axes unmount during loading too.
       show: valueSlot.present && !isLoading,
       color: axisLabelColor,
@@ -924,7 +924,7 @@ function buildMainAxes(ctx: OptionBuildContext): { xAxis: XAxisOption; yAxis: YA
 }
 
 // Tooltip HTML builder, closed over the build context. Dims by the click
-// selection only — the Recharts twin passes `cursor={false}`, so there is no
+// selection only - the Recharts twin passes `cursor={false}`, so there is no
 // axis-pointer line and hover-highlight never touches the tooltip.
 function createTooltipFormatter(ctx: OptionBuildContext) {
   const { config, selectedDataKey, tooltipSlot } = ctx;
@@ -934,7 +934,7 @@ function createTooltipFormatter(ctx: OptionBuildContext) {
     if (!rows.length) return "";
 
     const first = rows[0] as { axisValue?: string | number; name?: string };
-    // Label shows the RAW axis value — matches ChartTooltipContent (no tick formatter).
+    // Label shows the RAW axis value - matches ChartTooltipContent (no tick formatter).
     const axisValue = first.axisValue ?? first.name ?? "";
     const label = String(axisValue);
 
@@ -980,7 +980,7 @@ function buildTooltipOption(ctx: OptionBuildContext): TooltipComponentOption {
   return {
     ...tooltipBaseOption({
       present: tooltipSlot.present && !isLoading,
-      // The twin disables the cursor (`cursor={false}`) — no shadow, no line —
+      // The twin disables the cursor (`cursor={false}`) - no shadow, no line -
       // so the axisPointer color/width below go unused; only `position` applies.
       cursor: false,
       tokens,
@@ -992,7 +992,7 @@ function buildTooltipOption(ctx: OptionBuildContext): TooltipComponentOption {
   };
 }
 
-// ── Brush — the evil-brush "bar" look, canvas-style: a real mini chart of the
+// ── Brush - the evil-brush "bar" look, canvas-style: a real mini chart of the
 // full data in a second grid, with a transparent slider dataZoom laid over it.
 // Both zoom entries target only the MAIN x-axis, so the mini chart never filters
 // itself. Only called for the vertical layout, where the category axis is x.
@@ -1014,7 +1014,7 @@ function buildBrushOption(
     right: 8,
     bottom: brushBottom,
     height: brushHeight,
-    // No visible axes here — opt out of label containment so the mini chart
+    // No visible axes here - opt out of label containment so the mini chart
     // spans the full brush frame.
     outerBoundsMode: "none",
   };
@@ -1063,7 +1063,7 @@ function buildBrushOption(
   return { miniGrid, miniXAxis, miniYAxis, miniSeries, dataZoom };
 }
 
-// Loading skeleton — ONE gray row of bars regardless of declared series (Recharts
+// Loading skeleton - ONE gray row of bars regardless of declared series (Recharts
 // parity: its skeleton is a single LoadingBar), swept by the shimmer rAF.
 function buildLoadingOption(
   ctx: OptionBuildContext,
@@ -1168,14 +1168,14 @@ function buildBarSeries(ctx: OptionBuildContext): BarSeriesOption[] {
         }
       : null;
 
-    // Per-bar glow shadow — the shadowColor is sampled from the series gradient
+    // Per-bar glow shadow - the shadowColor is sampled from the series gradient
     // at each bar's horizontal position, so a multi-stop series glows in its own
     // colors across the plot instead of one flat tint (a single shadowColor was
     // the bug). A canvas shape carries only one shadow, so the sample is per bar,
     // not within a bar; the wide, soft shadowBlur reads as the Recharts blur's
     // colored halo with no hard rim.
     // `glowing` haloes every bar in the series; enableMaxValueHighlight haloes only
-    // the winning column — the muted ones must stay flat or the "one bar stands
+    // the winning column - the muted ones must stay flat or the "one bar stands
     // out" reading collapses. Same shadow either way, so the two share a builder.
     const glowAt = (i: number) => ({
       shadowBlur: GLOW_BLUR,
@@ -1247,7 +1247,7 @@ function buildBarSeries(ctx: OptionBuildContext): BarSeriesOption[] {
         borderRadius,
         opacity: dim,
         // The glow lives on each datum's itemStyle (per-bar sampled shadowColor),
-        // not here — a single series-level shadowColor can't follow a gradient.
+        // not here - a single series-level shadowColor can't follow a gradient.
       },
       // Hover-highlight uses ECharts-native focus/blur: `self` keeps only the
       // hovered bar lit and dims every other, matching the twin's per-bar dim.
@@ -1272,7 +1272,7 @@ function buildBarSeries(ctx: OptionBuildContext): BarSeriesOption[] {
 
   // Stacked segments butt together into one solid column, so part them with a REAL
   // gap: a transparent series stacked between each adjacent pair. A background
-  // -colored border can't do this — a border paints all four sides, outlining every
+  // -colored border can't do this - a border paints all four sides, outlining every
   // segment (glaring the moment a bar glows) instead of only separating them.
   //
   // The spacer's value is in DATA units, so it is derived from the measured
@@ -1305,28 +1305,28 @@ function buildBarSeries(ctx: OptionBuildContext): BarSeriesOption[] {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Live imperative state — everything the ECharts event handlers, rAF loops, and
+// Live imperative state - everything the ECharts event handlers, rAF loops, and
 // theme/resize repushes read or write OUTSIDE the React render cycle, grouped in
 // one ref-stable object. None of it is render output, which is exactly why it is
 // not React state.
 // ─────────────────────────────────────────────────────────────────────────────
 
 type LiveState = {
-  resolved: ResolvedColors | null; // colors read off the live DOM — feeds builds and rAF loops
+  resolved: ResolvedColors | null; // colors read off the live DOM - feeds builds and rAF loops
   hasRevealed: boolean; // the intro grow-in already played on this chart instance
-  revealEndsAt: number; // performance.now() the entrance settles — gates the stripped-cap correction
-  valuePxPerUnit: number | null; // measured value-axis pixels-per-unit — sizes the stripped cap
-  barWidthPx: number | null; // measured bar width — sizes the blocks variant's squares
+  revealEndsAt: number; // performance.now() the entrance settles - gates the stripped-cap correction
+  valuePxPerUnit: number | null; // measured value-axis pixels-per-unit - sizes the stripped cap
+  barWidthPx: number | null; // measured bar width - sizes the blocks variant's squares
   // Openness per bar index for the expandable variant, plus which one the pointer
   // is on. Per-index so a bar being left keeps easing shut while the next one
-  // opens — a single shared value made the outgoing bar snap.
+  // opens - a single shared value made the outgoing bar snap.
   expand: { key: string | null; hovered: number | null; progress: Map<number, number> };
   expandRaf: number; // in-flight expand animation frame
   animateExpand: (key: string | null, index: number | null) => void;
   loadingRows: number[] | null; // skeleton data, lazily rolled and re-rolled per shimmer sweep
   categories: string[]; // x labels of the last build, for the brush label pills
   dataLength: number; // row count, for the datazoom index math
-  brushRange: BrushRange; // live zoom window — carried through every rebuild
+  brushRange: BrushRange; // live zoom window - carried through every rebuild
   brushGeom: BrushGeometry | null; // brush footer layout of the last build
   brushOverlay: BrushOverlayElements | null; // zrender elements, owned by syncBrushOverlay
   brushHover: { inside: boolean; left: boolean; right: boolean };
@@ -1339,15 +1339,15 @@ type LiveState = {
     hasStripped: boolean; // any visible stripped bar → run the post-layout cap correction
     hasBlocks: boolean; // any blocks bar → re-push once the bar width is measurable
     hasStackGap: boolean; // stacked with >1 series → the segment gap needs the axis scale
-    expandableKey: string | null; // the expandable series, if any — drives the column hover
+    expandableKey: string | null; // the expandable series, if any - drives the column hover
     barCategoryGap?: number; // consumer's category gap, needed to derive the bar width
     isHorizontal: boolean; // layout, for measuring the value axis in the finished handler
   };
   // Update-style re-push for paths that bypass React entirely (theme flips,
-  // resizes) — set by the sync effect.
+  // resizes) - set by the sync effect.
   repush: () => void;
   // Rebuilds ONLY the stripped bar series (fresh per-datum cap fractions) and
-  // merges them with a silent lazyUpdate — never notMerge, so it leaves the
+  // merges them with a silent lazyUpdate - never notMerge, so it leaves the
   // dataZoom drag anchor and the running entrance untouched. Set by the sync effect.
   patchStrippedCaps: () => void;
 };
@@ -1360,8 +1360,8 @@ type LiveState = {
  * Apache ECharts port of the EvilCharts bar chart, exposing a compound-as-config
  * API so its JSX reads identically to the Recharts twin. The root owns the data,
  * config, selection state, loading skeleton, intro grow-in, and optional zoom
- * brush; every visual part — `<Bar>`, `<XAxis>`, `<YAxis>`, `<Grid>`,
- * `<Tooltip>`, `<Legend>` — is composed as a declarative child that renders
+ * brush; every visual part - `<Bar>`, `<XAxis>`, `<YAxis>`, `<Grid>`,
+ * `<Tooltip>`, `<Legend>` - is composed as a declarative child that renders
  * nothing. The root walks those children by reference and drives a single
  * imperative ECharts instance. Fully self-contained: its only dependencies are
  * `react`, `echarts`, and `motion`.
@@ -1429,7 +1429,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
     patchStrippedCaps: () => {},
   }).current;
 
-  // Skeleton rows roll lazily on first use — an impure useRef initializer would
+  // Skeleton rows roll lazily on first use - an impure useRef initializer would
   // re-roll Math.random() on every render.
   const loadingData = useCallback(() => (live.loadingRows ??= getLoadingBarData(loadingBars)), [live, loadingBars]);
   const shouldReduceMotion = useReducedMotion();
@@ -1501,7 +1501,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
   // Which series may be clicked to toggle selection (consulted by the click handler).
   const clickableKeys = useMemo(() => new Set(bars.filter((bar) => bar.isClickable).map((bar) => bar.dataKey)), [bars]);
 
-  // Any visible stripped bar? (never while loading — the skeleton has no stripped
+  // Any visible stripped bar? (never while loading - the skeleton has no stripped
   // series.) Gates the post-layout cap correction in the `finished` handler.
   const hasStrippedBars = !isLoading && bars.some((bar) => bar.variant === "stripped");
 
@@ -1534,7 +1534,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
   // The brush is meaningful only when the category axis is on x (vertical layout).
   const brushEnabled = showBrush && !isHorizontal;
 
-  // Reposition the brush overlays from the live refs — safe to call from drag
+  // Reposition the brush overlays from the live refs - safe to call from drag
   // events, hover tracking, and pushes alike, since it never touches setOption.
   const syncBrushOverlayNow = useCallback(() => {
     const chart = echartsRef.current;
@@ -1669,7 +1669,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
 
     const resizeObserver = new ResizeObserver(() => {
       // Observers always fire once right after observe(). Repushing on that
-      // no-op fire would land one frame into the intro and stomp the grow-in —
+      // no-op fire would land one frame into the intro and stomp the grow-in -
       // only react when the renderer size actually changed.
       if (mount.clientWidth === chart.getWidth() && mount.clientHeight === chart.getHeight()) {
         return;
@@ -1679,7 +1679,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
     });
     resizeObserver.observe(mount);
 
-    // Light/dark flips change no React state — re-resolve and push directly.
+    // Light/dark flips change no React state - re-resolve and push directly.
     const themeObserver = new MutationObserver(() => {
       live.repush();
     });
@@ -1690,7 +1690,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
 
     // Expandable hover, driven by the pointer's COLUMN rather than the bar element.
     // An expandable bar is a hairline at rest, so element hover would only catch a
-    // couple of pixels — and hovering the empty space above a bar (where the axis
+    // couple of pixels - and hovering the empty space above a bar (where the axis
     // tooltip still responds) would highlight it without expanding it. Converting
     // the pointer's x back to a category index makes the whole column the target,
     // matching what the tooltip already does. Registered ONCE here rather than in
@@ -1729,7 +1729,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
       const zoom = option.dataZoom?.[0];
       if (!zoom) return;
 
-      // Ride the selection — pure zrender updates, so the drag stays 1:1.
+      // Ride the selection - pure zrender updates, so the drag stays 1:1.
       live.brushRange = { start: zoom.start ?? 0, end: zoom.end ?? 100 };
       syncBrushOverlayNow();
 
@@ -1742,7 +1742,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
     });
 
     // Every push measures the axis scale and corrects stripped caps before it
-    // paints, so this only catches rescales that BYPASS push — a dataZoom drag
+    // paints, so this only catches rescales that BYPASS push - a dataZoom drag
     // narrowing the window until the value axis re-ranges. The correction is a
     // SILENT series-only merge (patchStrippedCaps), so it can't reset a dataZoom
     // drag. Held off until the entrance finishes (revealEndsAt) so it never lands
@@ -1819,13 +1819,13 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [renderer]);
 
-  // ── Sync ECharts with props/theme/selection — resolve, build, push ────────────
+  // ── Sync ECharts with props/theme/selection - resolve, build, push ────────────
   useEffect(() => {
     const chart = echartsRef.current;
     const container = containerRef.current;
     if (!chart || !container) return;
 
-    // Colors come from the <style> committed just before this effect ran — read
+    // Colors come from the <style> committed just before this effect ran - read
     // them here, right before the push, rather than round-tripping through state.
     live.resolved = resolveColors(container, config, seriesKeys);
 
@@ -1833,7 +1833,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
       // Refresh the value-axis pixel scale before building, so stripped caps get the
       // right per-bar fraction on this same push (after a resize the coordinate
       // system is already updated here). Null before the very first push, and stale
-      // when this push rescales the axis (loading skeleton → real data) — the
+      // when this push rescales the axis (loading skeleton → real data) - the
       // post-apply re-measure below corrects both before anything paints.
       const measured = measureValuePxPerUnit(chart, isHorizontal);
       if (measured != null) live.valuePxPerUnit = measured;
@@ -1846,7 +1846,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
           animationDuration: BAR_GROW_DURATION,
           animationDurationUpdate: 0,
         });
-        // chartOptions is an untyped escape hatch — the spread erases the option's
+        // chartOptions is an untyped escape hatch - the spread erases the option's
         // shape, so re-assert it. The only cast in the file.
         chart.setOption(merged as EChartsOption, { notMerge: true });
       };
@@ -1857,9 +1857,9 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
       // the first build uses fallbacks: the `blocks` variant's square segments (bar
       // width), the stacked-segment gap, and the stripped variant's constant-pixel
       // cap (both value-axis pixels-per-unit). Measure now and, if anything moved,
-      // rebuild IMMEDIATELY — still inside this task, before the browser paints, so
+      // rebuild IMMEDIATELY - still inside this task, before the browser paints, so
       // the corrected chart is the only thing ever shown. Doing this from the async
-      // `finished` handler instead made the bars visibly re-align a frame later —
+      // `finished` handler instead made the bars visibly re-align a frame later -
       // exactly the stripped-cap flicker this replaces.
       let needsRebuild = false;
       if (live.handlers.hasBlocks) {
@@ -1881,7 +1881,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
       // until the grow finishes (0 = nothing animating, correct immediately).
       const maxStagger = data.length > 1 ? (data.length - 1) * BAR_STAGGER : 0;
       live.revealEndsAt = withEntrance ? performance.now() + BAR_GROW_DURATION + maxStagger : 0;
-      // Overlays live outside the option — reposition them after every push.
+      // Overlays live outside the option - reposition them after every push.
       syncBrushOverlayNow();
     };
 
@@ -1891,7 +1891,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
     // Drives the `expandable` hover: eases live.expand.progress toward its target
     // and re-merges ONLY the expandable series each frame, so the strip grows out
     // of the bar's middle. A series-scoped silent merge (same shape as
-    // patchStrippedCaps) — never a full notMerge push, which would fight the
+    // patchStrippedCaps) - never a full notMerge push, which would fight the
     // hover state it is animating.
     live.animateExpand = (key: string | null, index: number | null) => {
       const expandKeys = new Set(bars.filter((bar) => bar.variant === "expandable").map((bar) => bar.dataKey));
@@ -1919,7 +1919,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
         const now = performance.now();
         const dt = Math.min(64, now - last);
         last = now;
-        // Exponential approach — every bar eases toward its own target, so the one
+        // Exponential approach - every bar eases toward its own target, so the one
         // being left keeps animating shut while the next one opens.
         const k = 1 - Math.exp(-dt / EXPAND_TAU);
         let moving = false;
@@ -1948,7 +1948,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
       if (patch.length) chart.setOption({ series: patch }, { silent: true, lazyUpdate: true });
     };
 
-    // Intro grow-in — ECharts' native bar entrance (bars rise from the baseline),
+    // Intro grow-in - ECharts' native bar entrance (bars rise from the baseline),
     // staggered per-datum by animationType, enabled only for the first real
     // render: every later push (selection, theme, zoom) applies instantly, since
     // notMerge would otherwise replay the entrance on each. A loading cycle
@@ -1985,7 +1985,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
     syncBrushOverlayNow,
   ]);
 
-  // ── Default tooltip — show the tooltip at `defaultIndex` with no hover ────────
+  // ── Default tooltip - show the tooltip at `defaultIndex` with no hover ────────
   // Recharts' `defaultIndex` keeps a tooltip open on load; ECharts has no static
   // equivalent, so dispatch `showTip` once the layout has settled.
   useEffect(() => {
@@ -1998,7 +1998,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
     return () => clearTimeout(timer);
   }, [renderer, tooltipSlot.present, tooltipSlot.defaultIndex, isLoading, data.length, seriesKeys.length]);
 
-  // ── Loading shimmer — rAF sweeps a bright band across the gray bars ──────────
+  // ── Loading shimmer - rAF sweeps a bright band across the gray bars ──────────
   useEffect(() => {
     const chart = echartsRef.current;
     if (!chart || !isLoading) return;
@@ -2022,7 +2022,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
       }
       // Sweep the clip window from fully off-screen to fully off-screen, leaned
       // 45°. The gradient runs on ABSOLUTE pixel coordinates (0,0)→(w,w) shared
-      // by every bar — the whole skeleton lives in one coordinate frame, so each
+      // by every bar - the whole skeleton lives in one coordinate frame, so each
       // bar brightens as the diagonal band passes diagonally over it, the same
       // sweep language as the area chart's loading shimmer. `maxT` is the farthest
       // plot corner projected onto the 45° axis, keeping the sweep tight instead
@@ -2105,7 +2105,7 @@ export function EChartsBarChart<TData extends Record<string, unknown>>({
 // Loading skeleton helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Skeleton bar heights as a smooth random walk in a comfortable band — reads
+// Skeleton bar heights as a smooth random walk in a comfortable band - reads
 // like a resting chart instead of raw noise spikes.
 function getLoadingBarData(bars: number): number[] {
   const rows: number[] = [];
@@ -2128,7 +2128,7 @@ function shimmerWindowStops(center: number, color: string, peak: number) {
     const dist = Math.abs(x - center);
     if (dist <= half - feather) return peak;
     if (dist >= half) return 0;
-    // Sine-eased falloff — a linear ramp still reads as a hard cut.
+    // Sine-eased falloff - a linear ramp still reads as a hard cut.
     return peak * Math.sin(((1 - (dist - (half - feather)) / feather) * Math.PI) / 2);
   };
 
@@ -2147,7 +2147,7 @@ function shimmerWindowStops(center: number, color: string, peak: number) {
 
 // Compound API: every part hangs off the root as a static member, so a consumer
 // writes <EChartsBarChart.Bar/>, <EChartsBarChart.Tooltip/>, … from a single
-// import — no colliding named marker exports when several charts share one file.
+// import - no colliding named marker exports when several charts share one file.
 EChartsBarChart.Bar = Bar;
 EChartsBarChart.XAxis = XAxis;
 EChartsBarChart.YAxis = YAxis;

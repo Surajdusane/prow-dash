@@ -35,7 +35,7 @@ const SEVERITY_ITEMS = COMPLAINT_SEVERITIES.map((severity) => ({
 }));
 
 /**
- * Store-driven complaint dialog — opened from the household drawer footer.
+ * Store-driven complaint dialog - opened from the household drawer footer.
  * The profile query is shared with the drawer, so the context line is warm.
  */
 export function AddComplaintDialog() {

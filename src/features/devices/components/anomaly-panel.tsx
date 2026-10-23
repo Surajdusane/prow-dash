@@ -35,7 +35,7 @@ export function AnomalyPanel() {
       <CardHeader>
         <CardTitle>Anomalies</CardTitle>
         <p className="text-muted-foreground text-sm">
-          Devices flagged by telemetry — offline, no readings, rising TDS or low purity — worst first.
+          Devices flagged by telemetry - offline, no readings, rising TDS or low purity - worst first.
         </p>
       </CardHeader>
 

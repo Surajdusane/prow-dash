@@ -288,7 +288,7 @@ export const leads = pgTable(
 );
 
 /* =========================================================
-   RELATIONS  (Drizzle v1 — centralized defineRelations)
+   RELATIONS  (Drizzle v1 - centralized defineRelations)
    ========================================================= */
 
 export const relations = defineRelations(

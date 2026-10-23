@@ -49,7 +49,7 @@ export const COMPLAINT_SEVERITY_LABELS: Record<ComplaintSeverity, string> = {
   high: "High",
 };
 
-/** Mirrors the service-ops labels — ticket vocabulary is shared across routes. */
+/** Mirrors the service-ops labels - ticket vocabulary is shared across routes. */
 export const TICKET_TYPE_LABELS: Record<"filter_change" | "repair" | "installation" | "inspection", string> = {
   filter_change: "Filter change",
   repair: "Repair",
@@ -86,7 +86,7 @@ export const SUBSCRIPTION_STATUS_LABELS: Record<"active" | "cancelled" | "paused
    Risk helpers
    ──────────────────────────────────────────────────────────────────────────── */
 
-/** Band for a 0–100 score — mirrors the shared server thresholds. */
+/** Band for a 0–100 score - mirrors the shared server thresholds. */
 export function riskBandOf(score: number): RiskBand {
   if (score >= RISK_BAND_THRESHOLDS.high) return "high";
   if (score >= RISK_BAND_THRESHOLDS.medium) return "medium";

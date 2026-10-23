@@ -1,4 +1,4 @@
-# Prompt 04 — The two idea deep dives
+# Prompt 04 - The two idea deep dives
 
 Read `docs-prompt/00-readme.md` first.
 
@@ -17,17 +17,17 @@ Each page starts with a **60-second summary**, then goes deep. A recruiter shoul
 
 Use this structure for both:
 
-1. **60-second summary** — 3 short paragraphs or 5 bullets.
-2. **Why this exists** — the business cost of not solving it.
-3. **Options I considered** — table with `Option | Why it looks attractive | Why I did not choose it`.
-4. **What I chose** — the model and the reason.
-5. **How it works** — step-by-step, with formulas and thresholds.
-6. **The data behind it** — tables, windows, source files.
-7. **The UI** — what each surface does and which query feeds it.
-8. **Code map** — layer → file → link.
-9. **What to watch as a reviewer** — 3 concrete clicks or files.
-10. **Trade-offs and limitations** — honest.
-11. **What I would do next** — 3 bullets.
+1. **60-second summary** - 3 short paragraphs or 5 bullets.
+2. **Why this exists** - the business cost of not solving it.
+3. **Options I considered** - table with `Option | Why it looks attractive | Why I did not choose it`.
+4. **What I chose** - the model and the reason.
+5. **How it works** - step-by-step, with formulas and thresholds.
+6. **The data behind it** - tables, windows, source files.
+7. **The UI** - what each surface does and which query feeds it.
+8. **Code map** - layer → file → link.
+9. **What to watch as a reviewer** - 3 concrete clicks or files.
+10. **Trade-offs and limitations** - honest.
+11. **What I would do next** - 3 bullets.
 
 ## 1. Predictive service demand
 
@@ -108,10 +108,10 @@ Live route: `/service-ops`.
 
 Explain each surface:
 
-- **Predictive table** — the action queue. Columns: household, area, filter age, latest TDS, TDS slope, reason. Sorted by the composite score.
-- **Area demand** — grouped bar: tickets per 100 households + infrastructure age in the tooltip. Shows where demand concentrates.
-- **SLA gauge** — semi-radial: are we resolving within target?
-- **Technician workload** — horizontal bar: open load vs 30-day throughput.
+- **Predictive table** - the action queue. Columns: household, area, filter age, latest TDS, TDS slope, reason. Sorted by the composite score.
+- **Area demand** - grouped bar: tickets per 100 households + infrastructure age in the tooltip. Shows where demand concentrates.
+- **SLA gauge** - semi-radial: are we resolving within target?
+- **Technician workload** - horizontal bar: open load vs 30-day throughput.
 
 Why these visuals:
 - Table for an action queue, not a chart.
@@ -255,10 +255,10 @@ Add a short “How I would validate this” box if the numbers are not available
 
 Seed links:
 
-- `src/db/seed/generators/households.ts` — risk cohort + cancel logic
-- `src/db/seed/generators/complaints.ts` — complaint cluster
-- `src/db/seed/generators/payments.ts` — late/failed payments
-- `src/db/seed/generators/tickets.ts` — SLA misses
+- `src/db/seed/generators/households.ts` - risk cohort + cancel logic
+- `src/db/seed/generators/complaints.ts` - complaint cluster
+- `src/db/seed/generators/payments.ts` - late/failed payments
+- `src/db/seed/generators/tickets.ts` - SLA misses
 
 ### The UI
 
@@ -266,11 +266,11 @@ Live routes: `/customers`, with the household drawer as the detail state.
 
 Explain each surface:
 
-- **Risk table** — server-paged, sortable, filterable by band, area, status. This is the action list.
-- **Risk distribution donut** — the active book split by low/medium/high. Shows whether risk is concentrated.
-- **Complaint trend** — multi-line by category over 12 months. Shows whether the problem is water quality, service delay, billing, or device malfunction.
-- **Household drawer** — risk ring, subscription, readings sparkline, complaints, payments, tickets. This is the “why” behind the score.
-- **Recompute risk** — one-click mutation, used after adding/resolving a complaint.
+- **Risk table** - server-paged, sortable, filterable by band, area, status. This is the action list.
+- **Risk distribution donut** - the active book split by low/medium/high. Shows whether risk is concentrated.
+- **Complaint trend** - multi-line by category over 12 months. Shows whether the problem is water quality, service delay, billing, or device malfunction.
+- **Household drawer** - risk ring, subscription, readings sparkline, complaints, payments, tickets. This is the “why” behind the score.
+- **Recompute risk** - one-click mutation, used after adding/resolving a complaint.
 
 Why these visuals:
 - Table for triage, not a chart.

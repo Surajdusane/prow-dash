@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { useTRPC } from "@/trpc/client";
 
-/** Per-area health strip — households, open tickets, avg TDS, SLA met %. */
+/** Per-area health strip - households, open tickets, avg TDS, SLA met %. */
 export const useGetAreaHealth = () => {
   const trpc = useTRPC();
 

@@ -22,7 +22,7 @@ export function ServiceOpsErrorBoundary({ children }: { children: ReactNode }): 
               <EmptyHeader>
                 <EmptyTitle>Couldn&apos;t load Service Ops</EmptyTitle>
                 <EmptyDescription>
-                  The service data request failed. This is usually a cold database — try again.
+                  The service data request failed. This is usually a cold database - try again.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>

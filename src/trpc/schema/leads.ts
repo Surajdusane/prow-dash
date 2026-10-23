@@ -18,7 +18,7 @@ export const createLeadSchema = z.object({
 
 export const updateLeadSchema = z.object({
   id: z.coerce.number().int().positive(),
-  /** `null` clears a previously set visit date — the UI's "clear" affordance. */
+  /** `null` clears a previously set visit date - the UI's "clear" affordance. */
   visitDate: z.iso.date().nullable().optional(),
   converted: z.boolean().optional(),
   flatsConverted: z.number().int().min(0).max(100).optional(),

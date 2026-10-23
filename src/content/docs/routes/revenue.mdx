@@ -1,7 +1,7 @@
 ---
-title: "/revenue — Revenue and retention"
+title: "revenue - Revenue and retention"
 description:
-  MRR, plan mix, payment outcomes and cohort retention — where revenue is
+  MRR, plan mix, payment outcomes and cohort retention - where revenue is
   leaking and which cohorts stick.
 ---
 
@@ -18,7 +18,7 @@ rising, are customers moving up-plan or down-plan, how much is late or failed,
 do newer cohorts stick, and which overdue payments can be recovered today. The
 page answers **where revenue is leaking, and which cohort is weak**.
 
-## What I chose — and what I left out
+## What I chose - and what I left out
 
 | Option                  | Why I rejected it                                 | What I chose instead                                     |
 | ----------------------- | ------------------------------------------------- | -------------------------------------------------------- |
@@ -38,11 +38,11 @@ card has its own Suspense boundary and a matching skeleton.
 
 Five tiles from `getRevenueKpis`:
 
-- **MRR** — the sum of active plan prices. It is a run-rate, not cash collected.
-- **ARPU** — MRR ÷ active subscriptions, rounded to whole rupees.
-- **Active subs** — subscriptions billing today.
-- **Failed this month** — failed payments ÷ every payment billed this month.
-- **Collections (90d)** — collected ÷ billed across the current and previous two
+- **MRR** - the sum of active plan prices. It is a run-rate, not cash collected.
+- **ARPU** - MRR ÷ active subscriptions, rounded to whole rupees.
+- **Active subs** - subscriptions billing today.
+- **Failed this month** - failed payments ÷ every payment billed this month.
+- **Collections (90d)** - collected ÷ billed across the current and previous two
   billing months. Collected means `paidDate` is set; late payers that eventually
   settled still count. This is the "are we actually getting paid?" number.
 
@@ -241,7 +241,7 @@ monthly totals, so "who was active when" has one definition across the route.
      symbol="getMrrTrend"
      label="getMrrTrend"
    />
-   — MRR is rebuilt from spans at each month-end. There is no snapshot table.
+   - MRR is rebuilt from spans at each month-end. There is no snapshot table.
 2. Expand the cohort matrix. The dots are months a cohort has not reached, not
    zero retention; `cohortAgeMonths` draws the boundary.
 3. Mark an overdue payment paid. Watch the KPI row, payment outcomes, and table

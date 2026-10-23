@@ -19,7 +19,7 @@ export type HouseholdSeed = {
   cancelDate: string | null;
   planName: PlanName;
   planId: number;
-  /** ~12% of households — cluster of complaints + payment failures, sometimes churn. */
+  /** ~12% of households - cluster of complaints + payment failures, sometimes churn. */
   riskCohort: boolean;
   cohortWindow: CohortWindow | null;
 };
@@ -102,7 +102,7 @@ export function generateHouseholds(
       if (join > latestJoin) join = addDays(latestJoin, -randInt(faker, 0, 25));
       if (join < addDays(onboarded, 1)) join = addDays(onboarded, 1);
 
-      // A slice of households join recently — organic growth inside existing societies.
+      // A slice of households join recently - organic growth inside existing societies.
       if (chance(faker, RECENT_JOINER_SHARE)) {
         const recentJoin = addDays(ctx.today, -randInt(faker, 3, 90));
         if (recentJoin > join) join = recentJoin;

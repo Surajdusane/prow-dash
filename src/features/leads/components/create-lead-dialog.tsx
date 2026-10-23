@@ -19,7 +19,7 @@ import { useCreateLead } from "@/features/leads/hooks";
 import { useLeadsUiStore } from "@/features/leads/store";
 import { LEAD_ROLE_LABELS, LEAD_ROLES, LEAD_SOURCES, leadSourceLabel } from "@/features/leads/utils";
 
-/** Sentinel for "no role" — the role is optional, but Select needs a concrete value. */
+/** Sentinel for "no role" - the role is optional, but Select needs a concrete value. */
 const NO_ROLE = "none";
 
 const roleItems = [

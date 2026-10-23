@@ -34,7 +34,7 @@ function pageWindow(current: number, total: number): (number | "ellipsis")[] {
 
 /**
  * Server-paged table footer. Buttons (not links) because paging only flips
- * query state — nothing navigates.
+ * query state - nothing navigates.
  */
 export function TablePagination({
   page,

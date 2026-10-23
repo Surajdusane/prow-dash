@@ -94,7 +94,7 @@ export type GetReadingsTrendParams = {
 };
 
 export type ReadingsTrendPoint = {
-  /** `YYYY-MM-DD` — stable chart x-axis key. */
+  /** `YYYY-MM-DD` - stable chart x-axis key. */
   day: string;
   avgTds: number;
   avgPurity: number;
@@ -104,7 +104,7 @@ const READING_LOOKBACK_DAYS = 30;
 const STALE_DAYS = 7;
 /**
  * Filter due when older than the max natural cycle (60–75 days). The fleet
- * only covers active households — cancelled households' devices are collected.
+ * only covers active households - cancelled households' devices are collected.
  */
 const SERVICE_DUE_DAYS = 75;
 const ANOMALY_LIMIT = 100;
@@ -288,8 +288,8 @@ export async function getReadingsTrend(db: Database, params: GetReadingsTrendPar
 const TREND_MAX_POINTS = 60;
 
 /**
- * Folds a long daily series into evenly sized averaged buckets — the last
- * point of each bucket labels it — so a 90-day window renders at ~45 points
+ * Folds a long daily series into evenly sized averaged buckets - the last
+ * point of each bucket labels it - so a 90-day window renders at ~45 points
  * without changing the trend's shape.
  */
 function downsampleTrend(points: ReadingsTrendPoint[]): ReadingsTrendPoint[] {

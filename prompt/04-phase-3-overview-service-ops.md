@@ -1,4 +1,4 @@
-# Phase 3 — Overview (`/`) + Service Ops (`/service-ops`)
+# Phase 3 - Overview (`/`) + Service Ops (`/service-ops`)
 
 > Read `prompt/00-master-plan.md` first (§7). Work in this repo; follow `AGENTS.md`.
 
@@ -18,7 +18,7 @@ Pattern for both routes:
 - `features/<f>/server/index.ts`: `prefetchX()` wrappers using `prefetch` from `@/trpc/server` (one per procedure, or a `batchPrefetchOverview()`).
 - `features/<f>/hooks/*`: one hook per procedure (`useSuspenseQuery`) + mutations (`useMutation` + `toastManager` on success/error + `queryClient.invalidateQueries`).
 - Server page: `export const dynamic = "force-dynamic"` → `batchPrefetch([...])` → `<HydrateClient><ErrorBoundary fallback={…}><Suspense fallback={Skeletons}><ClientSections /></Suspense></ErrorBoundary></HydrateClient>`.
-- Client components never fetch directly — only hooks.
+- Client components never fetch directly - only hooks.
 
 ## `/` Overview
 
@@ -39,7 +39,7 @@ Pattern for both routes:
 - **Kanban board (dnd-kit):**
   - Columns: New (open, unassigned) → Assigned (open + technician) → In Progress → Resolved (last 30d).
   - `DndContext` + one `SortableContext` per column, `useSortable` cards, `DragOverlay` for the floating card, `PointerSensor` + `KeyboardSensor` (a11y bonus).
-  - Drop → optimistic mutation: `updateStatus` (column change) and/or `assign` (moving out of New needs a technician — open a small assign popover/select when dropping into Assigned without one).
+  - Drop → optimistic mutation: `updateStatus` (column change) and/or `assign` (moving out of New needs a technician - open a small assign popover/select when dropping into Assigned without one).
   - Optimistic pattern: `onMutate` cancel queries + snapshot + `setQueryData`; `onError` rollback + error toast; `onSettled` invalidate. Success toast on drop.
   - Card: flat + society, area, ticket type badge, technician avatar initials, raised date, SLA countdown/overdue badge. Column header: count + filter (type/area/search) from `getBoard` input.
 - **Predicted next service table** (top 25 from `getPredictive`): household, area, filter age, latest TDS, slope, reason. Badge color by urgency; "Create ticket" row action pre-filling the create dialog.
@@ -59,6 +59,6 @@ Pattern for both routes:
 
 ## Gotchas
 
-- Charts are client components — keep them in leaf components fed by props from hook-powered parents.
+- Charts are client components - keep them in leaf components fed by props from hook-powered parents.
 - Keep chart containers `h-[280px]`+ fixed; evilcharts needs a sized parent.
 - Don't over-fetch the board: resolved column capped at 30 days on the server.

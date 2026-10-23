@@ -38,14 +38,14 @@ is the source, and its exported `AppRouter` type is what the client imports.
 
 | Namespace    | Queries                                                                                                    | Mutations                                              |
 | ------------ | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `overview`   | `getKpis`, `getRevenueTrend`, `getHouseholdGrowth`, `getPlanMix`, `getAreaHealth`                          | —                                                      |
+| `overview`   | `getKpis`, `getRevenueTrend`, `getHouseholdGrowth`, `getPlanMix`, `getAreaHealth`                          | -                                                      |
 | `serviceOps` | `getBoard`, `getAreaDemand`, `getPredictive`, `getSlaStats`, `getTechnicianWorkload`, `getHouseholdsLite`  | `createTicket`, `updateStatus`, `assign`, `remove`     |
 | `customers`  | `getKpis`, `getAreas`, `getRiskTable`, `getRiskDistribution`, `getComplaintTrend`, `getById`               | `recomputeRisk`, `createComplaint`, `resolveComplaint` |
-| `devices`    | `getAreas`, `getFleet`, `getReadings`, `getReadingsTrend`, `getAnomalies`, `getFleetStats`                 | —                                                      |
+| `devices`    | `getAreas`, `getFleet`, `getReadings`, `getReadingsTrend`, `getAnomalies`, `getFleetStats`                 | -                                                      |
 | `revenue`    | `getKpis`, `getMrrTrend`, `getPlanMixTrend`, `getPaymentStatusByMonth`, `getCohortRetention`, `getOverdue` | `markPaid`                                             |
-| `societies`  | `getKpis`, `getList`, `getGrowthTrend`, `getAreaPenetration`, `getById`                                    | —                                                      |
+| `societies`  | `getKpis`, `getList`, `getGrowthTrend`, `getAreaPenetration`, `getById`                                    | -                                                      |
 | `leads`      | `getKpis`, `getFunnel`, `getBySource`, `getList`                                                           | `create`, `update`                                     |
-| `impact`     | `getTotals`, `getMonthlyTrend`, `getByPlan`                                                                | —                                                      |
+| `impact`     | `getTotals`, `getMonthlyTrend`, `getByPlan`                                                                | -                                                      |
 
 The names map to the eight dashboard concerns:
 
@@ -93,8 +93,8 @@ markPaid: authorizedProcedure.input(markPaidSchema).mutation(async ({ ctx: { db 
 ```
 
 `input(markPaidSchema)` validates `{ paymentId }` and coerces it to a number.
-`markPaymentPaid` performs the update. The router adds one useful failure mode —
-the payment disappeared or the id was wrong — and returns the database row
+`markPaymentPaid` performs the update. The router adds one useful failure mode -
+the payment disappeared or the id was wrong - and returns the database row
 unchanged. It does not format a success message, choose a currency symbol, or
 decide what the toast should say; that belongs to the hook.
 
@@ -260,8 +260,8 @@ in place; the complaint dialog stays open so the operator can retry.
 
 ## Naming
 
-- Queries: `getX` — `getKpis`, `getRiskTable`, `getPredictive`, `getMrrTrend`.
-- Mutations: a verb — `createTicket`, `markPaid`, `recomputeRisk`,
+- Queries: `getX` - `getKpis`, `getRiskTable`, `getPredictive`, `getMrrTrend`.
+- Mutations: a verb - `createTicket`, `markPaid`, `recomputeRisk`,
   `resolveComplaint`.
 - Router namespaces match the route/feature names: `serviceOps` for
   `/service-ops`, `customers` for `/customers`.
@@ -294,33 +294,33 @@ would hide which shape the caller is about to render.
 
 ## Code links
 
-- <SourceLink path="src/trpc/init.ts" label="init.ts" /> — context, transformer,
+- <SourceLink path="src/trpc/init.ts" label="init.ts" /> - context, transformer,
   base procedure.
 - <SourceLink
     path="src/trpc/procedures/authorizedProcedure.ts"
     label="authorizedProcedure.ts"
   />
-  — the no-auth alias.
-- <SourceLink path="src/trpc/routers/_app.ts" label="_app.ts" /> — the eight
+  - the no-auth alias.
+- <SourceLink path="src/trpc/routers/_app.ts" label="_app.ts" /> - the eight
   namespaces.
-- <SourceLink path="src/trpc/server.tsx" label="server.tsx" /> — prefetch,
+- <SourceLink path="src/trpc/server.tsx" label="server.tsx" /> - prefetch,
   hydration, per-request cache.
-- <SourceLink path="src/trpc/client.tsx" label="client.tsx" /> — batch link and
+- <SourceLink path="src/trpc/client.tsx" label="client.tsx" /> - batch link and
   SuperJSON.
-- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" /> — stale
+- <SourceLink path="src/trpc/query-client.ts" label="query-client.ts" /> - stale
   time and dehydration rules.
-- <SourceLink path="src/trpc/schema/common.ts" label="schema/common.ts" /> —
+- <SourceLink path="src/trpc/schema/common.ts" label="schema/common.ts" /> -
   pagination and sort contracts.
 - <SourceLink path="src/trpc/schema/customers.ts" label="schema/customers.ts" />
-  — risk table and complaint inputs.
+  - risk table and complaint inputs.
 - <SourceLink
     path="src/trpc/schema/service-ops.ts"
     label="schema/service-ops.ts"
   />
-  — board filters and ticket mutations.
-- <SourceLink path="src/app/api/trpc/[trpc]/route.ts" label="trpc route.ts" /> —
+  - board filters and ticket mutations.
+- <SourceLink path="src/app/api/trpc/[trpc]/route.ts" label="trpc route.ts" /> -
   the HTTP adapter.
-- <SourceLink path="scripts/generate-openapi.ts" label="generate-openapi.ts" />—
+- <SourceLink path="scripts/generate-openapi.ts" label="generate-openapi.ts" />-
   the OpenAPI generator.
-- <SourceLink path="src/app/api-docs/route.ts" label="api-docs/route.ts" /> —
+- <SourceLink path="src/app/api-docs/route.ts" label="api-docs/route.ts" /> -
   Scalar and the SuperJSON hooks.

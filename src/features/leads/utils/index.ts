@@ -16,7 +16,7 @@ export const LEAD_ROLE_LABELS: Record<LeadRole, string> = {
 
 export const LEAD_ROLES = Object.keys(LEAD_ROLE_LABELS) as LeadRole[];
 
-/** The five known acquisition channels — mirrors the seed's weighted sources. */
+/** The five known acquisition channels - mirrors the seed's weighted sources. */
 export const LEAD_SOURCES = ["instagram", "referral", "google", "walk-in", "broker"] as const;
 
 export const LEAD_SOURCE_LABELS: Record<string, string> = {
@@ -44,7 +44,7 @@ export const FUNNEL_STAGE_LABELS: Record<FunnelStage["stage"], string> = {
 
 export const FUNNEL_STAGE_ORDER: FunnelStage["stage"][] = ["leads", "visits", "converted"];
 
-/** One hue per funnel stage — leads sky, visits violet, converted emerald. */
+/** One hue per funnel stage - leads sky, visits violet, converted emerald. */
 export const FUNNEL_STAGE_COLOR_PAIRS = {
   leads: categoryColorPair(0),
   visits: categoryColorPair(1),

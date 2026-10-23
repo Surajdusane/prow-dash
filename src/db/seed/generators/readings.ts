@@ -37,7 +37,7 @@ export type FilterCycle = {
   /** Drift speed multiplier (infra age × season × usage). */
   speed: number;
   repair: RepairEvent | null;
-  /** True when the service life ended mid-cycle — no change event was emitted. */
+  /** True when the service life ended mid-cycle - no change event was emitted. */
   truncated: boolean;
 };
 
@@ -61,13 +61,13 @@ const PLAN_INTENSITY: Record<PlanName, number> = { starter: 0.95, standard: 1, p
 /** Areas at this infrastructure age or above drift hard (Whitefield / E-City / Sarjapur Road). */
 const HIGH_INFRA_THRESHOLD = 9.5;
 
-/** Repairs resolve in 3–68h (skewed short) — SLA target is 48h. */
+/** Repairs resolve in 3–68h (skewed short) - SLA target is 48h. */
 function repairResolutionHours(faker: Faker): number {
   const u = faker.number.float({ min: 0, max: 1 });
   return Math.round(3 + u * u * 65);
 }
 
-/** Filter-change visits resolve in 6–96h — SLA target is 72h. */
+/** Filter-change visits resolve in 6–96h - SLA target is 72h. */
 function filterResolutionHours(faker: Faker): number {
   const u = faker.number.float({ min: 0, max: 1 });
   return Math.round(6 + u * u * 90);
@@ -79,7 +79,7 @@ function filterResolutionHours(faker: Faker): number {
  * Between replacements TDS climbs toward a per-cycle ceiling while purity and
  * hardness degrade; each replacement resets the curve sharply. In high-infra
  * areas (and during monsoon/summer) the drift is faster, so the hard threshold
- * is crossed *before* the scheduled change — those early crossings become
+ * is crossed *before* the scheduled change - those early crossings become
  * genuinely predictive repair tickets.
  */
 export function simulateDispenserLife(
@@ -158,7 +158,7 @@ export function simulateDispenserLife(
 
   // Service-life tail: after the last completed change (or after a recent
   // install) fewer than 15 days may remain. Telemetry should keep flowing to
-  // activeEnd — the next change is still pending, so this cycle is truncated
+  // activeEnd - the next change is still pending, so this cycle is truncated
   // and emits no filter-change events.
   const tailDays = daysBetween(cycleStart, ctx.activeEnd);
   if (tailDays >= 1) {

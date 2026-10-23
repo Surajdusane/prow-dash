@@ -22,7 +22,7 @@ export function CustomersErrorBoundary({ children }: { children: ReactNode }): R
               <EmptyHeader>
                 <EmptyTitle>Couldn&apos;t load Customers</EmptyTitle>
                 <EmptyDescription>
-                  The churn data request failed. This is usually a cold database — try again.
+                  The churn data request failed. This is usually a cold database - try again.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>

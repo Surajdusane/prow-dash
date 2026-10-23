@@ -46,7 +46,7 @@ import {
 // existing consumers/examples keep importing them from the chart module.
 export type { ChartConfig, EChartsRenderer, LegendVariant, TooltipPosition, TooltipRoundness, TooltipVariant };
 
-// Modular registration keeps the bundle lean — only the pieces this chart needs.
+// Modular registration keeps the bundle lean - only the pieces this chart needs.
 // A pie has no coordinate system, so there is no GridComponent and no axes; the
 // tooltip is item-triggered. Never register GraphicComponent: the loading shimmer
 // and selection dim are per-sector itemStyle updates, not graphic overlays.
@@ -54,12 +54,12 @@ echarts.use([PieChart, TooltipComponent]);
 
 type EChartsInstance = ReturnType<typeof echarts.init>;
 
-// The exact option surface this chart uses — a pie series plus the tooltip
+// The exact option surface this chart uses - a pie series plus the tooltip
 // component. Narrower than echarts' full EChartsOption, so a misspelled key fails
 // the compile instead of silently reaching setOption.
 type EChartsOption = ComposeOption<PieSeriesOption | TooltipComponentOption>;
 
-// Sector paint — structurally assignable to a pie datum's itemStyle. `color`
+// Sector paint - structurally assignable to a pie datum's itemStyle. `color`
 // accepts the same solid-or-gradient value sectorPaint returns, and the optional
 // border fields carry the constant-width gap / overlap separator.
 type PieItemStyle = {
@@ -76,10 +76,10 @@ type PieItemStyle = {
 
 const REVEAL_DURATION = 1000; // intro draw-in length, in milliseconds (ECharts' default)
 // NOTE: the intro is ECharts' RAW default pie entrance (`animationType: "expansion"`
-// — sectors sweep out from the start angle). We only gate whether it plays; we do
+// - sectors sweep out from the start angle). We only gate whether it plays; we do
 // not customize its easing, matching the area chart's "raw default" policy.
 const LOADING_ANIMATION_DURATION = 2000; // shimmer loop, in milliseconds
-const LOADING_SECTORS = 5; // skeleton sector count — Recharts twin uses 5 equal sectors
+const LOADING_SECTORS = 5; // skeleton sector count - Recharts twin uses 5 equal sectors
 
 const DEFAULT_INNER_RADIUS: number | string = 0;
 const DEFAULT_OUTER_RADIUS: number | string = "80%";
@@ -91,18 +91,18 @@ const DEFAULT_END_ANGLE = 360;
 const FALLBACK_COLOR = "rgba(120, 120, 120, 1)";
 
 // Overlapping sectors (negative paddingAngle) get a background-colored border to
-// separate the petals — the canvas analogue of the Recharts twin's
+// separate the petals - the canvas analogue of the Recharts twin's
 // `stroke="var(--background)" strokeWidth={5}`.
 const OVERLAP_BORDER_WIDTH = 5;
 
-// Selecting a sector pops it radially OUTWARD from the center — the offset-slice
+// Selecting a sector pops it radially OUTWARD from the center - the offset-slice
 // look from the official ECharts pie-pattern example. This is the pixel distance
 // the chosen sector translates along its own bisector; deselecting returns it.
 const SELECTED_OFFSET = 12;
 
 // The selected sector stays fully opaque; the others recede to this dimmed
 // opacity. Tuned to ~half the former 0.3 so the selected sector reads with more
-// contrast against the dimmed ones — the analogue of the area chart's dim-fill
+// contrast against the dimmed ones - the analogue of the area chart's dim-fill
 // halving (its dimmed fill went 0.2 → 0.1 while the selected state stays full).
 const DIMMED_OPACITY = 0.15;
 
@@ -126,7 +126,7 @@ function sectorBorder(paddingAngle: number, background: string): { borderColor: 
 
 // Loading shimmer opacities (× the foreground token's own alpha). A sine-feathered
 // window sweeps around the ring, brightening each sector from base → peak as it
-// passes — the angular twin of the area chart's swept clip window, and a match for
+// passes - the angular twin of the area chart's swept clip window, and a match for
 // the Recharts twin's staggered sector pulse.
 const LOADING_BASE_OPACITY = 0.15; // resting sector fill, × foreground alpha
 const LOADING_PEAK_OPACITY = 0.5; // fill inside the sweep window, × foreground alpha
@@ -137,7 +137,7 @@ const LOADING_SHIMMER_FEATHER = 0.22; // sine-eased edge softening of the window
 // Public types
 // ─────────────────────────────────────────────────────────────────────────────
 
-// The pie has a single fill style — a per-sector color gradient. Kept as a named
+// The pie has a single fill style - a per-sector color gradient. Kept as a named
 // union for API parity with the Recharts twin (and room to grow).
 export type PieVariant = "gradient";
 // Where sector labels sit: "inside" draws value text on the sector (the default),
@@ -161,53 +161,53 @@ export type BackgroundVariant =
   | "bubbles";
 
 export interface EChartsPieChartProps<TData extends Record<string, unknown>> {
-  data: TData[]; // rows rendered by the chart — one sector each
+  data: TData[]; // rows rendered by the chart - one sector each
   config: ChartConfig; // sector colors + labels, keyed by the sector name
   dataKey: keyof TData & string; // key holding each sector's numeric value
   nameKey: keyof TData & string; // key holding each sector's name
   className?: string; // extra classes for the chart container
-  renderer?: EChartsRenderer; // rendering engine — canvas by default, or SVG
+  renderer?: EChartsRenderer; // rendering engine - canvas by default, or SVG
   // Master switch for the intro draw-in. Not present on the Recharts twin (which
   // hardcodes its animation); added here as the ECharts off-switch, mirroring the
   // ECharts area chart's `animation` prop. OS reduce-motion also disables it.
   animation?: boolean;
   defaultSelectedSector?: string | null; // sector selected on first render
-  selectedSector?: string | null; // controlled selection — overrides internal state when set
+  selectedSector?: string | null; // controlled selection - overrides internal state when set
   onSelectionChange?: (selection: { dataKey: string; value: number } | null) => void; // fires when the selected sector changes
   isLoading?: boolean; // shows the animated loading skeleton
   chartOptions?: Record<string, unknown>; // escape hatch merged over the built ECharts option
-  children?: ReactNode; // declarative config — <Pie>, <Tooltip>, <Legend>, <Background>
+  children?: ReactNode; // declarative config - <Pie>, <Tooltip>, <Legend>, <Background>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Composible parts — DECLARATIVE CONFIG. Every part renders `null`; the root
+// Composible parts - DECLARATIVE CONFIG. Every part renders `null`; the root
 // walks `children` by reference (child.type === Pie, …) to collect its props.
 // Presence semantics mirror the Recharts twin: omit a child and that part does
-// not render. These are never mounted into the tree — they only carry props.
+// not render. These are never mounted into the tree - they only carry props.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface PieProps {
   variant?: PieVariant; // fill style for the pie's sectors
-  innerRadius?: number | string; // inner radius — set above 0 for a donut
+  innerRadius?: number | string; // inner radius - set above 0 for a donut
   outerRadius?: number | string; // outer radius of the pie
   cornerRadius?: number; // border-radius of each sector in pixels
-  paddingAngle?: number; // gap between sectors in degrees — negative overlaps them
+  paddingAngle?: number; // gap between sectors in degrees - negative overlaps them
   startAngle?: number; // angle the pie starts drawing from
   endAngle?: number; // angle the pie stops drawing at
-  isClickable?: boolean; // lets sectors be selected by clicking them — the selected sector pops outward
+  isClickable?: boolean; // lets sectors be selected by clicking them - the selected sector pops outward
   children?: ReactNode; // optional <Label> composition for sector labels
 }
 
 /**
  * The pie series. Declares its own shape (radii, angles, corner rounding,
- * padding) and clickability. Renders nothing — the root reads these props to
+ * padding) and clickability. Renders nothing - the root reads these props to
  * build the ECharts pie. When clickable, the selected sector pops radially
  * outward. Compose a <Label> inside it to draw labels on each sector.
  */
 const Pie: FC<PieProps> = () => null;
 
 export interface LabelProps {
-  dataKey?: string; // data key for the label text — defaults to the pie's value key
+  dataKey?: string; // data key for the label text - defaults to the pie's value key
   position?: LabelPosition; // "inside" (value on the sector) or "outside" (name past the rim, with a leader line)
 }
 
@@ -242,7 +242,7 @@ export interface BackgroundProps {
 const Background: FC<BackgroundProps> = () => null;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Children collection — walk the declarative config into plain objects the
+// Children collection - walk the declarative config into plain objects the
 // option builder consumes. <Label> is read from the <Pie>'s own children; a
 // missing <Label> means sector labels do not render.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -257,7 +257,7 @@ type PieSlot = {
   endAngle: number;
   isClickable: boolean;
   labelDataKey: string | null; // null when no <Label> child is present
-  labelPosition: LabelPosition; // where the <Label> sits — only meaningful when labelDataKey !== null
+  labelPosition: LabelPosition; // where the <Label> sits - only meaningful when labelDataKey !== null
 };
 
 type TooltipSlot = {
@@ -367,8 +367,8 @@ function collectConfig(children: ReactNode): CollectedConfig {
 // Per-sector fill: a solid color for a single-color config, else a diagonal
 // top-left → bottom-right gradient across the sector's own bounding box. This
 // mirrors the Recharts twin's `RadialColorGradient` (a `linearGradient` with
-// x1/y1 = 0 and x2/y2 = 1). ECharts gradients are bbox-relative by default —
-// exactly what a per-sector gradient wants — so no `global` override is needed.
+// x1/y1 = 0 and x2/y2 = 1). ECharts gradients are bbox-relative by default -
+// exactly what a per-sector gradient wants - so no `global` override is needed.
 function sectorPaint(slots: string[]): string | echarts.graphic.LinearGradient {
   if (slots.length <= 1) return slots[0] ?? FALLBACK_COLOR;
   const stops = slots.map((color, i) => ({ offset: i / (slots.length - 1), color }));
@@ -383,7 +383,7 @@ function sectorPaint(slots: string[]): string | echarts.graphic.LinearGradient {
 // values are ring fractions in [0, 1)). Sectors inside the window read at
 // `LOADING_PEAK_OPACITY`, outside at `LOADING_BASE_OPACITY`, with a sine falloff
 // across the feather so the sweep edge isn't a hard cut. Distance wraps around
-// the ring — the highlight travels continuously, like the Recharts twin's pulse.
+// the ring - the highlight travels continuously, like the Recharts twin's pulse.
 function loadingSectorAlpha(pos: number, center: number): number {
   const raw = Math.abs(pos - center);
   const dist = Math.min(raw, 1 - raw); // shortest way around the ring
@@ -392,7 +392,7 @@ function loadingSectorAlpha(pos: number, center: number): number {
 
   if (dist >= half) return LOADING_BASE_OPACITY;
   if (dist <= half - feather) return LOADING_PEAK_OPACITY;
-  // Sine-eased ramp — a linear one still reads as a hard cut.
+  // Sine-eased ramp - a linear one still reads as a hard cut.
   const t = 1 - (dist - (half - feather)) / feather;
   const eased = Math.sin((t * Math.PI) / 2);
   return LOADING_BASE_OPACITY + (LOADING_PEAK_OPACITY - LOADING_BASE_OPACITY) * eased;
@@ -404,7 +404,7 @@ function loadingSectorAlpha(pos: number, center: number): number {
 // of this file.
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Background overlay (SVG) — the Recharts twin renders its decorative pattern in
+// Background overlay (SVG) - the Recharts twin renders its decorative pattern in
 // SVG, so we render the SAME SVG patterns as a layer BEHIND the transparent
 // ECharts canvas. Copied verbatim from the repo's <ChartBackground> so this file
 // depends on nothing outside `react`, `echarts`, and `motion`. The Tailwind
@@ -538,7 +538,7 @@ function BackgroundLayer({ variant }: { variant: BackgroundVariant }) {
     <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden preserveAspectRatio="none">
       <defs>
         <PatternComponent id={patternId} />
-        {/* Gaussian blur for a soft edge fade — a slightly inset white rect blurred
+        {/* Gaussian blur for a soft edge fade - a slightly inset white rect blurred
             into a mask leaves smooth transparent edges. */}
         <filter id={filterId}>
           <feGaussianBlur stdDeviation="25" />
@@ -553,7 +553,7 @@ function BackgroundLayer({ variant }: { variant: BackgroundVariant }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Option builders — pure functions from a snapshot context to ECharts option
+// Option builders - pure functions from a snapshot context to ECharts option
 // fragments. The component reads its refs ONCE per build into this context;
 // nothing below touches React state or the chart instance.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -582,7 +582,7 @@ function pieCenterY(legendSlot: LegendSlot): string {
 }
 
 // Tooltip HTML builder, closed over the build context. The pie tooltip is
-// item-triggered, so each hover surfaces exactly one sector — its indicator,
+// item-triggered, so each hover surfaces exactly one sector - its indicator,
 // label, and value, matching ChartTooltipContent with `hideLabel` (no header).
 function createTooltipFormatter(ctx: OptionBuildContext) {
   const { config, selectedSector, tooltipSlot } = ctx;
@@ -606,7 +606,7 @@ function createTooltipFormatter(ctx: OptionBuildContext) {
     // The row shape matches the area chart's indicator + label + value, so it
     // reuses the shared tooltipRow/tooltipIndicatorHtml. The pie tooltip is
     // item-triggered with NO header (hideLabel), so it keeps its own no-header
-    // shell — built from the shared roundnessClass/tooltipVariantClass — rather
+    // shell - built from the shared roundnessClass/tooltipVariantClass - rather
     // than the header-carrying tooltipShell.
     const row = tooltipRow({
       indicatorHtml: tooltipIndicatorHtml(name, colorsCount),
@@ -626,7 +626,7 @@ function buildTooltipOption(ctx: OptionBuildContext): TooltipComponentOption {
   // The pie tooltip is item-triggered (no axis, no cursor line), so it can't use
   // the shared tooltipBaseOption (which is trigger:"axis" with an axisPointer).
   // It keeps its own item-tooltip fields and wires the position prop directly
-  // through the shared resolveTooltipPosition — "variable" → undefined (default
+  // through the shared resolveTooltipPosition - "variable" → undefined (default
   // follow-the-pointer behavior), "fixed" → pinned near the top, tracking X.
   return {
     show: tooltipSlot.present && !isLoading,
@@ -657,7 +657,7 @@ function buildPieSeries(ctx: OptionBuildContext): PieSeriesOption[] {
   const sectors = data.map((row) => {
     const name = String(row[nameKey]);
     const slots = resolved.series[name] ?? [FALLBACK_COLOR];
-    // Only a clickable pie dims — a static one never has a selection to dim from.
+    // Only a clickable pie dims - a static one never has a selection to dim from.
     const isSelected = pie.isClickable && selectedSector === name;
     const isDimmed = pie.isClickable && hasSelection && selectedSector !== name;
 
@@ -667,13 +667,13 @@ function buildPieSeries(ctx: OptionBuildContext): PieSeriesOption[] {
       borderRadius: pie.cornerRadius,
     };
     // Constant-width background gap (positive paddingAngle) or overlap separator
-    // (negative). Parallel-edged from rim to center — no wedge-shaped taper.
+    // (negative). Parallel-edged from rim to center - no wedge-shaped taper.
     if (border) {
       itemStyle.borderColor = border.borderColor;
       itemStyle.borderWidth = border.borderWidth;
     }
 
-    // The `selected` flag drives the native offset — React selection is the single
+    // The `selected` flag drives the native offset - React selection is the single
     // source of truth, re-applied on every notMerge push so it survives rebuilds.
     return { name, value: Number(row[dataKey]) || 0, itemStyle, selected: isSelected };
   });
@@ -682,7 +682,7 @@ function buildPieSeries(ctx: OptionBuildContext): PieSeriesOption[] {
   const isOutside = pie.labelPosition === "outside";
   // An explicit <Label dataKey> always wins. Otherwise inside labels show the
   // sector's value (Recharts parity) and outside labels show the sector's name/
-  // config label — matching the classic ECharts pie-simple outer labels.
+  // config label - matching the classic ECharts pie-simple outer labels.
   const explicitKey = pie.labelDataKey ? pie.labelDataKey : null;
   const labelFormatter = (labelParams: { dataIndex: number; name?: string; value?: unknown }) => {
     if (explicitKey) return String(data[labelParams.dataIndex]?.[explicitKey] ?? "");
@@ -716,11 +716,11 @@ function buildPieSeries(ctx: OptionBuildContext): PieSeriesOption[] {
       // orientation, so `clockwise: false` reproduces the twin's sector order.
       clockwise: false,
       // Only a NEGATIVE paddingAngle reaches padAngle (petal overlap). Positive
-      // gaps are drawn as constant-width borders instead — an angular pad would
+      // gaps are drawn as constant-width borders instead - an angular pad would
       // taper to a wedge toward the center.
       padAngle: Math.min(pie.paddingAngle, 0),
       cursor: pie.isClickable ? "pointer" : "default",
-      // No hover scale on ANY variant — hovering only surfaces the tooltip. The
+      // No hover scale on ANY variant - hovering only surfaces the tooltip. The
       // pop-out below is the sole selection affordance, never a hover effect.
       emphasis: { scale: false },
       // Native select state: the chosen sector translates SELECTED_OFFSET px along
@@ -728,7 +728,7 @@ function buildPieSeries(ctx: OptionBuildContext): PieSeriesOption[] {
       // Driven by each datum's `selected` flag; deselecting returns it.
       selectedMode: pie.isClickable ? "single" : false,
       selectedOffset: SELECTED_OFFSET,
-      // Neutralize any default select styling — the selected sector keeps its
+      // Neutralize any default select styling - the selected sector keeps its
       // normal paint (inherited via state merge) and only its position moves.
       select: { itemStyle: {} },
       label,
@@ -747,7 +747,7 @@ function buildPieSeries(ctx: OptionBuildContext): PieSeriesOption[] {
   ];
 }
 
-// Loading skeleton — ONE gray ring of equal sectors regardless of the real data
+// Loading skeleton - ONE gray ring of equal sectors regardless of the real data
 // (Recharts parity), swept by the shimmer rAF. Respects the pie's shape so a
 // donut skeleton stays a donut. The per-sector color is a placeholder; the rAF
 // loop retints each sector every frame.
@@ -801,14 +801,14 @@ function buildLoadingOption(ctx: OptionBuildContext): EChartsOption {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Live imperative state — everything the ECharts event handlers and rAF loops
+// Live imperative state - everything the ECharts event handlers and rAF loops
 // read or write OUTSIDE the React render cycle, grouped in one ref-stable object
 // so the whole imperative surface is visible at a glance. None of it is render
 // output, which is exactly why it is not React state.
 // ─────────────────────────────────────────────────────────────────────────────
 
 type LiveState = {
-  resolved: ResolvedColors | null; // colors read off the live DOM — feeds builds and rAF loops
+  resolved: ResolvedColors | null; // colors read off the live DOM - feeds builds and rAF loops
   hasRevealed: boolean; // the intro draw-in already played on this chart instance
   // Latest callbacks/flags for the imperative ECharts click handler.
   handlers: {
@@ -816,7 +816,7 @@ type LiveState = {
     selectedSector: string | null;
     selectSector: (name: string | null) => void;
   };
-  // Update-style re-push for paths that bypass React entirely (theme flips) —
+  // Update-style re-push for paths that bypass React entirely (theme flips) -
   // set by the sync effect.
   repush: () => void;
 };
@@ -828,8 +828,8 @@ type LiveState = {
 /**
  * Apache ECharts port of the EvilCharts pie chart, exposing a compound-as-config
  * API so its JSX reads identically to the Recharts twin. The root owns the data,
- * config, selection state, loading skeleton, and intro reveal; every visual part —
- * `<Pie>`, `<Tooltip>`, `<Legend>`, `<Background>` — is composed as a declarative
+ * config, selection state, loading skeleton, and intro reveal; every visual part -
+ * `<Pie>`, `<Tooltip>`, `<Legend>`, `<Background>` - is composed as a declarative
  * child that renders nothing. The root walks those children by reference and
  * drives a single imperative ECharts instance. Fully self-contained: its only
  * dependencies are `react`, `echarts`, and `motion`.
@@ -882,7 +882,7 @@ export function EChartsPieChart<TData extends Record<string, unknown>>({
   const collected = useMemo(() => collectConfig(children), [children]);
   const { pie, tooltip: tooltipSlot, legend: legendSlot, background: backgroundSlot } = collected;
 
-  // Sector names in data order — the keys color resolution, the legend, and the
+  // Sector names in data order - the keys color resolution, the legend, and the
   // click handler all agree on. Config is keyed by these same names.
   const sectorKeys = useMemo(() => data.map((row) => String(row[nameKey as string])), [data, nameKey]);
 
@@ -949,7 +949,7 @@ export function EChartsPieChart<TData extends Record<string, unknown>>({
 
     const resizeObserver = new ResizeObserver(() => {
       // Observers always fire once right after observe(). Repushing on that no-op
-      // fire would land one frame into the intro and stomp the reveal — only
+      // fire would land one frame into the intro and stomp the reveal - only
       // react when the renderer size actually changed. The pie has no
       // renderer-sized textures, so a plain resize() (which re-lays the
       // percentage geometry) is all a size change needs.
@@ -960,7 +960,7 @@ export function EChartsPieChart<TData extends Record<string, unknown>>({
     });
     resizeObserver.observe(mount);
 
-    // Light/dark flips change no React state — re-resolve and push directly.
+    // Light/dark flips change no React state - re-resolve and push directly.
     const themeObserver = new MutationObserver(() => {
       live.repush();
     });
@@ -994,13 +994,13 @@ export function EChartsPieChart<TData extends Record<string, unknown>>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [renderer]);
 
-  // ── Sync ECharts with props/theme/selection — resolve, build, push ────────────
+  // ── Sync ECharts with props/theme/selection - resolve, build, push ────────────
   useEffect(() => {
     const chart = echartsRef.current;
     const container = containerRef.current;
     if (!chart || !container) return;
 
-    // Colors come from the <style> committed just before this effect ran — read
+    // Colors come from the <style> committed just before this effect ran - read
     // them here, right before the push, rather than round-tripping through state.
     live.resolved = resolveColors(container, config, sectorKeys);
 
@@ -1012,12 +1012,12 @@ export function EChartsPieChart<TData extends Record<string, unknown>>({
         animationDuration: REVEAL_DURATION,
         animationDurationUpdate: 0,
       });
-      // chartOptions is an untyped escape hatch — the spread erases the option's
+      // chartOptions is an untyped escape hatch - the spread erases the option's
       // shape, so re-assert it. The only cast in the file.
       chart.setOption(merged as EChartsOption, { notMerge: true });
     };
 
-    // Intro reveal — ECharts' native pie expansion, enabled only for the first
+    // Intro reveal - ECharts' native pie expansion, enabled only for the first
     // real render. Every later push (selection, theme) applies instantly, since
     // notMerge would otherwise replay the entrance on each. A loading cycle
     // re-arms it: the Recharts twin remounts its sectors after loading and
@@ -1036,7 +1036,7 @@ export function EChartsPieChart<TData extends Record<string, unknown>>({
     };
   }, [live, buildOption, chartOptions, isLoading, animation, shouldReduceMotion, config, renderer, sectorKeys]);
 
-  // ── Default tooltip index — show a sector's tooltip with no hover ─────────────
+  // ── Default tooltip index - show a sector's tooltip with no hover ─────────────
   useEffect(() => {
     const chart = echartsRef.current;
     if (!chart || isLoading || !tooltipSlot.present || tooltipSlot.defaultIndex == null) return;
@@ -1051,7 +1051,7 @@ export function EChartsPieChart<TData extends Record<string, unknown>>({
     return () => cancelAnimationFrame(raf);
   }, [isLoading, tooltipSlot.present, tooltipSlot.defaultIndex, renderer]);
 
-  // ── Loading shimmer — rAF sweeps a bright window around the ring ──────────────
+  // ── Loading shimmer - rAF sweeps a bright window around the ring ──────────────
   useEffect(() => {
     const chart = echartsRef.current;
     if (!chart || !isLoading) return;
@@ -1067,7 +1067,7 @@ export function EChartsPieChart<TData extends Record<string, unknown>>({
       const foreground = live.resolved?.tokens.foreground ?? FALLBACK_COLOR;
       const background = live.resolved?.tokens.background ?? FALLBACK_COLOR;
 
-      // Rebuild the full itemStyle for each sector — setOption replaces a series'
+      // Rebuild the full itemStyle for each sector - setOption replaces a series'
       // data array wholesale, so a partial datum would drop the border/rounding.
       const border = sectorBorder(paddingAngle, background);
       const sectors = Array.from({ length: LOADING_SECTORS }, (_, i) => {
@@ -1147,7 +1147,7 @@ export function EChartsPieChart<TData extends Record<string, unknown>>({
 
 // Compound API: every part hangs off the root as a static member, so a consumer
 // writes <EChartsPieChart.Pie/>, <EChartsPieChart.Tooltip/>, … from a single
-// import — no colliding named marker exports when several charts share one file.
+// import - no colliding named marker exports when several charts share one file.
 EChartsPieChart.Pie = Pie;
 EChartsPieChart.Label = Label;
 EChartsPieChart.Tooltip = Tooltip;

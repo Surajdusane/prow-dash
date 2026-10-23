@@ -18,7 +18,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 /**
- * Each channel's pipeline side by side — leads, visits and conversions as
+ * Each channel's pipeline side by side - leads, visits and conversions as
  * grouped bars. The stock tooltip only knows the three counts; a custom
  * formatter also surfaces the channel's conversion rate.
  */

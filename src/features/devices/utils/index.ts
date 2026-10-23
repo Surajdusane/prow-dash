@@ -44,7 +44,7 @@ export function ticketTypeForAnomaly(anomaly: AnomalyRow): "filter_change" | "re
    Time helpers
    ──────────────────────────────────────────────────────────────────────────── */
 
-/** "just now" / "42m ago" / "3h ago" / "5d ago" — for last-reading columns. */
+/** "just now" / "42m ago" / "3h ago" / "5d ago" - for last-reading columns. */
 export function formatRelativeTime(value: Date | string | null, now: Date = new Date()): string {
   if (value === null) return "never";
 
@@ -102,14 +102,14 @@ export function toFleetTableInput(state: FleetTableState): GetFleetInput {
    Telemetry chart config
    ──────────────────────────────────────────────────────────────────────────── */
 
-/** Legend swatches — shared by the fleet trend card and the device drawer. */
+/** Legend swatches - shared by the fleet trend card and the device drawer. */
 export const TDS_SWATCH = "bg-[#0284c7] dark:bg-[#38bdf8]";
 export const PURITY_SWATCH = "bg-[#059669] dark:bg-[#34d399]";
 
 /**
  * Dual y-axis escape hatch for TDS/purity telemetry: TDS (~200–500 ppm) and
  * purity (~85–99%) need separate scales, so the purity series must declare
- * `yAxisIndex: 1`. Both axes use `scale: true` so the range follows the data —
+ * `yAxisIndex: 1`. Both axes use `scale: true` so the range follows the data -
  * ECharts otherwise anchors value axes at zero, flattening a 300–350 ppm swing
  * into a straight line. Axis styling stays neutral gray so it reads in both
  * themes.
